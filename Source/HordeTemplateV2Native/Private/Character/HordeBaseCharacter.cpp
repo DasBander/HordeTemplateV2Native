@@ -1,0 +1,384 @@
+
+
+#include "HordeBaseCharacter.h"
+#include "Net/UnrealNetwork.h"
+#include "Runtime/UMG/Public/UMG.h"
+#include "Inventory/InventoryHelpers.h"
+#include "Weapons/BaseFirearm.h"
+#include "HUD/Widgets/PlayerHeadDisplay.h"
+#include "AIModule/Classes/Perception/AISense_Sight.h"
+
+void AHordeBaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AHordeBaseCharacter, Stamina);
+	DOREPLIFETIME(AHordeBaseCharacter, Health);
+	DOREPLIFETIME(AHordeBaseCharacter, AnimMode);
+
+}
+
+// Sets default values
+AHordeBaseCharacter::AHordeBaseCharacter()
+{
+	PrimaryActorTick.bCanEverTick = false;
+	const ConstructorHelpers::FObjectFinder<USkeletalMesh> PlayerMeshAsset(TEXT("SkeletalMesh'/Game/HordeTemplateBP/Assets/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin'"));
+	if (PlayerMeshAsset.Succeeded()) {
+		GetMesh()->SetSkeletalMesh(PlayerMeshAsset.Object);
+		GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
+		GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f).Quaternion());
+	}
+	static ConstructorHelpers::FObjectFinder<UAnimBlueprintGeneratedClass> AnimBlueprint(TEXT("AnimBlueprint'/Game/HordeTemplateBP/Assets/Mannequin/Animations/ABP_ThirdPerson.ABP_ThirdPerson_C'"));
+	if (AnimBlueprint.Succeeded())
+	{
+		GetMesh()->AnimClass = AnimBlueprint.Object;
+	}
+
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Boom"));
+	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->TargetArmLength = 90.f;
+	CameraBoom->SetRelativeLocation(FVector(0.f, 49.f, 70.f));
+	CameraBoom->bUsePawnControlRotation = true;
+
+	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+	FollowCamera->SetupAttachment(CameraBoom);
+
+	PlayerNameWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Player 3D Name Widget"));
+	PlayerNameWidget->SetupAttachment(RootComponent);
+	PlayerNameWidget->SetDrawAtDesiredSize(true);
+	PlayerNameWidget->SetDrawSize(FVector2D(400.f, 50.f));
+	PlayerNameWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	PlayerNameWidget->SetPivot(FVector2D(0.f, 0.f));
+	PlayerNameWidget->SetRelativeLocation(FVector(0.f, 6.f, 81.f));
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> NameWidgetAsset(TEXT("WidgetBlueprint'/Game/HordeTemplateBP/Blueprint/Widgets/Misc/WBP_3d_PlayerView.WBP_3d_PlayerView_C'"));
+	if (NameWidgetAsset.Succeeded())
+	{
+		PlayerNameWidget->SetWidgetClass(NameWidgetAsset.Class);
+	}
+
+	StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("AI Stimuli Source"));
+	StimuliSource->RegisterForSense(UAISense_Sight::StaticClass());
+
+
+	
+
+
+	Inventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("Player Inventory"));
+	if (GetWorld())
+	{
+		Inventory->RegisterComponent();
+		Inventory->SetIsReplicated(true);
+		Inventory->OnActiveItemChanged.AddDynamic(this, &AHordeBaseCharacter::ActiveItemChanged);
+		const ConstructorHelpers::FObjectFinder<UDataTable> InventoryDataTableAsset(INVENTORY_DATATABLE_PATH);
+		if (InventoryDataTableAsset.Succeeded())
+		{
+			Inventory->DataTable = InventoryDataTableAsset.Object;
+		}
+	}
+
+
+}
+
+// Called when the game starts or when spawned
+void AHordeBaseCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	FTimerHandle DelayedBeginPlay;
+	FTimerDelegate DelayedBeginPlayDelegate;
+
+	DelayedBeginPlayDelegate.BindLambda([=] {
+		if (IsLocallyControlled())
+		{
+			GetWorld()->GetTimerManager().SetTimer(InteractionDetectionTimer, this, &AHordeBaseCharacter::InteractionDetection, 0.05f, true);
+			PlayerNameWidget->SetWidget(nullptr);
+			GetWorld()->GetTimerManager().SetTimer(HeadDisplayTraceTimer, this, &AHordeBaseCharacter::HeadDisplayTrace, 0.05f, true);
+		}
+		if (HasAuthority())
+		{
+
+			UpdateHeadDisplayWidget(GetPlayerState()->GetPlayerName(), Health);
+		}
+	});
+	GetWorld()->GetTimerManager().SetTimer(DelayedBeginPlay, DelayedBeginPlayDelegate, 1.f, false);
+	
+}
+
+
+void AHordeBaseCharacter::ServerInteract_Implementation(AActor* ActorToInteractWith)
+{
+	IInteractionInterface::Execute_Interact(LastInteractionActor, this);
+}
+
+bool AHordeBaseCharacter::ServerInteract_Validate(AActor* ActorToInteractWith)
+{
+	return true;
+}
+
+void AHordeBaseCharacter::StartInteraction()
+{
+	if (!IsInteracting && LastInteractionActor)
+	{
+		InteractionProgress = 0.f;
+		FInteractionInfo InteractionInfo = IInteractionInterface::Execute_GetInteractionInfo(LastInteractionActor);
+		if (InteractionInfo.AllowedToInteract)
+		{
+			GetHUD()->GetHUDWidget()->IsInteracting = true;
+			IsInteracting = true;
+			TargetInteractionTime = InteractionInfo.InteractionTime;
+			GetWorld()->GetTimerManager().SetTimer(InteractionTimer, this, &AHordeBaseCharacter::ProcessInteraction, .01f, true);
+		}
+	}
+}
+
+void AHordeBaseCharacter::StopInteraction()
+{
+	if (GetWorld()->GetTimerManager().IsTimerActive(InteractionTimer))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(InteractionTimer);
+	}
+	IsInteracting = false;
+	GetHUD()->GetHUDWidget()->IsInteracting = false;
+	InteractionTime = 0.f;
+	TargetInteractionTime = 0.f;
+	InteractionProgress = 0.f;
+}
+
+void AHordeBaseCharacter::ProcessInteraction()
+{
+	if(InteractionTime >= TargetInteractionTime)
+	{
+		StopInteraction();
+		if (LastInteractionActor)
+		{
+			ServerInteract(LastInteractionActor);
+		}
+	}
+	else {
+		InteractionTime = InteractionTime + 0.01f;
+		InteractionProgress = FMath::GetMappedRangeValueClamped(FVector2D(0.f, TargetInteractionTime), FVector2D(0.f, 100.f), InteractionTime);
+	}
+	FInteractionInfo InteractionInfo = IInteractionInterface::Execute_GetInteractionInfo(LastInteractionActor);
+	if (!InteractionInfo.AllowedToInteract || !LastInteractionActor)
+	{
+		StopInteraction();
+	}
+}
+
+void AHordeBaseCharacter::HeadDisplayTrace()
+{
+	FHitResult HitResult(ForceInit);
+
+	const TArray<AActor*> IgnoringActors = {this};
+
+
+	if (UKismetSystemLibrary::SphereTraceSingle(GetWorld(), FollowCamera->GetComponentLocation(), FollowCamera->GetComponentLocation() + (FollowCamera->GetForwardVector() * 500.f), 64.f, ETraceTypeQuery::TraceTypeQuery3, false, IgnoringActors, EDrawDebugTrace::None, HitResult, true))
+	{
+		AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(HitResult.GetActor());
+		if (PLY)
+		{
+			LastFacingCharacter = PLY;
+			UPlayerHeadDisplay* PLYWidget = Cast<UPlayerHeadDisplay>(LastFacingCharacter->GetHeadDisplayWidget());
+			if (PLYWidget)
+			{
+				PLYWidget->OnShowWidgetDelegate.Broadcast();
+			}
+		}
+		else {
+			if (LastFacingCharacter)
+			{
+				UPlayerHeadDisplay* PLYWidget = Cast<UPlayerHeadDisplay>(LastFacingCharacter->GetHeadDisplayWidget());
+				if (PLYWidget)
+				{
+					PLYWidget->OnHideWidgetDelegate.Broadcast();
+					LastFacingCharacter = nullptr;
+				}
+			}
+		}
+	}
+	else {
+		if (LastFacingCharacter)
+		{
+			UPlayerHeadDisplay* PLYWidget = Cast<UPlayerHeadDisplay>(LastFacingCharacter->GetHeadDisplayWidget());
+			if (PLYWidget)
+			{
+				PLYWidget->OnHideWidgetDelegate.Broadcast();
+				LastFacingCharacter = nullptr;
+			}
+		}
+	}
+}
+
+void AHordeBaseCharacter::InteractionDetection()
+{
+	FCollisionQueryParams TraceParams = FCollisionQueryParams(FName(TEXT("ItemTrace")), true, GetOwner());
+	TraceParams.bTraceComplex = true;
+	TraceParams.bReturnPhysicalMaterial = false;
+	TraceParams.AddIgnoredActor(GetOwner());
+	FHitResult HitResult(ForceInit);
+	
+
+	const TArray<AActor*> IgnoringActors;
+
+	if (UKismetSystemLibrary::SphereTraceSingle(GetWorld(), FollowCamera->GetComponentLocation(), FollowCamera->GetComponentLocation() + (FollowCamera->GetForwardVector() * 300.f), 5.f, ETraceTypeQuery::TraceTypeQuery1, false, IgnoringActors, EDrawDebugTrace::None, HitResult, true))
+	{
+		if (HitResult.GetActor())
+		{
+			if (HitResult.GetActor()->Implements<UInteractionInterface>())
+			{
+				LastInteractionActor = HitResult.GetActor();
+				FInteractionInfo NewInfo = IInteractionInterface::Execute_GetInteractionInfo(LastInteractionActor);
+				AHordeBaseHUD* HUD = GetHUD();
+				if (HUD && HUD->GetHUDWidget())
+				{
+					HUD->GetHUDWidget()->OnSetInteractionText.Broadcast(NewInfo.InteractionText);
+				}
+
+			}
+			else {
+				LastInteractionActor = nullptr;
+				AHordeBaseHUD* HUD = GetHUD();
+				if (HUD && HUD->GetHUDWidget())
+				{
+					HUD->GetHUDWidget()->OnHideInteractionText.Broadcast();
+				}
+			}
+		}
+		
+	}
+	else {
+		LastInteractionActor = nullptr;
+		AHordeBaseHUD* HUD = GetHUD();
+		if (HUD && HUD->GetHUDWidget())
+		{
+			HUD->GetHUDWidget()->OnHideInteractionText.Broadcast();
+		}
+	}
+}
+
+
+void AHordeBaseCharacter::UpdatePlayerMovementSpeed_Implementation(float NewMovementSpeed)
+{
+	GetCharacterMovement()->MaxWalkSpeed = NewMovementSpeed;
+}
+
+bool AHordeBaseCharacter::UpdatePlayerMovementSpeed_Validate(float NewMovementSpeed)
+{
+	return true;
+}
+
+void AHordeBaseCharacter::UpdateHeadDisplayWidget_Implementation(const FString& PlayerName, float PlayerHealth)
+{
+	UPlayerHeadDisplay* PHD = Cast<UPlayerHeadDisplay>(PlayerNameWidget->GetUserWidgetObject());
+	if (PHD)
+	{
+		PHD->PlayerName = PlayerName;
+		PHD->Health = PlayerHealth;
+	}
+}
+
+bool AHordeBaseCharacter::UpdateHeadDisplayWidget_Validate(const FString& PlayerName, float PlayerHealth)
+{
+	return true;
+}
+
+void AHordeBaseCharacter::ActiveItemChanged(FString ItemID, int32 ItemIndex, int32 LoadedAmmo)
+{
+	StopWeaponFire();
+	if (CurrentSelectedFirearm)
+	{
+		CurrentSelectedFirearm->Destroy();
+	}
+
+	FItem NewFirearmItem = UInventoryHelpers::FindItemByID(FName(*ItemID));
+	if (NewFirearmItem.ItemID != "None" && NewFirearmItem.FirearmClass != nullptr)
+	{
+		FTransform NullTransform;
+		CurrentSelectedFirearm = GetWorld()->SpawnActorDeferred<ABaseFirearm>(NewFirearmItem.FirearmClass, NullTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
+		if (CurrentSelectedFirearm)
+		{
+			CurrentSelectedFirearm->WeaponID = ItemID;
+			CurrentSelectedFirearm->LoadedAmmo = LoadedAmmo;
+			CurrentSelectedFirearm->FireMode = (uint8)NewFirearmItem.DefaultFireMode;
+			CurrentSelectedFirearm->FinishSpawning(NullTransform);
+			CurrentSelectedFirearm->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, NewFirearmItem.AttachmentPoint);
+		}
+	}
+}
+
+AHordeBaseHUD* AHordeBaseCharacter::GetHUD()
+{
+	AHordeBaseHUD* returnObj = nullptr;
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (PC) {
+		returnObj = Cast<AHordeBaseHUD>(PC->GetHUD());
+	}
+	return returnObj;
+}
+
+void AHordeBaseCharacter::StopWeaponFire()
+{
+
+}
+
+float AHordeBaseCharacter::GetHealth()
+{
+	return Health;
+}
+
+UUserWidget* AHordeBaseCharacter::GetHeadDisplayWidget()
+{
+	return PlayerNameWidget->GetUserWidgetObject();
+}
+
+ABaseFirearm* AHordeBaseCharacter::GetCurrentFirearm()
+{
+	return CurrentSelectedFirearm;
+}
+
+// Called to bind functionality to input
+void AHordeBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	check(PlayerInputComponent);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Use", IE_Pressed, this, &AHordeBaseCharacter::StartInteraction);
+	PlayerInputComponent->BindAction("Use", IE_Released, this, &AHordeBaseCharacter::StopInteraction);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAxis("MoveForward", this, &AHordeBaseCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &AHordeBaseCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
+
+}
+
+void AHordeBaseCharacter::MoveForward(float Value)
+{
+	if ((Controller != NULL) && (Value != 0.0f))
+	{
+		// find out which way is forward
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		// get forward vector
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		AddMovementInput(Direction, Value);
+	}
+}
+
+void AHordeBaseCharacter::MoveRight(float Value)
+{
+	if ((Controller != NULL) && (Value != 0.0f))
+	{
+		// find out which way is right
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		// get right vector 
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		// add movement in that direction
+		AddMovementInput(Direction, Value);
+	}
+}
