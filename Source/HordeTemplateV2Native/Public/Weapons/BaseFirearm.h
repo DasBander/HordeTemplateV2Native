@@ -32,10 +32,12 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Replicated, Category = "Firearm")
 		bool ProjectileFromMuzzle = false; 
-protected:
 
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "Firearm")
 		void ServerToggleFireMode();
+protected:
+
+
 
 	UFUNCTION(NetMulticast, WithValidation, Unreliable, BlueprintCallable, Category = "Firearm")
 		void PlayFireModeChange();

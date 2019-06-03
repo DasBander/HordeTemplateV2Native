@@ -7,6 +7,7 @@
 #include "Weapons/BaseFirearm.h"
 #include "HUD/Widgets/PlayerHeadDisplay.h"
 #include "AIModule/Classes/Perception/AISense_Sight.h"
+#include "CameraShake_Damage.h"
 
 void AHordeBaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -15,6 +16,8 @@ void AHordeBaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(AHordeBaseCharacter, Stamina);
 	DOREPLIFETIME(AHordeBaseCharacter, Health);
 	DOREPLIFETIME(AHordeBaseCharacter, AnimMode);
+	DOREPLIFETIME(AHordeBaseCharacter, IsSprinting);
+	DOREPLIFETIME(AHordeBaseCharacter, IsDead);
 
 }
 
@@ -27,6 +30,7 @@ AHordeBaseCharacter::AHordeBaseCharacter()
 		GetMesh()->SetSkeletalMesh(PlayerMeshAsset.Object);
 		GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
 		GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f).Quaternion());
+		GetMesh()->SetCollisionProfileName(FName(TEXT("Ragdoll")));
 	}
 	static ConstructorHelpers::FObjectFinder<UAnimBlueprintGeneratedClass> AnimBlueprint(TEXT("AnimBlueprint'/Game/HordeTemplateBP/Assets/Mannequin/Animations/ABP_ThirdPerson.ABP_ThirdPerson_C'"));
 	if (AnimBlueprint.Succeeded())
@@ -61,9 +65,6 @@ AHordeBaseCharacter::AHordeBaseCharacter()
 	StimuliSource->RegisterForSense(UAISense_Sight::StaticClass());
 
 
-	
-
-
 	Inventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("Player Inventory"));
 	if (GetWorld())
 	{
@@ -80,7 +81,7 @@ AHordeBaseCharacter::AHordeBaseCharacter()
 
 }
 
-// Called when the game starts or when spawned
+
 void AHordeBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -108,12 +109,90 @@ void AHordeBaseCharacter::BeginPlay()
 
 void AHordeBaseCharacter::ServerInteract_Implementation(AActor* ActorToInteractWith)
 {
-	IInteractionInterface::Execute_Interact(LastInteractionActor, this);
+	if (ActorToInteractWith)
+	{
+		IInteractionInterface::Execute_Interact(ActorToInteractWith, this);
+		FInteractionInfo InterInf = IInteractionInterface::Execute_GetInteractionInfo(ActorToInteractWith);
+		if (InterInf.InteractionSound)
+		{
+			PlaySoundOnAllClients(InterInf.InteractionSound, GetMesh()->GetComponentLocation());
+		}
+	}
 }
 
 bool AHordeBaseCharacter::ServerInteract_Validate(AActor* ActorToInteractWith)
 {
 	return true;
+}
+
+void AHordeBaseCharacter::PlaySoundOnAllClients_Implementation(USoundCue* Sound, FVector Location)
+{
+	if (Sound)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), Sound, Location, FRotator::ZeroRotator, 1.f, 1.f, 0.f, nullptr, nullptr, true);
+		UE_LOG(LogTemp, Warning, TEXT("Should play Sound: %s at %s"), *Sound->GetName(), *Location.ToText().ToString());
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Could not PlaySoundOnAllClients! SoundCue not valid."));
+	}
+	
+}
+
+bool AHordeBaseCharacter::PlaySoundOnAllClients_Validate(USoundCue* Sound, FVector Location)
+{
+	return true;
+}
+
+float AHordeBaseCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser)
+{
+	Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+
+	if (!IsDead)
+	{
+		if (RemoveHealth(Damage))
+		{
+			CharacterDie();
+		}
+		else {
+			APlayerController* PC = Cast<APlayerController>(GetController());
+			if (PC)
+			{
+				PC->ClientPlayCameraShake(UCameraShake_Damage::StaticClass(), 2.f);
+			}
+			USoundCue* DamageSound = ObjectFromPath<USoundCue>(FName(TEXT("SoundCue'/Game/HordeTemplateBP/Assets/Sounds/A_PlayerDamage.A_PlayerDamage'")));
+			if (DamageSound)
+			{
+				PlaySoundOnAllClients(DamageSound, GetMesh()->GetComponentLocation());
+			}
+		}
+	}
+	return Health;
+}
+
+bool AHordeBaseCharacter::RemoveHealth(float HealthToRemove)
+{
+	Health = FMath::Clamp<float>((Health - HealthToRemove), 0.f, 100.f);
+	UpdateHeadDisplayWidget(GetPlayerState()->GetPlayerName(), Health);
+	return (Health <= 0.f);
+}
+
+void AHordeBaseCharacter::CharacterDie()
+{
+	IsDead = true;
+	if (CurrentSelectedFirearm)
+	{
+		Inventory->ServerDropItem(CurrentSelectedFirearm);
+	}
+
+
+	/*
+	Set Dead in PlayerState
+	Ragdoll Player
+	Spawn Spectator 
+
+	*/
+
+	SetLifeSpan(20.f);
 }
 
 void AHordeBaseCharacter::StartInteraction()
@@ -147,23 +226,30 @@ void AHordeBaseCharacter::StopInteraction()
 
 void AHordeBaseCharacter::ProcessInteraction()
 {
-	if(InteractionTime >= TargetInteractionTime)
+	if (LastInteractionActor)
 	{
-		StopInteraction();
-		if (LastInteractionActor)
+		if (InteractionTime >= TargetInteractionTime)
 		{
-			ServerInteract(LastInteractionActor);
+			StopInteraction();
+			if (LastInteractionActor)
+			{
+				ServerInteract(LastInteractionActor);
+			}
+		}
+		else {
+			InteractionTime = InteractionTime + 0.01f;
+			InteractionProgress = FMath::GetMappedRangeValueClamped(FVector2D(0.f, TargetInteractionTime), FVector2D(0.f, 100.f), InteractionTime);
+		}
+		FInteractionInfo InteractionInfo = IInteractionInterface::Execute_GetInteractionInfo(LastInteractionActor);
+		if (!InteractionInfo.AllowedToInteract)
+		{
+			StopInteraction();
 		}
 	}
 	else {
-		InteractionTime = InteractionTime + 0.01f;
-		InteractionProgress = FMath::GetMappedRangeValueClamped(FVector2D(0.f, TargetInteractionTime), FVector2D(0.f, 100.f), InteractionTime);
-	}
-	FInteractionInfo InteractionInfo = IInteractionInterface::Execute_GetInteractionInfo(LastInteractionActor);
-	if (!InteractionInfo.AllowedToInteract || !LastInteractionActor)
-	{
 		StopInteraction();
 	}
+	
 }
 
 void AHordeBaseCharacter::HeadDisplayTrace()
@@ -283,6 +369,65 @@ bool AHordeBaseCharacter::UpdateHeadDisplayWidget_Validate(const FString& Player
 	return true;
 }
 
+
+
+void AHordeBaseCharacter::ServerStartSprinting_Implementation()
+{
+	if (!IsSprinting && GetVelocity().SizeSquared() > 10.f && GetCharacterMovement()->IsMovingOnGround())
+	{
+		if (GetWorld()->GetTimerManager().IsTimerActive(TimerIncreaseStamina))
+		{
+			GetWorld()->GetTimerManager().ClearTimer(TimerIncreaseStamina);
+		}
+		GetWorld()->GetTimerManager().SetTimer(TimerDecreaseStamina, this, &AHordeBaseCharacter::DecreaseStamina, .1f, true);
+		IsSprinting = true;
+		UpdatePlayerMovementSpeed(600.f);
+	}
+}
+
+bool AHordeBaseCharacter::ServerStartSprinting_Validate()
+{
+	return true;
+}
+
+void AHordeBaseCharacter::ServerStopSprinting_Implementation()
+{
+	if(IsSprinting)
+	{
+		if(GetWorld()->GetTimerManager().IsTimerActive(TimerDecreaseStamina))
+		{
+			GetWorld()->GetTimerManager().ClearTimer(TimerDecreaseStamina);
+		}
+		IsSprinting = false;
+		GetWorld()->GetTimerManager().SetTimer(TimerIncreaseStamina, this, &AHordeBaseCharacter::IncreaseStamina, .1f, true);
+		UpdatePlayerMovementSpeed(300.f);
+	}
+}
+
+bool AHordeBaseCharacter::ServerStopSprinting_Validate()
+{
+	return true;
+}
+
+void AHordeBaseCharacter::DecreaseStamina()
+{
+	if (Stamina > .0f && GetVelocity().SizeSquared() > 10.f)
+	{
+		Stamina = FMath::Clamp<float>((Stamina - StaminaDecreaseRate), 0.f, 100.f);
+	}
+	else {
+		ServerStopSprinting();
+	}
+}
+
+void AHordeBaseCharacter::IncreaseStamina()
+{
+	if (Stamina < 100.f && !IsSprinting)
+	{
+		Stamina = FMath::Clamp<float>((Stamina + StaminaRefreshRate), 0.f, 100.f);
+	}
+}
+
 void AHordeBaseCharacter::ActiveItemChanged(FString ItemID, int32 ItemIndex, int32 LoadedAmmo)
 {
 	StopWeaponFire();
@@ -322,6 +467,14 @@ void AHordeBaseCharacter::StopWeaponFire()
 
 }
 
+void AHordeBaseCharacter::ToggleFiremode()
+{
+	if(CurrentSelectedFirearm)
+	{
+		CurrentSelectedFirearm->ServerToggleFireMode();
+	}
+}
+
 float AHordeBaseCharacter::GetHealth()
 {
 	return Health;
@@ -343,9 +496,12 @@ void AHordeBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AHordeBaseCharacter::ServerStartSprinting);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AHordeBaseCharacter::ServerStopSprinting);
 	PlayerInputComponent->BindAction("Use", IE_Pressed, this, &AHordeBaseCharacter::StartInteraction);
 	PlayerInputComponent->BindAction("Use", IE_Released, this, &AHordeBaseCharacter::StopInteraction);
+	PlayerInputComponent->BindAction("Toggle Firemode", IE_Pressed, this, &AHordeBaseCharacter::ToggleFiremode);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAxis("MoveForward", this, &AHordeBaseCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AHordeBaseCharacter::MoveRight);

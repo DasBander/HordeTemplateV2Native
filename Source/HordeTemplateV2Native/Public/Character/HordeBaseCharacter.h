@@ -42,11 +42,27 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Character|Inventory")
 		UWidgetComponent* PlayerNameWidget;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Player")
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Character")
 		UAIPerceptionStimuliSourceComponent* StimuliSource;
 
 	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category = "Interaction")
 		void ServerInteract(AActor* ActorToInteractWith);
+	
+	UFUNCTION()
+		virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) override;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Character")
+		bool IsDead = false;
+
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, NetMulticast, Reliable, WithValidation, Category = "Character")
+		void PlaySoundOnAllClients(USoundCue* Sound, FVector Location);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Character")
+		bool RemoveHealth(float HealthToRemove);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Character")
+		void CharacterDie();
 	/*
 	Interaction
 	*/
@@ -78,6 +94,7 @@ protected:
 		bool IsInteracting = false;
 
 
+	
 	/*
 	Sprinting
 	*/
@@ -106,6 +123,28 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, Replicated, Category = "Character|Stamina")
 		float Stamina = 100.f;
+
+	UPROPERTY(BlueprintReadWrite, Replicated, Category = "Character|Stamina")
+		bool IsSprinting = false;
+
+	UFUNCTION(Server, Reliable, WithValidation)
+		void ServerStartSprinting();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+		void ServerStopSprinting();
+
+	UFUNCTION()
+		void DecreaseStamina();
+
+	UFUNCTION()
+		void IncreaseStamina();
+
+	UPROPERTY()
+		FTimerHandle TimerIncreaseStamina;
+
+	UPROPERTY()
+		FTimerHandle TimerDecreaseStamina;
+
 	/*
 	Inventory
 	*/
@@ -122,7 +161,13 @@ protected:
 	/*
 	Weapon Logic
 	*/
-	void StopWeaponFire();
+
+	UFUNCTION()
+		void StopWeaponFire();
+
+	UFUNCTION()
+		void ToggleFiremode();
+
 public:	
 
 	float GetHealth();
@@ -135,6 +180,7 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Interaction")
 		float TargetInteractionTime = 0.f;
+
 
 	UUserWidget* GetHeadDisplayWidget();
 

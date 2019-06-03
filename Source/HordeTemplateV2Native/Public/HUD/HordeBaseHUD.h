@@ -22,7 +22,7 @@ protected:
 		UPlayerHUDWidget* PlayerHUDWidget;
 
 	UPROPERTY()
-	TSubclassOf<class UPlayerHUDWidget> PlayerHUDWidgetClass;
+		TSubclassOf<class UPlayerHUDWidget> PlayerHUDWidgetClass;
 
 public:
 
