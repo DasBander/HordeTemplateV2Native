@@ -16,6 +16,9 @@ class HORDETEMPLATEV2NATIVE_API AHordeWorldSettings : public AWorldSettings
 	
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Horde Game|Player Starting")
+		TArray<FName> StartingItems = {"Item_Hands"};
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Horde Game|Round Based")
 		int32 MaxRounds = 13;

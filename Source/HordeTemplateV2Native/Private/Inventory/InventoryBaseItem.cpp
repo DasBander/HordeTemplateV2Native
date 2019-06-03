@@ -23,6 +23,7 @@ void AInventoryBaseItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 
 
 	DOREPLIFETIME(AInventoryBaseItem, ItemInfo);
+	DOREPLIFETIME(AInventoryBaseItem, ItemID);
 }
 
 // Called when the game starts or when spawned
@@ -44,6 +45,11 @@ void AInventoryBaseItem::Interact_Implementation(AActor* InteractingOwner)
 }
 
 
+FInteractionInfo AInventoryBaseItem::GetInteractionInfo_Implementation()
+{
+	return ItemInfo.InteractionInfo;
+}
+
 void AInventoryBaseItem::PopInfo()
 {
 	if (ItemID.ToString() != "None" && !Spawned)
@@ -55,7 +61,10 @@ void AInventoryBaseItem::PopInfo()
 		}
 	}
 	else {
-		ItemID = ItemInfo.ItemID;
+		if (ItemInfo.WorldModel)
+		{
+			WorldMesh->SetStaticMesh(ItemInfo.WorldModel);
+		}
 		WorldMesh->SetSimulatePhysics(true);
 
 	}

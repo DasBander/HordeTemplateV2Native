@@ -94,6 +94,7 @@ protected:
 		bool IsInteracting = false;
 
 
+
 	
 	/*
 	Sprinting
@@ -114,6 +115,9 @@ protected:
 	
 	UFUNCTION(NetMulticast, Unreliable, WithValidation, BlueprintCallable, Category = "Player|Head Display")
 		void UpdateHeadDisplayWidget(const FString& PlayerName, float PlayerHealth);
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation, BlueprintCallable, Category = "Player|Head Display")
+		void RagdollPlayer();
 
 	UPROPERTY(BlueprintReadWrite, Category = "Character|Stamina")
 		float StaminaRefreshRate = 0.8f;
@@ -166,11 +170,55 @@ protected:
 		void StopWeaponFire();
 
 	UFUNCTION()
+		void TriggerWeaponFire();
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Firearm")
+		bool Reloading = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Firearm")
+		bool IsBursting = false;
+
+	UPROPERTY()
+		FTimerHandle WeaponFireTimer;
+
+	UPROPERTY()
+		FItem CurrentWeaponInfo;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Firearm")
+		FTimerHandle BurstTimer;
+
+	UFUNCTION()
+		void BurstWeapon();
+
+	UFUNCTION()
+		void AutoFireWeapon();
+
+	UPROPERTY()
+		float NumberOfBursts = 0.f;
+
+
+	UFUNCTION()
 		void ToggleFiremode();
+
+	UFUNCTION(Server, Reliable, WithValidation, BlueprintCallable, Category = "Firearm")
+		void ServerReload();
 
 public:	
 
-	float GetHealth();
+	FORCEINLINE float GetHealth()
+	{
+		return Health;
+	}
+
+	FORCEINLINE bool GetIsDead()
+	{
+		return IsDead;
+	}
+
+	FORCEINLINE UCameraComponent* GetCamera()
+	{
+		return FollowCamera;
+	}
 
 	UPROPERTY(BlueprintReadOnly, Category="Interaction")
 		float InteractionProgress = 0.f;

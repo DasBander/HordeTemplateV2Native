@@ -4,6 +4,7 @@
 #include "HordeTemplateV2Native.h"
 #include "InventoryBaseItem.h"
 #include "Character/HordeBaseCharacter.h"
+#include "Gameplay/HordeWorldSettings.h"
 
 UInventoryComponent::UInventoryComponent()
 {
@@ -61,6 +62,8 @@ void UInventoryComponent::ServerAddItem_Implementation(const FString& ItemID, bo
 					if (FoundItm.Type != EActiveType::EActiveAmmo)
 					{
 						ActiveItemIndex = NewAddedIndex;
+
+
 						OnActiveItemChanged.Broadcast(Inventory[NewAddedIndex].ItemID.ToString(), NewAddedIndex, Inventory[NewAddedIndex].DefaultLoadedAmmo);
 						
 					}
@@ -77,8 +80,9 @@ void UInventoryComponent::ServerAddItem_Implementation(const FString& ItemID, bo
 			int32 NewAddedIndex = Inventory.Add((Custom) ? CustomItem : FoundItm);
 			if (FoundItm.Type != EActiveType::EActiveAmmo)
 			{
+				UE_LOG(LogTemp, Warning, TEXT("Added Item %s at Index: %s using Custom: "), *Inventory[NewAddedIndex].ItemID.ToString(), *FString::FromInt(NewAddedIndex), (Custom) ? *FString("Yes") : *FString("No"));
 				ActiveItemIndex = NewAddedIndex;
-				OnActiveItemChanged.Broadcast(Inventory[NewAddedIndex].ItemID.ToString(), NewAddedIndex, Inventory[NewAddedIndex].DefaultLoadedAmmo);
+ 	 		OnActiveItemChanged.Broadcast(Inventory[NewAddedIndex].ItemID.ToString(), NewAddedIndex, Inventory[NewAddedIndex].DefaultLoadedAmmo);
 
 			}
 			RefreshCurrentAmmoForItem();
@@ -98,7 +102,7 @@ void UInventoryComponent::ServerDropItem_Implementation(ABaseFirearm* Firearm)
 {
 	if (Firearm)
 	{
-		if (Inventory.IsValidIndex(ActiveItemIndex) && Inventory[ActiveItemIndex].ItemID != "Item_Hands" || "Hands")
+		if (Inventory.IsValidIndex(ActiveItemIndex) && (Inventory[ActiveItemIndex].ItemID != "Item_Hands" || Inventory[ActiveItemIndex].ItemID != "Hands"))
 		{
 			FItem ItemToDrop = Inventory[ActiveItemIndex];
 			ItemToDrop.UpdateAmmo(Firearm->LoadedAmmo);
@@ -107,9 +111,18 @@ void UInventoryComponent::ServerDropItem_Implementation(ABaseFirearm* Firearm)
 			AInventoryBaseItem* Item = GetWorld()->SpawnActor<AInventoryBaseItem>(AInventoryBaseItem::StaticClass(), CalculateDropLocation(), SpawnParam);
 			if (Item)
 			{
+				Item->ItemInfo = ItemToDrop;
+				Item->Spawned = true;
+				Item->ItemID = ItemToDrop.ItemID;
+
 				Inventory.RemoveAt(ActiveItemIndex);
 				ActiveItemIndex = 0;
-				OnActiveItemChanged.Broadcast("Item_Hands", 0, 0);
+				AHordeBaseCharacter* OwningPLY = Cast<AHordeBaseCharacter>(GetOwner());
+				if (OwningPLY && !OwningPLY->GetIsDead())
+				{
+					OnActiveItemChanged.Broadcast("Item_Hands", 0, 0);
+				}
+
 			}
 		}
 	}
@@ -197,6 +210,18 @@ void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (GetOwner()->HasAuthority())
+	{
+		AHordeWorldSettings* WorldSettings = Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings(true));
+		if (WorldSettings)
+		{
+			for (auto& StartingItem : WorldSettings->StartingItems)
+			{
+				ServerAddItem(StartingItem.ToString(), false, FItem());
+			}
+		}
+
+	}
 	
 }
 

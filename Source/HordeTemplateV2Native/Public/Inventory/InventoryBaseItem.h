@@ -19,11 +19,13 @@ public:
 	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, Category = "Inventory Item")
 		FItem ItemInfo;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Item")
+	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, Category = "Inventory Item")
 		FName ItemID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Item")
 		bool Spawned = false;
+
+	
 
 
 protected:
@@ -35,6 +37,10 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interaction")
 	void Interact(AActor* InteractingOwner);
 	virtual void Interact_Implementation(AActor* InteractingOwner) override;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interaction")
+		FInteractionInfo GetInteractionInfo();
+	virtual FInteractionInfo GetInteractionInfo_Implementation() override;
 
 	void PopInfo();
 

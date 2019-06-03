@@ -1,6 +1,9 @@
 
 
 #include "BaseFirearm.h"
+#include "Gameplay/GameplayStructures.h"
+#include "Inventory/InventoryHelpers.h"
+#include "Character/HordeBaseCharacter.h"
 
 ABaseFirearm::ABaseFirearm()
 {
@@ -37,6 +40,8 @@ void ABaseFirearm::FireFirearm()
 {
 
 }
+
+
 
 void ABaseFirearm::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -80,7 +85,16 @@ bool ABaseFirearm::PlayFireModeChange_Validate()
 
 void ABaseFirearm::ServerToggleFireMode_Implementation()
 {
-
+	EFireMode CurrentFireMode = EFireMode(FireMode);
+	FItem CurrentWeaponItem = UInventoryHelpers::FindItemByID(FName(*WeaponID));
+	int32 CurrentSelectedIndex = CurrentWeaponItem.FireModes.Find(CurrentFireMode);
+	if (CurrentSelectedIndex == (CurrentWeaponItem.FireModes.Num() - 1))
+	{
+		FireMode = (uint8)CurrentWeaponItem.FireModes[0];
+	}
+	else {
+		FireMode = (uint8)CurrentWeaponItem.FireModes[CurrentSelectedIndex + 1];
+	}
 }
 
 bool ABaseFirearm::ServerToggleFireMode_Validate()
@@ -90,8 +104,20 @@ bool ABaseFirearm::ServerToggleFireMode_Validate()
 
 void ABaseFirearm::GetOwnerEyePoint(bool LocationFromWeapon, FVector& ViewLocation, FRotator& ViewRotation)
 {
-	ViewLocation = FVector::ZeroVector;
-	ViewRotation = FRotator::ZeroRotator;
+	AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(GetOwner());
+	if (PLY)
+	{
+		FVector CopyLocationViewPoint;
+		FRotator CopyRotationViewPoint;
+		PLY->GetActorEyesViewPoint(CopyLocationViewPoint, CopyRotationViewPoint);
+		ViewLocation = (LocationFromWeapon) ? Weapon->GetSocketLocation(FName("muzzle")) : PLY->GetCamera()->GetComponentLocation();
+		ViewRotation = (LocationFromWeapon) ? Weapon->GetSocketRotation(FName("muzzle")) : CopyRotationViewPoint;
+	}
+	else {
+		ViewLocation = FVector::ZeroVector;
+		ViewRotation = FRotator::ZeroRotator;
+	}
+
 }
 
 // Called when the game starts or when spawned

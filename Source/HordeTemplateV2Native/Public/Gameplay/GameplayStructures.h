@@ -5,6 +5,18 @@
 #include "Projectiles/BaseProjectile.h"
 #include "GameplayStructures.generated.h"
 
+USTRUCT(BlueprintType)
+struct FPlayerAnimationData {
+	GENERATED_USTRUCT_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+		UAnimMontage* CharacterReloadAnimation = nullptr;
+
+	FPlayerAnimationData();
+
+};
+
 UENUM(BlueprintType)
 enum class EActiveType : uint8
 {
@@ -79,6 +91,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup")
 		FInteractionInfo InteractionInfo;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+		FPlayerAnimationData PlayerAnimationData;
 
 	FItem()
 	{

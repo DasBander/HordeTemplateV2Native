@@ -18,7 +18,8 @@ void AHordeBaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(AHordeBaseCharacter, AnimMode);
 	DOREPLIFETIME(AHordeBaseCharacter, IsSprinting);
 	DOREPLIFETIME(AHordeBaseCharacter, IsDead);
-
+	DOREPLIFETIME(AHordeBaseCharacter, Reloading);
+	DOREPLIFETIME(AHordeBaseCharacter, CurrentSelectedFirearm);
 }
 
 // Sets default values
@@ -145,27 +146,29 @@ bool AHordeBaseCharacter::PlaySoundOnAllClients_Validate(USoundCue* Sound, FVect
 
 float AHordeBaseCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser)
 {
-	Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
-
-	if (!IsDead)
+	if (HasAuthority())
 	{
-		if (RemoveHealth(Damage))
+		if (!IsDead)
 		{
-			CharacterDie();
-		}
-		else {
-			APlayerController* PC = Cast<APlayerController>(GetController());
-			if (PC)
+			if (RemoveHealth(Damage))
 			{
-				PC->ClientPlayCameraShake(UCameraShake_Damage::StaticClass(), 2.f);
+				CharacterDie();
 			}
-			USoundCue* DamageSound = ObjectFromPath<USoundCue>(FName(TEXT("SoundCue'/Game/HordeTemplateBP/Assets/Sounds/A_PlayerDamage.A_PlayerDamage'")));
-			if (DamageSound)
-			{
-				PlaySoundOnAllClients(DamageSound, GetMesh()->GetComponentLocation());
+			else {
+				APlayerController* PC = Cast<APlayerController>(GetController());
+				if (PC)
+				{
+					PC->ClientPlayCameraShake(UCameraShake_Damage::StaticClass(), 2.f);
+				}
+				USoundCue* DamageSound = ObjectFromPath<USoundCue>(FName(TEXT("SoundCue'/Game/HordeTemplateBP/Assets/Sounds/A_PlayerDamage.A_PlayerDamage'")));
+				if (DamageSound)
+				{
+					PlaySoundOnAllClients(DamageSound, GetMesh()->GetComponentLocation());
+				}
 			}
 		}
 	}
+	
 	return Health;
 }
 
@@ -187,11 +190,10 @@ void AHordeBaseCharacter::CharacterDie()
 
 	/*
 	Set Dead in PlayerState
-	Ragdoll Player
 	Spawn Spectator 
 
 	*/
-
+	RagdollPlayer();
 	SetLifeSpan(20.f);
 }
 
@@ -344,6 +346,17 @@ void AHordeBaseCharacter::InteractionDetection()
 }
 
 
+void AHordeBaseCharacter::RagdollPlayer_Implementation()
+{
+	GetMesh()->SetSimulatePhysics(true);
+	GetCapsuleComponent()->SetCollisionProfileName(FName(TEXT("DeadAI")));
+}
+
+bool AHordeBaseCharacter::RagdollPlayer_Validate()
+{
+	return true;
+}
+
 void AHordeBaseCharacter::UpdatePlayerMovementSpeed_Implementation(float NewMovementSpeed)
 {
 	GetCharacterMovement()->MaxWalkSpeed = NewMovementSpeed;
@@ -450,6 +463,7 @@ void AHordeBaseCharacter::ActiveItemChanged(FString ItemID, int32 ItemIndex, int
 			CurrentSelectedFirearm->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, NewFirearmItem.AttachmentPoint);
 		}
 	}
+	AnimMode = NewFirearmItem.AnimType;
 }
 
 AHordeBaseHUD* AHordeBaseCharacter::GetHUD()
@@ -464,7 +478,73 @@ AHordeBaseHUD* AHordeBaseCharacter::GetHUD()
 
 void AHordeBaseCharacter::StopWeaponFire()
 {
+	if (GetWorld()->GetTimerManager().IsTimerActive(WeaponFireTimer))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(WeaponFireTimer);
+	}
+}
 
+void AHordeBaseCharacter::TriggerWeaponFire()
+{
+	if (!(Reloading || IsBursting))
+	{
+		if (CurrentSelectedFirearm)
+		{
+			CurrentWeaponInfo = UInventoryHelpers::FindItemByID(FName(*CurrentSelectedFirearm->WeaponID));
+			if (CurrentWeaponInfo.FirearmClass != nullptr)
+			{
+				switch (CurrentWeaponInfo.DefaultFireMode) 
+				{
+
+				case EFireMode::EFireModeBurst:
+					GetWorld()->GetTimerManager().SetTimer(BurstTimer, this, &AHordeBaseCharacter::BurstWeapon, CurrentWeaponInfo.FireRate, true);
+					IsBursting = true;
+					break;
+
+				case EFireMode::EFireModeFull:
+					CurrentSelectedFirearm->ServerFireFirearm();
+					GetWorld()->GetTimerManager().SetTimer(WeaponFireTimer, this, &AHordeBaseCharacter::AutoFireWeapon, CurrentWeaponInfo.FireRate, true);
+					break;
+
+				case EFireMode::EFireModeSingle:
+					CurrentSelectedFirearm->ServerFireFirearm();
+				break;
+
+				default:
+					break;
+				}
+			}
+		}
+	}
+}
+
+void AHordeBaseCharacter::BurstWeapon()
+{
+	if (CurrentWeaponInfo.BurstFireAmount >= NumberOfBursts)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(BurstTimer);
+		NumberOfBursts = 0.f;
+		IsBursting = false;
+	}
+	else {
+		if (CurrentSelectedFirearm)
+		{
+			CurrentSelectedFirearm->ServerFireFirearm();
+			NumberOfBursts = NumberOfBursts + 1.f;
+		}
+	}
+}
+
+void AHordeBaseCharacter::AutoFireWeapon()
+{
+	if (CurrentSelectedFirearm)
+	{
+		CurrentSelectedFirearm->ServerFireFirearm();
+		if (Reloading)
+		{
+			StopWeaponFire();
+		}
+	}
 }
 
 void AHordeBaseCharacter::ToggleFiremode()
@@ -475,9 +555,32 @@ void AHordeBaseCharacter::ToggleFiremode()
 	}
 }
 
-float AHordeBaseCharacter::GetHealth()
+
+
+void AHordeBaseCharacter::ServerReload_Implementation()
 {
-	return Health;
+	if (!Reloading)
+	{
+		if (CurrentSelectedFirearm)
+		{
+			FItem TempItem = UInventoryHelpers::FindItemByID(FName(*CurrentSelectedFirearm->WeaponID));
+			int32 AmmoIndex;
+			int32 AmmoAmount = Inventory->CountAmmo(TempItem.AmmoType, AmmoIndex);
+			if (AmmoAmount > 0 && (TempItem.DefaultLoadedAmmo != CurrentSelectedFirearm->LoadedAmmo))
+			{
+				Reloading = true;
+				if (TempItem.PlayerAnimationData.CharacterReloadAnimation)
+				{
+					float AnimationDuration = TempItem.PlayerAnimationData.CharacterReloadAnimation->CalculateSequenceLength();
+				}
+			}
+		}
+	}
+}
+
+bool AHordeBaseCharacter::ServerReload_Validate()
+{
+	return true;
 }
 
 UUserWidget* AHordeBaseCharacter::GetHeadDisplayWidget()
@@ -496,15 +599,25 @@ void AHordeBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	check(PlayerInputComponent);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &AHordeBaseCharacter::ServerReload);
+
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AHordeBaseCharacter::TriggerWeaponFire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AHordeBaseCharacter::StopWeaponFire);
+
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AHordeBaseCharacter::ServerStartSprinting);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AHordeBaseCharacter::ServerStopSprinting);
+
 	PlayerInputComponent->BindAction("Use", IE_Pressed, this, &AHordeBaseCharacter::StartInteraction);
 	PlayerInputComponent->BindAction("Use", IE_Released, this, &AHordeBaseCharacter::StopInteraction);
+
 	PlayerInputComponent->BindAction("Toggle Firemode", IE_Pressed, this, &AHordeBaseCharacter::ToggleFiremode);
+
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+
 	PlayerInputComponent->BindAxis("MoveForward", this, &AHordeBaseCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AHordeBaseCharacter::MoveRight);
+
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 

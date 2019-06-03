@@ -29,12 +29,16 @@ public:
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Firearm")
 		uint8 FireMode;
 
-
+	
 	UPROPERTY(BlueprintReadWrite, Replicated, Category = "Firearm")
 		bool ProjectileFromMuzzle = false; 
 
 	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "Firearm")
 		void ServerToggleFireMode();
+
+	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "Firearm")
+		void ServerFireFirearm();
+
 protected:
 
 
@@ -42,8 +46,7 @@ protected:
 	UFUNCTION(NetMulticast, WithValidation, Unreliable, BlueprintCallable, Category = "Firearm")
 		void PlayFireModeChange();
 
-	UFUNCTION(Server, WithValidation, Reliable, BlueprintCallable, Category = "Firearm")
-		void ServerFireFirearm();
+
 
 	UFUNCTION(NetMulticast, WithValidation, Unreliable, BlueprintCallable, Category = "Firearm")
 		void PlayFirearmFX();
