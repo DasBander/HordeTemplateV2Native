@@ -55,16 +55,16 @@ protected:
 		bool IsDead = false;
 
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, NetMulticast, Reliable, WithValidation, Category = "Character")
+	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, WithValidation, Category = "Character")
 		void PlaySoundOnAllClients(USoundCue* Sound, FVector Location);
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, NetMulticast, Unreliable, WithValidation, Category = "Character")
-		void PlayAnimationAllClients(UAnimMontage* Montage);
+	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, WithValidation, Category = "Character")
+		void PlayAnimationAllClients(class UAnimMontage* Montage);
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Character")
+	UFUNCTION(BlueprintCallable, Category = "Character")
 		bool RemoveHealth(float HealthToRemove);
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Character")
+	UFUNCTION(BlueprintCallable, Category = "Character")
 		void CharacterDie();
 	/*
 	Interaction

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/WorldSettings.h"
+#include "Gameplay/HordeGameMode.h"
 #include "HordeWorldSettings.generated.h"
 
 /**
@@ -19,6 +20,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Horde Game|Player Starting")
 		TArray<FName> StartingItems = {"Item_Hands"};
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Horde Game|Gameplay")
+		EMatchMode MatchMode;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Horde Game|Round Based")
 		int32 MaxRounds = 13;

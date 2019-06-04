@@ -30,8 +30,8 @@ UENUM(BlueprintType)
 enum class EFireMode : uint8
 {
 	EFireModeSingle UMETA(DisplayName = "Single Fire"),
-	EFireModeFull UMETA(DisplayName = "Full Automatic"),
-	EFireModeBurst UMETA(DisplayName = "Burst Fire")
+	EFireModeBurst UMETA(DisplayName = "Burst Fire"),
+	EFireModeFull UMETA(DisplayName = "Full Automatic")
 };
 
 USTRUCT(BlueprintType)

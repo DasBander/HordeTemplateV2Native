@@ -37,13 +37,13 @@ public:
 	/*
 	Updates the Amount of Ammo in Current Selected item.
 	*/
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void UpdateCurrentItemAmmo(int32 Ammo);
 
 	/*
 	Refreshes the Value of AvailableAmmoForCurrentWeapon so we can use it in our HUD.
 	*/
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void RefreshCurrentAmmoForItem();
 
 	/*
@@ -62,7 +62,7 @@ public:
 	/*
 	Checks if Item exists in Inventory and returns Index as well as the Item Type
 	*/
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category="Inventory")
+	UFUNCTION(BlueprintCallable, Category="Inventory")
 	bool InventoryItemExists(FString ItemID, int32& Index, EActiveType& ItemType);
 
 	/*
@@ -74,13 +74,13 @@ public:
 	/*
 	Gets amount of Ammo by Type
 	*/
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category="Inventory")
+	UFUNCTION(BlueprintCallable, Category="Inventory")
 	int32 CountAmmo(FName AmmoType, int32& Index);
 
 	/*
 	Removes Specific Amount of Ammo by Type
 	*/
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
 		bool RemoveAmmoByType(FName AmmoType, int32 AmountToRemove);
 
 	/*

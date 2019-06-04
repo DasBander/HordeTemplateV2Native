@@ -10,6 +10,7 @@ UInventoryComponent::UInventoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
+	
 }
 
 void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -40,6 +41,9 @@ void UInventoryComponent::RefreshCurrentAmmoForItem()
 	{
 		int32 TempIndex;
 		AvailableAmmoForCurrentWeapon = CountAmmo(Inventory[ActiveItemIndex].AmmoType, TempIndex);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("ActiveItemIndex invalid."));
 	}
 }
 
@@ -80,8 +84,7 @@ void UInventoryComponent::ServerAddItem_Implementation(const FString& ItemID, bo
 			int32 NewAddedIndex = Inventory.Add((Custom) ? CustomItem : FoundItm);
 			if (FoundItm.Type != EActiveType::EActiveAmmo)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Added Item %s at Index: %s using Custom: "), *Inventory[NewAddedIndex].ItemID.ToString(), *FString::FromInt(NewAddedIndex), (Custom) ? *FString("Yes") : *FString("No"));
-				ActiveItemIndex = NewAddedIndex;
+			ActiveItemIndex = NewAddedIndex;
  	 		OnActiveItemChanged.Broadcast(Inventory[NewAddedIndex].ItemID.ToString(), NewAddedIndex, Inventory[NewAddedIndex].DefaultLoadedAmmo);
 
 			}
@@ -106,9 +109,8 @@ void UInventoryComponent::ServerDropItem_Implementation(ABaseFirearm* Firearm)
 		{
 			FItem ItemToDrop = Inventory[ActiveItemIndex];
 			ItemToDrop.UpdateAmmo(Firearm->LoadedAmmo);
-			FActorSpawnParameters SpawnParam;
-			SpawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-			AInventoryBaseItem* Item = GetWorld()->SpawnActor<AInventoryBaseItem>(AInventoryBaseItem::StaticClass(), CalculateDropLocation(), SpawnParam);
+			FTransform TransformToSpawn = CalculateDropLocation();
+			AInventoryBaseItem* Item = GetWorld()->SpawnActorDeferred<AInventoryBaseItem>(AInventoryBaseItem::StaticClass(), TransformToSpawn, GetOwner(), nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
 			if (Item)
 			{
 				Item->ItemInfo = ItemToDrop;
@@ -122,6 +124,7 @@ void UInventoryComponent::ServerDropItem_Implementation(ABaseFirearm* Firearm)
 				{
 					OnActiveItemChanged.Broadcast("Item_Hands", 0, 0);
 				}
+				Item->FinishSpawning(TransformToSpawn);
 
 			}
 		}
@@ -156,7 +159,7 @@ bool UInventoryComponent::InventoryItemExists(FString ItemID, int32& Index, EAct
 FTransform UInventoryComponent::CalculateDropLocation()
 {
 	FTransform TempLocation;
-	ACharacter* PLY = Cast<ACharacter>(GetOwner());
+	AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(GetOwner());
 	if (PLY)
 	{
 		APlayerController* PC = Cast<APlayerController>(PLY->GetController());
@@ -170,18 +173,20 @@ FTransform UInventoryComponent::CalculateDropLocation()
 			TraceParams.bTraceComplex = true;
 			TraceParams.bReturnPhysicalMaterial = false;
 			TraceParams.AddIgnoredActor(GetOwner());
+			TraceParams.AddIgnoredActor(PLY->GetCurrentFirearm());
 			FHitResult HitResult(ForceInit);
-			if (GetWorld()->LineTraceSingleByChannel(HitResult, EyeLocation, EyeLocation + (EyeRotation.Vector() * 200.f), DROP_TRACE_CHANNEL, TraceParams))
-			{
+			GetWorld()->LineTraceSingleByChannel(HitResult, EyeLocation, EyeLocation + (EyeRotation.Vector() * 200.f), DROP_TRACE_CHANNEL, TraceParams);
+			
 				if (HitResult.bBlockingHit)
 				{
-					TempLocation.SetLocation(HitResult.TraceEnd);
-				}
-				else {
 					TempLocation.SetLocation(HitResult.ImpactPoint);
 				}
+				else {
+					TempLocation.SetLocation(HitResult.TraceEnd);
+
+				}
 				TempLocation.SetRotation(FRotator({ 0.f, FMath::FRandRange(0.f, 360.f), 0.f }).Quaternion());
-			}
+			
 		}
 	}
 
@@ -215,13 +220,14 @@ bool UInventoryComponent::RemoveAmmoByType(FName AmmoType, int32 AmountToRemove)
 		if ((Inventory[AmmoIndex].DefaultLoadedAmmo - AmountToRemove) <= 0)
 		{
 			Inventory.RemoveAt(AmmoIndex);
-			return true;
 		}
-		else 
+		else
 		{
-			Inventory[AmmoIndex].UpdateAmmo(Inventory[AmmoIndex].DefaultLoadedAmmo - AmountToRemove);
-			return true;
+			Inventory[AmmoIndex].UpdateAmmo((Inventory[AmmoIndex].DefaultLoadedAmmo - AmountToRemove));
 		}
+		RefreshCurrentAmmoForItem();
+		return true;
+	
 	}
 	else {
 		return false;

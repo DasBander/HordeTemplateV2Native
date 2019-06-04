@@ -131,7 +131,6 @@ void AHordeBaseCharacter::PlaySoundOnAllClients_Implementation(USoundCue* Sound,
 	if (Sound)
 	{
 		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), Sound, Location, FRotator::ZeroRotator, 1.f, 1.f, 0.f, nullptr, nullptr, true);
-		UE_LOG(LogTemp, Warning, TEXT("Should play Sound: %s at %s"), *Sound->GetName(), *Location.ToText().ToString());
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("Could not PlaySoundOnAllClients! SoundCue not valid."));
@@ -172,12 +171,13 @@ float AHordeBaseCharacter::TakeDamage(float Damage, struct FDamageEvent const& D
 	return Health;
 }
 
-void AHordeBaseCharacter::PlayAnimationAllClients_Implementation(UAnimMontage* Montage)
+void AHordeBaseCharacter::PlayAnimationAllClients_Implementation(class UAnimMontage* Montage)
 {
-	GetMesh()->GetAnimInstance()->Montage_Play(Montage);
+	UAnimMontage* Mont = ObjectFromPath<UAnimMontage>(TEXT("AnimMontage'/Game/HordeTemplateBP/Assets/Animations/AM_Reload_Rifle.AM_Reload_Rifle'"));
+	GetMesh()->GetAnimInstance()->Montage_Play(Mont, 1.f, EMontagePlayReturnType::Duration, 0.f, false);
 }
 
-bool AHordeBaseCharacter::PlayAnimationAllClients_Validate(UAnimMontage* Montage)
+bool AHordeBaseCharacter::PlayAnimationAllClients_Validate(class UAnimMontage* Montage)
 {
 	return true;
 }
@@ -253,7 +253,7 @@ void AHordeBaseCharacter::ProcessInteraction()
 			InteractionProgress = FMath::GetMappedRangeValueClamped(FVector2D(0.f, TargetInteractionTime), FVector2D(0.f, 100.f), InteractionTime);
 		}
 		FInteractionInfo InteractionInfo = IInteractionInterface::Execute_GetInteractionInfo(LastInteractionActor);
-		if (!InteractionInfo.AllowedToInteract)
+		if (!InteractionInfo.AllowedToInteract || IsDead)
 		{
 			StopInteraction();
 		}
@@ -496,14 +496,14 @@ void AHordeBaseCharacter::StopWeaponFire()
 
 void AHordeBaseCharacter::TriggerWeaponFire()
 {
-	if (!(Reloading || IsBursting))
+	if (!(Reloading || IsBursting) && !IsDead)
 	{
 		if (CurrentSelectedFirearm)
 		{
 			CurrentWeaponInfo = UInventoryHelpers::FindItemByID(FName(*CurrentSelectedFirearm->WeaponID));
 			if (CurrentWeaponInfo.FirearmClass != nullptr)
 			{
-				switch (CurrentWeaponInfo.DefaultFireMode) 
+				switch ((EFireMode)CurrentSelectedFirearm->FireMode) 
 				{
 
 				case EFireMode::EFireModeBurst:
@@ -530,7 +530,7 @@ void AHordeBaseCharacter::TriggerWeaponFire()
 
 void AHordeBaseCharacter::BurstWeapon()
 {
-	if (CurrentWeaponInfo.BurstFireAmount >= NumberOfBursts)
+	if (NumberOfBursts >= CurrentWeaponInfo.BurstFireAmount || IsDead)
 	{
 		GetWorld()->GetTimerManager().ClearTimer(BurstTimer);
 		NumberOfBursts = 0.f;
@@ -550,7 +550,7 @@ void AHordeBaseCharacter::AutoFireWeapon()
 	if (CurrentSelectedFirearm)
 	{
 		CurrentSelectedFirearm->ServerFireFirearm();
-		if (Reloading)
+		if (Reloading || IsDead)
 		{
 			StopWeaponFire();
 		}
@@ -562,6 +562,12 @@ void AHordeBaseCharacter::ToggleFiremode()
 	if(CurrentSelectedFirearm)
 	{
 		CurrentSelectedFirearm->ServerToggleFireMode();
+
+		USoundCue* ToggleFireModeSound = ObjectFromPath<USoundCue>(FName(TEXT("SoundCue'/Game/HordeTemplateBP/Assets/Sounds/A_ToggleFiremode_Cue.A_ToggleFiremode_Cue'")));
+		if (ToggleFireModeSound)
+		{
+			PlaySoundOnAllClients(ToggleFireModeSound, GetMesh()->GetComponentLocation());
+		}
 	}
 }
 
@@ -578,9 +584,9 @@ void AHordeBaseCharacter::FinishReload()
 		FItem TempItem = UInventoryHelpers::FindItemByID(FName(*CurrentSelectedFirearm->WeaponID));
 		int32 AmmoIndex;
 		int32 AmmoAmount = Inventory->CountAmmo(TempItem.AmmoType, AmmoIndex);
-		if (AmmoAmount >= (CurrentSelectedFirearm->LoadedAmmo - TempItem.MaximumLoadedAmmo))
+		if (AmmoAmount >= (TempItem.MaximumLoadedAmmo - CurrentSelectedFirearm->LoadedAmmo))
 		{
-			Inventory->RemoveAmmoByType(TempItem.AmmoType, (CurrentSelectedFirearm->LoadedAmmo - TempItem.MaximumLoadedAmmo));
+			Inventory->RemoveAmmoByType(TempItem.AmmoType, (TempItem.MaximumLoadedAmmo - CurrentSelectedFirearm->LoadedAmmo));
 			CurrentSelectedFirearm->LoadedAmmo = TempItem.MaximumLoadedAmmo;
 		}
 		else

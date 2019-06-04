@@ -4,6 +4,7 @@
 #include "Gameplay/GameplayStructures.h"
 #include "Inventory/InventoryHelpers.h"
 #include "Character/HordeBaseCharacter.h"
+#include "Gameplay/HordeBaseController.h"
 
 ABaseFirearm::ABaseFirearm()
 {
@@ -38,7 +39,39 @@ ABaseFirearm::ABaseFirearm()
 
 void ABaseFirearm::FireFirearm()
 {
+	if (LoadedAmmo > 0)
+	{
+		PlayFirearmFX();
+		LoadedAmmo = FMath::Clamp<int32>((LoadedAmmo - 1), 0, 9999);
 
+		FItem CurrentWeaponItem = UInventoryHelpers::FindItemByID(FName(*WeaponID));
+		FTransform SpawnTransform;
+		FVector EyeViewPoint;
+		FRotator EyeRotation;
+		GetOwnerEyePoint(false, EyeViewPoint, EyeRotation);
+		SpawnTransform.SetLocation(EyeViewPoint);
+		SpawnTransform.SetRotation(EyeRotation.Quaternion());
+		ABaseProjectile* Projectile = GetWorld()->SpawnActor<ABaseProjectile>(CurrentWeaponItem.ProjectileClass, SpawnTransform, FActorSpawnParameters());
+		if (Projectile)
+		{
+			Projectile->SetOwner(GetOwner());
+		}
+
+		AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(GetOwner());
+		if (PLY)
+		{
+			AHordeBaseController* PC = Cast<AHordeBaseController>(PLY->GetController());
+			if (PC)
+			{
+				//PC->ClientPlayCameraShake()
+			}
+			PLY->Inventory->UpdateCurrentItemAmmo(LoadedAmmo);
+		}
+	}
+
+	else {
+		//No Ammo
+	}
 }
 
 
@@ -55,7 +88,8 @@ void ABaseFirearm::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 
 void ABaseFirearm::PlayFirearmFX_Implementation()
 {
-
+	MuzzleFlash->Activate(true);
+	WeaponSound->Play();
 }
 
 bool ABaseFirearm::PlayFirearmFX_Validate()
