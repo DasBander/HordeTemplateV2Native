@@ -1,6 +1,10 @@
 
 
 #include "HordeBaseHUD.h"
+#include "Engine/Canvas.h"
+#include "TextureResource.h"
+#include "CanvasItem.h"
+#include "Engine/Texture2D.h"
 #include "Character/HordeBaseCharacter.h"
 
 AHordeBaseHUD::AHordeBaseHUD()
@@ -10,6 +14,13 @@ AHordeBaseHUD::AHordeBaseHUD()
 	{
 		PlayerHUDWidgetClass = PlayerHUDAsset.Class;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UTexture2D> CrosshairTexAsset(TEXT("Texture2D'/Game/HordeTemplateBP/Assets/Textures/Hud/center_dot.center_dot'"));
+	if (CrosshairTexAsset.Succeeded())
+	{
+		CrosshairTex = CrosshairTexAsset.Object;
+	}
+
 }
 
 UPlayerHUDWidget* AHordeBaseHUD::GetHUDWidget()
@@ -31,4 +42,20 @@ void AHordeBaseHUD::BeginPlay()
 	PlayerHUDWidget->AddToViewport();
 }
 
+void AHordeBaseHUD::DrawHUD()
+{
+	Super::DrawHUD();
+
+	// Find center of the Canvas
+	const FVector2D Center(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f);
+
+	// Offset by half the texture's dimensions so that the center of the texture aligns with the center of the Canvas
+	const FVector2D CrosshairDrawPosition((Center.X - (CrosshairTex->GetSurfaceWidth() * 0.5)),
+		(Center.Y - (CrosshairTex->GetSurfaceHeight() * 0.5f)));
+
+	// Draw the crosshair
+	FCanvasTileItem TileItem(CrosshairDrawPosition, CrosshairTex->Resource, FLinearColor::White);
+	TileItem.BlendMode = SE_BLEND_Translucent;
+	Canvas->DrawItem(TileItem);
+}
 

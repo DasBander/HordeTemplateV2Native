@@ -13,7 +13,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 		UAnimMontage* CharacterReloadAnimation = nullptr;
 
-	FPlayerAnimationData();
+	FPlayerAnimationData() {}
 
 };
 

@@ -58,6 +58,9 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, NetMulticast, Reliable, WithValidation, Category = "Character")
 		void PlaySoundOnAllClients(USoundCue* Sound, FVector Location);
 
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, NetMulticast, Unreliable, WithValidation, Category = "Character")
+		void PlayAnimationAllClients(UAnimMontage* Montage);
+
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Character")
 		bool RemoveHealth(float HealthToRemove);
 
@@ -202,6 +205,15 @@ protected:
 
 	UFUNCTION(Server, Reliable, WithValidation, BlueprintCallable, Category = "Firearm")
 		void ServerReload();
+
+	UPROPERTY()
+		FTimerHandle ReloadTimerHandle;
+
+	UFUNCTION()
+		void FinishReload();
+
+	UFUNCTION()
+		void DropCurrentItem();
 
 public:	
 

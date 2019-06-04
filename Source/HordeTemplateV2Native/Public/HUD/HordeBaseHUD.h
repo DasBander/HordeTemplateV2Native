@@ -24,6 +24,8 @@ protected:
 	UPROPERTY()
 		TSubclassOf<class UPlayerHUDWidget> PlayerHUDWidgetClass;
 
+	UPROPERTY()
+	class UTexture2D* CrosshairTex;
 public:
 
 	AHordeBaseHUD();
@@ -33,4 +35,5 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;
+	virtual void DrawHUD() override;
 };

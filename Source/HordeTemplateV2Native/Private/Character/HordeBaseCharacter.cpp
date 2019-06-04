@@ -172,6 +172,16 @@ float AHordeBaseCharacter::TakeDamage(float Damage, struct FDamageEvent const& D
 	return Health;
 }
 
+void AHordeBaseCharacter::PlayAnimationAllClients_Implementation(UAnimMontage* Montage)
+{
+	GetMesh()->GetAnimInstance()->Montage_Play(Montage);
+}
+
+bool AHordeBaseCharacter::PlayAnimationAllClients_Validate(UAnimMontage* Montage)
+{
+	return true;
+}
+
 bool AHordeBaseCharacter::RemoveHealth(float HealthToRemove)
 {
 	Health = FMath::Clamp<float>((Health - HealthToRemove), 0.f, 100.f);
@@ -557,6 +567,41 @@ void AHordeBaseCharacter::ToggleFiremode()
 
 
 
+void AHordeBaseCharacter::FinishReload()
+{
+	if (GetWorld()->GetTimerManager().IsTimerActive(ReloadTimerHandle))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(ReloadTimerHandle);
+	}
+	if (CurrentSelectedFirearm)
+	{
+		FItem TempItem = UInventoryHelpers::FindItemByID(FName(*CurrentSelectedFirearm->WeaponID));
+		int32 AmmoIndex;
+		int32 AmmoAmount = Inventory->CountAmmo(TempItem.AmmoType, AmmoIndex);
+		if (AmmoAmount >= (CurrentSelectedFirearm->LoadedAmmo - TempItem.MaximumLoadedAmmo))
+		{
+			Inventory->RemoveAmmoByType(TempItem.AmmoType, (CurrentSelectedFirearm->LoadedAmmo - TempItem.MaximumLoadedAmmo));
+			CurrentSelectedFirearm->LoadedAmmo = TempItem.MaximumLoadedAmmo;
+		}
+		else
+		{
+			CurrentSelectedFirearm->LoadedAmmo = AmmoAmount;
+			Inventory->RemoveAmmoByType(TempItem.AmmoType, AmmoAmount);
+		}
+		Reloading = false;
+		Inventory->UpdateCurrentItemAmmo(CurrentSelectedFirearm->LoadedAmmo);
+	}
+}
+
+void AHordeBaseCharacter::DropCurrentItem()
+{
+	if (CurrentSelectedFirearm && !Reloading)
+	{
+		StopWeaponFire();
+		Inventory->ServerDropItem(CurrentSelectedFirearm);
+	}
+}
+
 void AHordeBaseCharacter::ServerReload_Implementation()
 {
 	if (!Reloading)
@@ -572,6 +617,11 @@ void AHordeBaseCharacter::ServerReload_Implementation()
 				if (TempItem.PlayerAnimationData.CharacterReloadAnimation)
 				{
 					float AnimationDuration = TempItem.PlayerAnimationData.CharacterReloadAnimation->CalculateSequenceLength();
+					PlayAnimationAllClients(TempItem.PlayerAnimationData.CharacterReloadAnimation);
+					GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, this, &AHordeBaseCharacter::FinishReload, AnimationDuration, false);
+				}
+				else {
+					FinishReload();
 				}
 			}
 		}
@@ -599,6 +649,8 @@ void AHordeBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	check(PlayerInputComponent);
+	PlayerInputComponent->BindAction("DropItem", IE_Pressed, this, &AHordeBaseCharacter::DropCurrentItem);
+
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &AHordeBaseCharacter::ServerReload);
 
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AHordeBaseCharacter::TriggerWeaponFire);

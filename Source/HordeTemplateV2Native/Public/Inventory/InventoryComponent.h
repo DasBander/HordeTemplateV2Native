@@ -78,6 +78,12 @@ public:
 	int32 CountAmmo(FName AmmoType, int32& Index);
 
 	/*
+	Removes Specific Amount of Ammo by Type
+	*/
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
+		bool RemoveAmmoByType(FName AmmoType, int32 AmountToRemove);
+
+	/*
 	Data Table where we have all Item Base Values stored.
 	*/
 	UPROPERTY(EditAnywhere, Category="Inventory")

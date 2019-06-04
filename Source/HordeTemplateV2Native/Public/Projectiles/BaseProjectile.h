@@ -18,11 +18,13 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	
+	UPROPERTY()
+		int32 ImpactCounter = 0;
+
+	UPROPERTY(EditDefaultsOnly, Category="Projectile")
+	float Damage = 25.f;
 
 
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 };

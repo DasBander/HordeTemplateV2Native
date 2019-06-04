@@ -206,6 +206,28 @@ int32 UInventoryComponent::CountAmmo(FName AmmoType, int32& Index)
 	return TempAmount;
 }
 
+bool UInventoryComponent::RemoveAmmoByType(FName AmmoType, int32 AmountToRemove)
+{
+	int32 AmmoIndex;
+	int32 TempAmount = CountAmmo(AmmoType, AmmoIndex);
+	if (TempAmount >= AmountToRemove)
+	{
+		if ((Inventory[AmmoIndex].DefaultLoadedAmmo - AmountToRemove) <= 0)
+		{
+			Inventory.RemoveAt(AmmoIndex);
+			return true;
+		}
+		else 
+		{
+			Inventory[AmmoIndex].UpdateAmmo(Inventory[AmmoIndex].DefaultLoadedAmmo - AmountToRemove);
+			return true;
+		}
+	}
+	else {
+		return false;
+	}
+}
+
 void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
