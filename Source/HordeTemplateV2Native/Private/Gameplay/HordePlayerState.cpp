@@ -1,4 +1,60 @@
 
 
 #include "HordePlayerState.h"
+#include "HordeGameState.h"
+#include "HUD/HordeBaseHUD.h"
+#include "HordeTemplateV2Native.h"
 
+void AHordePlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AHordePlayerState, Player);
+}
+
+void AHordePlayerState::ClientUpdateGameStatus_Implementation(EGameStatus GameStatus)
+{
+	APlayerController* PC = Cast<APlayerController>(GetOwner());
+	if (PC)
+	{
+		AHordeBaseHUD* HUD = Cast<AHordeBaseHUD>(PC->GetHUD());
+		if (HUD)
+		{
+			HUD->OnGameStatusChanged.Broadcast((uint8)GameStatus);
+		}
+	}
+}
+
+void AHordePlayerState::OnMessageReceived_Implementation(FChatMessage Msg)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Message Received: %s"), *Msg.Message.ToString());
+}
+
+void AHordePlayerState::BeginPlay()
+{
+	Super::BeginPlay();
+
+	FTimerHandle DelayedBeginPlay;
+	FTimerDelegate DelayedBeginPlayDelegate;
+
+	DelayedBeginPlayDelegate.BindLambda([=] {
+		if (HasAuthority())
+		{
+			AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
+			if (GS)
+			{
+				ClientUpdateGameStatus(GS->GameStatus);
+				Player.SelectedCharacter = GS->GetFreeCharacter();
+				Player.PlayerID = UniqueId->ToString();
+				Player.UserName = GetPlayerName();
+
+				GS->TakePlayer(Player);
+				GS->UpdatePlayerLobby();
+				GS->PopMessage(FChatMessage("SERVER", FText::FromString(GetPlayerName() + " has joined.")));
+
+			}
+		}
+	});
+
+	GetWorld()->GetTimerManager().SetTimer(DelayedBeginPlay, DelayedBeginPlayDelegate, 2.f, false);
+}

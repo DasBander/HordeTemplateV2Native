@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/WorldSettings.h"
 #include "Gameplay/HordeGameMode.h"
+#include "HordeTemplateV2Native.h"
 #include "HordeWorldSettings.generated.h"
 
 /**
@@ -18,7 +19,10 @@ class HORDETEMPLATEV2NATIVE_API AHordeWorldSettings : public AWorldSettings
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Horde Game|Player Starting")
-		TArray<FName> StartingItems = {"Item_Hands"};
+		TArray<FName> StartingItems = DEFAULT_STARTING_ITEMS;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Horde Game|Lobby")
+		TArray<FName> PlayerCharacters = DEFAULT_AVAILABLE_PLAYERCHARACTERS;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Horde Game|Gameplay")
 		EMatchMode MatchMode;

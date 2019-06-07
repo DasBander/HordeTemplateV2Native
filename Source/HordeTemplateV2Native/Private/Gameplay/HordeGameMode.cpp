@@ -10,8 +10,13 @@
 AHordeGameMode::AHordeGameMode()
 {
 	GameStateClass = AHordeGameState::StaticClass();
-	DefaultPawnClass = AHordeBaseCharacter::StaticClass();
+	DefaultPawnClass = nullptr;
 	PlayerControllerClass = AHordeBaseController::StaticClass();
 	PlayerStateClass = AHordePlayerState::StaticClass();
 	HUDClass = AHordeBaseHUD::StaticClass();
+
+	bStartPlayersAsSpectators = 0;
 }
+
+
+

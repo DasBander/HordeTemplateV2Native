@@ -25,4 +25,6 @@ class HORDETEMPLATEV2NATIVE_API AHordeGameMode : public AGameMode
 	
 public:
 	AHordeGameMode();
+
+	
 };
