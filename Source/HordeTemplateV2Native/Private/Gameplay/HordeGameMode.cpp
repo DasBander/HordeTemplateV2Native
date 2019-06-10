@@ -18,5 +18,19 @@ AHordeGameMode::AHordeGameMode()
 	bStartPlayersAsSpectators = 0;
 }
 
+void AHordeGameMode::Logout(AController* Exiting)
+{
+	FTimerHandle DelayedRemove;
+	FTimerDelegate DelayedRemoveDel;
+	DelayedRemoveDel.BindLambda([=] {
+		AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
+		if (GS)
+		{
+			GS->UpdatePlayerLobby();
+		}
+	});
+	GetWorld()->GetTimerManager().SetTimer(DelayedRemove, DelayedRemoveDel, 1.f, false);
+
+}
 
 

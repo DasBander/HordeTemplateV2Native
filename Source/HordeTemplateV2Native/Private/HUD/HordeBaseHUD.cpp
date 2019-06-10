@@ -74,6 +74,11 @@ UPlayerHUDWidget* AHordeBaseHUD::GetHUDWidget()
 	return (PlayerHUDWidget) ? PlayerHUDWidget : nullptr;
 }
 
+UPlayerLobbyWidget* AHordeBaseHUD::GetLobbyWidget()
+{
+	return (PlayerLobbyWidget) ? PlayerLobbyWidget : nullptr;
+}
+
 void AHordeBaseHUD::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);

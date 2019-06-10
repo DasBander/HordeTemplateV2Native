@@ -26,5 +26,5 @@ class HORDETEMPLATEV2NATIVE_API AHordeGameMode : public AGameMode
 public:
 	AHordeGameMode();
 
-	
+	virtual void Logout(AController* Exiting) override;
 };

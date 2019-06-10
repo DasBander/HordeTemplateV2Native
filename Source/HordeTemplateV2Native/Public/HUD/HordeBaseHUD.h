@@ -55,6 +55,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "HUD")
 		UPlayerHUDWidget* GetHUDWidget();
 
+	UFUNCTION(BlueprintPure, Category = "HUD")
+		UPlayerLobbyWidget* GetLobbyWidget();
+
+
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;
 	virtual void DrawHUD() override;

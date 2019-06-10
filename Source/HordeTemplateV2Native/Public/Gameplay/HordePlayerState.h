@@ -20,14 +20,23 @@ public:
 		return Player;
 	}
 
+	FORCEINLINE void SwitchReady(bool State)
+	{
+		Player.PlayerReady = State;
+	}
+
 	UFUNCTION(Client, Reliable)
 		void OnMessageReceived(FChatMessage Msg);
+
+	UFUNCTION(Client, Reliable)
+		void UpdateLobbyPlayerList(const TArray<FPlayerInfo>& Players);
+
 protected:
 
 	UFUNCTION(Client, Reliable)
 		void ClientUpdateGameStatus(EGameStatus GameStatus);
 
-	
+
 
 	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, Category = "Player Info")
 		FPlayerInfo Player;

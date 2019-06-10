@@ -30,6 +30,21 @@ void AHordePlayerState::OnMessageReceived_Implementation(FChatMessage Msg)
 	UE_LOG(LogTemp, Warning, TEXT("Message Received: %s"), *Msg.Message.ToString());
 }
 
+void AHordePlayerState::UpdateLobbyPlayerList_Implementation(const TArray<FPlayerInfo>& Players)
+{
+	APlayerController* PC = Cast<APlayerController>(GetOwner());
+	if (PC)
+	{
+		AHordeBaseHUD* HUD = Cast<AHordeBaseHUD>(PC->GetHUD());
+		if (HUD)
+		{
+			HUD->GetLobbyWidget()->OnLobbyPlayersUpdateDelegate.Broadcast(Players);
+		}
+	}
+}
+
+
+
 void AHordePlayerState::BeginPlay()
 {
 	Super::BeginPlay();

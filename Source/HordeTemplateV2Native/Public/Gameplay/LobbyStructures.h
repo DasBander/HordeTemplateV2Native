@@ -68,7 +68,10 @@ public:
 		FName CharacterID = "None";
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characters")
-		FString PlayerID = "None";
+		FString PlayerID = "";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characters")
+		FString PlayerUsername = "";
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characters")
 		bool CharacterTaken = false;
@@ -97,6 +100,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lobby Info")
 		TArray<FLobbyAvailableCharacters> AvailableCharacters;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lobby Info")
+		int32 MinimumStartingPlayers = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lobby Info")
+		float DefaultLobbyTime = 300.f;
+
 	FLobbyInfo() {}
 
 
@@ -110,16 +119,18 @@ struct FPlayableLevel : public FTableRowBase
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Playable Levels")
-		FName LevelName = "None";
+		 FText LevelName = FText();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Playable Levels")
-		FName RawLevelName = "MAP_NONE";
+		FName RawLevelName = "TestingMap";
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Playable Levels")
 		UTexture2D* LevelImage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Playable Levels")
 		UTexture2D* LobbyImage;
+
+	FPlayableLevel() {}
 
 
 };
