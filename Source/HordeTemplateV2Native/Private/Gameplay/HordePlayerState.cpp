@@ -45,6 +45,69 @@ void AHordePlayerState::UpdateLobbyPlayerList_Implementation(const TArray<FPlaye
 
 
 
+void AHordePlayerState::ToggleReadyStatus_Implementation()
+{
+	Player.PlayerReady = (Player.PlayerReady) ? false : true;
+	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
+	if (GS)
+	{
+		GS->UpdatePlayerLobby();
+	}
+}
+
+bool AHordePlayerState::ToggleReadyStatus_Validate()
+{
+	return true;
+}
+
+void AHordePlayerState::RequestCharacterTrade_Implementation(const FString& InstigatorPlayer, const FString& TargetPlayer)
+{
+	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
+	if (GS)
+	{
+		GS->StartCharacterTrade(InstigatorPlayer, TargetPlayer);
+	}
+}
+
+bool AHordePlayerState::RequestCharacterTrade_Validate(const FString& InstigatorPlayer, const FString& TargetPlayer)
+{
+	return true;
+}
+
+void AHordePlayerState::CancelCharacterTrade_Implementation()
+{
+	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
+	if (GS)
+	{
+		if (GS->TradeProgress.Target == Player.PlayerID)
+		{
+			GS->AbortLobbyTrade();
+		}
+	}
+}
+
+bool AHordePlayerState::CancelCharacterTrade_Validate()
+{
+	return true;
+}
+
+void AHordePlayerState::AcceptCharacterTrade_Implementation()
+{
+	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
+	if (GS)
+	{
+		if (GS->TradeProgress.Target == Player.PlayerID)
+		{
+			GS->AcceptCharacterTrade();
+		}
+	}
+}
+
+bool AHordePlayerState::AcceptCharacterTrade_Validate()
+{
+	return true;
+}
+
 void AHordePlayerState::BeginPlay()
 {
 	Super::BeginPlay();

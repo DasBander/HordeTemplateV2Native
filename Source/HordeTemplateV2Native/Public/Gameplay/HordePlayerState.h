@@ -25,6 +25,11 @@ public:
 		Player.PlayerReady = State;
 	}
 
+	FORCEINLINE void SwitchCharacter(FName Character)
+	{
+		Player.SelectedCharacter = Character;
+	}
+
 	UFUNCTION(Client, Reliable)
 		void OnMessageReceived(FChatMessage Msg);
 
@@ -36,7 +41,17 @@ protected:
 	UFUNCTION(Client, Reliable)
 		void ClientUpdateGameStatus(EGameStatus GameStatus);
 
+	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "Lobby")
+		void ToggleReadyStatus();
 
+	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "Lobby|Trade")
+		void RequestCharacterTrade(const FString& InstigatorPlayer, const FString& TargetPlayer);
+
+	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "Lobby|Trade")
+		void AcceptCharacterTrade();
+
+	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "Lobby|Trade")
+		void CancelCharacterTrade();
 
 	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, Category = "Player Info")
 		FPlayerInfo Player;

@@ -135,3 +135,30 @@ public:
 
 };
 	
+USTRUCT(BlueprintType)
+struct FLobbyTrade
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characters")
+		FString Instigator = "";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characters")
+		FString Target = "";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characters")
+		float TimeLeft = 20;
+
+
+	FLobbyTrade() {}
+
+	FLobbyTrade(FString InInstigator, FString InTarget, float InTimeLeft) 
+	{
+		Instigator = InInstigator;
+		Target = InTarget;
+		TimeLeft = InTimeLeft;
+	}
+
+};

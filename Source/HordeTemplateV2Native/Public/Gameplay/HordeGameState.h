@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
+#include "HordePlayerState.h"
 #include "LobbyStructures.h"
 #include "HordeGameState.generated.h"
 
@@ -16,6 +17,10 @@ class HORDETEMPLATEV2NATIVE_API AHordeGameState : public AGameState
 	GENERATED_BODY()
 
 public:
+
+	/*
+	Lobby Setup	
+	*/
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Lobby")
 		FLobbyInfo LobbyInformation;
@@ -53,6 +58,15 @@ public:
 		void StartGame();
 
 	UFUNCTION()
+		bool IsCharacterTaken(FName CharacterID);
+
+	UFUNCTION(BlueprintCallable, Category="Lobby")
+		FName GetCharacterByID(FString PlayerID, int32 &CharacterIndex);
+
+	UFUNCTION()
+		AHordePlayerState* GetPlayerStateByID(FString PlayerID);
+
+	UFUNCTION()
 		void FreeupUnassignedCharacters();
 
 	UFUNCTION()
@@ -75,4 +89,28 @@ public:
 
 	UFUNCTION()
 	FName GetFreeCharacter();
+
+	/*
+	Lobby Character Trading
+	*/
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Lobby")
+		FLobbyTrade TradeProgress;
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Lobby")
+		bool IsTradeInProgress = false;
+
+	UPROPERTY()
+		FTimerHandle LobbyTradeTimer;
+
+	UFUNCTION()
+		void StartCharacterTrade(FString InstigatorPlayer, FString TargetPlayer);
+
+	UFUNCTION()
+		void ProcessCharacterTrade();
+
+	UFUNCTION()
+		void AcceptCharacterTrade();
+
+	UFUNCTION()
+		void AbortLobbyTrade();
 };

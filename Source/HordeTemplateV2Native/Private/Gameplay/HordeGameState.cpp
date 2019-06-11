@@ -1,7 +1,6 @@
 
 
 #include "HordeGameState.h"
-#include "HordePlayerState.h"
 #include "HordeTemplateV2Native.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Gameplay/HordeWorldSettings.h"
@@ -15,6 +14,8 @@ void AHordeGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(AHordeGameState, GameStarting);
 	DOREPLIFETIME(AHordeGameState, LobbyTime);
 	DOREPLIFETIME(AHordeGameState, BlockDisconnect);
+	DOREPLIFETIME(AHordeGameState, TradeProgress);
+	DOREPLIFETIME(AHordeGameState, IsTradeInProgress);
 }
 
 void AHordeGameState::BeginPlay()
@@ -45,9 +46,7 @@ void AHordeGameState::BeginPlay()
 					LobbyInformation.LobbyMapRotation.Add(PLevel->RawLevelName);
 					LobbyInformation.OwnerID = "Dedicated Server";
 					LobbyInformation.LobbyName = "Horde Game - Lobby";
-				}
-
-					
+				}	
 			}
 			else
 			{
@@ -61,7 +60,27 @@ void AHordeGameState::BeginPlay()
 
 void AHordeGameState::TakePlayer(FPlayerInfo Player)
 {
-
+	if (!IsCharacterTaken(Player.SelectedCharacter))
+	{
+		TArray<FLobbyAvailableCharacters> Characters = LobbyInformation.AvailableCharacters;
+		int32 CharacterIndex = -1;
+		for (auto PChar : Characters)
+		{
+			CharacterIndex++;
+			if (PChar.CharacterID == Player.SelectedCharacter)
+			{
+				break;
+			}
+		}
+		if (Characters.IsValidIndex(CharacterIndex))
+		{
+			Characters[CharacterIndex].CharacterTaken = true;
+			Characters[CharacterIndex].PlayerID = Player.PlayerID;
+			Characters[CharacterIndex].PlayerUsername = Player.UserName;
+			LobbyInformation.AvailableCharacters = Characters;
+			UpdatePlayerLobby();
+		}
+	}
 }
 
 void AHordeGameState::StartLobbyTimer()
@@ -131,6 +150,54 @@ void AHordeGameState::StartGame()
 
 }
 
+bool AHordeGameState::IsCharacterTaken(FName CharacterID)
+{
+	bool RetTaken = false;
+	for (auto Char : LobbyInformation.AvailableCharacters)
+	{
+		if (Char.CharacterID == CharacterID && Char.PlayerID != "")
+		{
+			RetTaken = true;
+		}
+	}
+	return RetTaken;
+}
+
+FName AHordeGameState::GetCharacterByID(FString PlayerID, int32 &CharacterIndex)
+{
+	int32 TempIndex = -1;
+	FName RetTemp = TEXT("None");
+	for (auto PChar : LobbyInformation.AvailableCharacters)
+	{
+		TempIndex++;
+		if (PChar.PlayerID == PlayerID)
+		{
+			RetTemp = PChar.CharacterID;
+			break;
+		}
+	}
+	CharacterIndex = TempIndex;
+	return RetTemp;
+}
+
+AHordePlayerState* AHordeGameState::GetPlayerStateByID(FString PlayerID)
+{
+	AHordePlayerState* RetPS = nullptr;
+	for (auto& PLY : PlayerArray)
+	{
+		AHordePlayerState* PS = Cast<AHordePlayerState>(PLY);
+		if (PS)
+		{
+			if (PS->UniqueId->ToString() == PlayerID)
+			{
+				RetPS = PS;
+				break;
+			}
+		}
+	}
+	return RetPS;
+}
+
 void AHordeGameState::FreeupUnassignedCharacters()
 {
 	TArray<FLobbyAvailableCharacters> LocalCharacters = LobbyInformation.AvailableCharacters;
@@ -151,10 +218,20 @@ void AHordeGameState::FreeupUnassignedCharacters()
 	{
 		if (LocalCharacters[PlyID].PlayerID != "" && LocalCharacters[PlyID].PlayerUsername != "")
 		{
+			//Display Disconnect Message.
 			PopMessage(FChatMessage("SERVER", FText::FromString(LocalCharacters[PlyID].PlayerUsername + " has disconnected")));
+
+			//Abort Character Trade if Player was involved.
+			if (IsTradeInProgress && TradeProgress.Instigator == LocalCharacters[PlyID].PlayerID || TradeProgress.Target == LocalCharacters[PlyID].PlayerID)
+			{
+				AbortLobbyTrade();
+			}
+
+			//Reset Character and set it to not taken.
 			LocalCharacters[PlyID].PlayerUsername = "";
 			LocalCharacters[PlyID].PlayerID = "";
 			LocalCharacters[PlyID].CharacterTaken = false;
+
 		}
 		else {
 			LocalCharacters[PlyID].PlayerUsername = "";
@@ -162,6 +239,7 @@ void AHordeGameState::FreeupUnassignedCharacters()
 			LocalCharacters[PlyID].CharacterTaken = false;
 		}
 	}
+	//Update Lobby Information with new Character List.
 	LobbyInformation.AvailableCharacters = LocalCharacters;
 
 
@@ -270,3 +348,68 @@ FName AHordeGameState::GetFreeCharacter()
 	}
 	return TempChar;
 }
+
+void AHordeGameState::StartCharacterTrade(FString InstigatorPlayer, FString TargetPlayer)
+{
+	if (!IsTradeInProgress && InstigatorPlayer != "" && TargetPlayer != "" && !GetWorld()->GetTimerManager().IsTimerActive(LobbyTradeTimer))
+	{
+		TradeProgress.Instigator = InstigatorPlayer;
+		TradeProgress.Target = TargetPlayer;
+		TradeProgress.TimeLeft = 20.f;
+		GetWorld()->GetTimerManager().SetTimer(LobbyTradeTimer, this, &AHordeGameState::ProcessCharacterTrade, 1.f, true);
+		IsTradeInProgress = true;
+	}
+}
+
+void AHordeGameState::ProcessCharacterTrade()
+{
+	if (TradeProgress.TimeLeft > 0)
+	{
+		TradeProgress.TimeLeft--;
+	}
+	else {
+		AbortLobbyTrade();
+	}
+}
+
+void AHordeGameState::AcceptCharacterTrade()
+{
+	
+	int32 TargetCharacterIndex = -1;
+	int32 InstigatorCharacterIndex = -1;
+	FName TargetCharacter = GetCharacterByID(TradeProgress.Target, TargetCharacterIndex);
+	FName InstigatorCharacter = GetCharacterByID(TradeProgress.Instigator, InstigatorCharacterIndex);
+
+	AHordePlayerState* TargetPlayerState = GetPlayerStateByID(TradeProgress.Target);
+	if (TargetPlayerState)
+	{
+		LobbyInformation.AvailableCharacters[InstigatorCharacterIndex].PlayerID = TargetPlayerState->GetPlayerInfo().PlayerID;
+		LobbyInformation.AvailableCharacters[InstigatorCharacterIndex].PlayerUsername = TargetPlayerState->GetPlayerInfo().UserName;
+		TargetPlayerState->SwitchCharacter(InstigatorCharacter);
+	}
+
+	AHordePlayerState* InstigatorPlayerState = GetPlayerStateByID(TradeProgress.Instigator);
+	if (InstigatorPlayerState)
+	{
+		LobbyInformation.AvailableCharacters[TargetCharacterIndex].PlayerID = InstigatorPlayerState->GetPlayerInfo().PlayerID;
+		LobbyInformation.AvailableCharacters[TargetCharacterIndex].PlayerUsername = InstigatorPlayerState->GetPlayerInfo().UserName;
+		InstigatorPlayerState->SwitchCharacter(TargetCharacter);
+	}
+	AbortLobbyTrade();
+	UpdatePlayerLobby();
+
+}
+
+void AHordeGameState::AbortLobbyTrade()
+{
+	if (GetWorld()->GetTimerManager().IsTimerActive(LobbyTradeTimer))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(LobbyTradeTimer);
+	}
+	TradeProgress.Instigator = "";
+	TradeProgress.Target = "";
+	TradeProgress.TimeLeft = 20.f;
+	IsTradeInProgress = false;
+}
+
+

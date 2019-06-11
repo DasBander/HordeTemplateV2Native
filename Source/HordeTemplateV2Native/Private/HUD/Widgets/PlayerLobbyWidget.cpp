@@ -36,26 +36,17 @@ FText UPlayerLobbyWidget::GetLobbyTime()
 	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
 	if (GS)
 	{
-		if (FMath::FloorToInt((GS->LobbyTime / 60)) < 10)
-		{
-			Args.Add("Minutes", FText::FromString("0" + FString::FromInt(FMath::FloorToInt((GS->LobbyTime / 60)))));
-		}
-		else {
-			Args.Add("Minutes", FText::FromString(FString::FromInt(FMath::FloorToInt((GS->LobbyTime / 60)))));
-		}
-		
-		if (FMath::TruncToInt(GS->LobbyTime - (FMath::FloorToInt((GS->LobbyTime / 60)) * 60.f)) < 10)
-		{
-			Args.Add("Seconds", FText::FromString("0" + FString::FromInt(FMath::TruncToInt(GS->LobbyTime - (FMath::FloorToInt((GS->LobbyTime / 60)) * 60.f)))));
-		}
-		else {
-			Args.Add("Seconds", FText::FromString(FString::FromInt(FMath::TruncToInt(GS->LobbyTime - (FMath::FloorToInt((GS->LobbyTime / 60)) * 60.f)))));
-		}
+		float LobbyTime = GS->LobbyTime;
 
-		return FText::Format(NSLOCTEXT("LobbyTime", "LobbyTime", "{Minutes} : {Seconds}"), Args);
+		int32 Minutes = FMath::FloorToInt(LobbyTime / 60.f);
+		int32 Seconds = FMath::TruncToInt(LobbyTime - (Minutes * 60.f));
+
+		FString TimeStr = FString::Printf(TEXT("%s%s : %s%s"), (Minutes < 10) ? TEXT("0") : TEXT(""), *FString::FromInt(Minutes), (Seconds < 10) ? TEXT("0") : TEXT(""), *FString::FromInt(Seconds));
+
+		return FText::FromString(TimeStr);
 	}
 	else {
-		return FText::FromString("Error.");
+		return FText::FromString("nA / nA");
 	}
 
 }
