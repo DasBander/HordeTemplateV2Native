@@ -43,6 +43,11 @@ public:
 	void TakePlayer(FPlayerInfo Player);
 
 	UFUNCTION()
+		void KickPlayer(const FString& PlayerID);
+
+
+
+	UFUNCTION()
 	void StartLobbyTimer();
 
 	UFUNCTION()
@@ -113,4 +118,42 @@ public:
 
 	UFUNCTION()
 		void AbortLobbyTrade();
+
+	/*
+	Round Base Game ( Non Linear )
+	*/
+
+	UFUNCTION()
+		void StartRoundBasedGame();
+
+	UFUNCTION()
+		void ProcessPauseTime();
+
+	UFUNCTION()
+		void StartGameRound();
+
+	UFUNCTION()
+		void ProcessRoundTime();
+
+	UFUNCTION()
+		void EndGameRound();
+
+	UPROPERTY()
+		FTimerHandle RoundTimer;
+
+	UPROPERTY()
+		FTimerHandle PauseTimer;
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Round Based")
+		float RoundTime = 0.f;
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Round Based")
+		float PauseTime = 0.f;
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Round Based")
+		bool IsRoundPaused = false;
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Round Based")
+		int32 GameRound = 0;
+
 };

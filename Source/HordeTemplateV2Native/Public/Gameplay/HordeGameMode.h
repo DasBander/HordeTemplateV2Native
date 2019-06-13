@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
+#include "LobbyStructures.h"
 #include "HordeGameMode.generated.h"
 
 
@@ -23,8 +24,23 @@ class HORDETEMPLATEV2NATIVE_API AHordeGameMode : public AGameMode
 {
 	GENERATED_BODY()
 	
+protected:
+	UPROPERTY()
+	int32 ZedsLeftToSpawn = 0;
+
+
 public:
 	AHordeGameMode();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Zeds")
+	void GetAISpawner(TArray<AActor*>& Spawner, int32 &FreePoints);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Zeds")
+		AActor* GetFreeAISpawnPoint();
+
 	virtual void Logout(AController* Exiting) override;
+
+	void GameStart(const TArray<FPlayerInfo>& LobbyPlayers);
+
+	void InitiateZombieSpawning(int32 Amount);
 };

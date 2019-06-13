@@ -16,6 +16,9 @@ void AHordeGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(AHordeGameState, BlockDisconnect);
 	DOREPLIFETIME(AHordeGameState, TradeProgress);
 	DOREPLIFETIME(AHordeGameState, IsTradeInProgress);
+	DOREPLIFETIME(AHordeGameState, RoundTime);
+	DOREPLIFETIME(AHordeGameState, IsRoundPaused);
+	DOREPLIFETIME(AHordeGameState, GameRound);
 }
 
 void AHordeGameState::BeginPlay()
@@ -83,6 +86,62 @@ void AHordeGameState::TakePlayer(FPlayerInfo Player)
 	}
 }
 
+void AHordeGameState::KickPlayer(const FString& PlayerID)
+{
+	AHordePlayerState* PS = GetPlayerStateByID(PlayerID);
+	if (PS)
+	{
+		PopMessage(FChatMessage("SERVER", FText::FromString(PS->GetPlayerInfo().UserName + " got kicked.")));
+		PS->GettingKicked();
+	}
+}
+
+void AHordeGameState::StartRoundBasedGame()
+{
+	if (!GetWorld()->GetTimerManager().IsTimerActive(PauseTimer))
+	{
+		GetWorld()->GetTimerManager().SetTimer(PauseTimer, this, &AHordeGameState::ProcessPauseTime, 1.f, true);
+		IsRoundPaused = true;
+		RoundTime = 0.f;
+	}
+}
+
+void AHordeGameState::ProcessPauseTime()
+{
+	AHordeWorldSettings* WS = Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings(false, true));
+	if (WS)
+	{
+		if (WS->PauseTime >= PauseTime)
+		{
+			PauseTime = 0.f;
+			GameRound++;
+			GetWorld()->GetTimerManager().ClearTimer(PauseTimer);
+			IsRoundPaused = false;
+
+			StartGameRound();
+		}
+		else 
+		{
+			PauseTime++;
+		}
+	}
+}
+
+void AHordeGameState::StartGameRound()
+{
+
+}
+
+void AHordeGameState::ProcessRoundTime()
+{
+
+}
+
+void AHordeGameState::EndGameRound()
+{
+
+}
+
 void AHordeGameState::StartLobbyTimer()
 {
 	if (!GetWorld()->GetTimerManager().IsTimerActive(LobbyTimer))
@@ -147,7 +206,33 @@ void AHordeGameState::UnreadyAllPlayers()
 
 void AHordeGameState::StartGame()
 {
+	if (GameStatus != EGameStatus::EINGAME)
+	{
+		AbortLobbyTrade();
+		GameStatus = EGameStatus::EINGAME;
+		for (auto& Ply : PlayerArray)
+		{
+			AHordePlayerState* PS = Cast<AHordePlayerState>(Ply);
+			if (PS)
+			{
+				PS->ClientUpdateGameStatus(GameStatus);
+			}
+		}
+		AHordeGameMode* HGM = Cast<AHordeGameMode>(GetWorld()->GetAuthGameMode());
+		if (HGM)
+		{
+			HGM->GameStart(LobbyPlayers);
+		}
 
+		AHordeWorldSettings* WS = Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings(true, true));
+		if (WS)
+		{
+			if (WS->MatchMode == EMatchMode::EMatchModeNonLinear)
+			{
+				StartRoundBasedGame();
+			}
+		}
+	}
 }
 
 bool AHordeGameState::IsCharacterTaken(FName CharacterID)

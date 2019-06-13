@@ -1,26 +1,64 @@
 
 
 #include "AISpawnPoint.h"
+#include "Components/CapsuleComponent.h"
+#include "ConstructorHelpers.h"
+#include "GameFramework/Character.h"
 
-// Sets default values
 AAISpawnPoint::AAISpawnPoint()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
+	PrimaryActorTick.bCanEverTick = false;
+
+	RootComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Root"));
+	RootComponent->SetRelativeScale3D(FVector(2.f, 2.f, 2.f));
+
+	UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(RootComponent);
+	if (Capsule)
+	{
+		Capsule->SetCapsuleHalfHeight(44.f, true);
+		Capsule->SetCapsuleRadius(22.f);
+		Capsule->OnComponentBeginOverlap.AddDynamic(this, &AAISpawnPoint::CharacterOverlap);
+		Capsule->OnComponentEndOverlap.AddDynamic(this, &AAISpawnPoint::CharacterEndOverlap);
+		Capsule->SetCollisionProfileName(FName("SpawnerCollision"));
+	}
+
+
+	ActorIcon = CreateDefaultSubobject<UBillboardComponent>(TEXT("Icon"));
+	ActorIcon->SetupAttachment(RootComponent);
+	ActorIcon->SetRelativeLocation(FVector(0.f, 0.f, 53.f));
+
+	const ConstructorHelpers::FObjectFinder<UTexture2D> IconAsset(TEXT("Texture2D'/Engine/EditorResources/S_Actor.S_Actor'"));
+	if (IconAsset.Succeeded())
+	{
+		ActorIcon->SetSprite(IconAsset.Object);
+	}
+
 
 }
 
-// Called when the game starts or when spawned
-void AAISpawnPoint::BeginPlay()
+void AAISpawnPoint::CharacterOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	Super::BeginPlay();
-	
+	if (OtherActor)
+	{
+		ACharacter* PLY = Cast<ACharacter>(OtherActor);
+		if (PLY)
+		{
+			SpawnNotFree = true;
+		}
+	}
+
 }
 
-// Called every frame
-void AAISpawnPoint::Tick(float DeltaTime)
+void AAISpawnPoint::CharacterEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	Super::Tick(DeltaTime);
-
+	if (OtherActor)
+	{
+		ACharacter* PLY = Cast<ACharacter>(OtherActor);
+		if (PLY)
+		{
+			SpawnNotFree = false;
+		}
+	}
 }
 

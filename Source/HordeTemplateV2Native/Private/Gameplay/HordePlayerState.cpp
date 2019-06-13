@@ -108,6 +108,46 @@ bool AHordePlayerState::AcceptCharacterTrade_Validate()
 	return true;
 }
 
+void AHordePlayerState::GettingKicked_Implementation()
+{
+	APlayerController* PC = Cast<APlayerController>(GetOwner());
+	if (PC)
+	{
+		GetWorld()->Exec(GetWorld(), TEXT("disconnect?message=kicked"));
+	}
+}
+
+void AHordePlayerState::SubmitMessage_Implementation(const FText& Message)
+{
+	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
+	if(GS)
+	{
+		GS->PopMessage(FChatMessage(Player.UserName, Message));
+	}
+}
+
+bool AHordePlayerState::SubmitMessage_Validate(const FText& Message)
+{
+	return true;
+}
+
+void AHordePlayerState::RequestPlayerKick_Implementation(FPlayerInfo Player)
+{
+	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
+	if (GS)
+	{
+		if (GS->LobbyInformation.OwnerID == Player.PlayerID)
+		{
+			GS->KickPlayer(Player.PlayerID);
+		}
+	}
+}
+
+bool AHordePlayerState::RequestPlayerKick_Validate(FPlayerInfo Player)
+{
+	return true;
+}
+
 void AHordePlayerState::BeginPlay()
 {
 	Super::BeginPlay();

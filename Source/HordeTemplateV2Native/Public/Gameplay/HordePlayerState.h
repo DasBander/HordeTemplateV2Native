@@ -36,10 +36,20 @@ public:
 	UFUNCTION(Client, Reliable)
 		void UpdateLobbyPlayerList(const TArray<FPlayerInfo>& Players);
 
-protected:
-
 	UFUNCTION(Client, Reliable)
 		void ClientUpdateGameStatus(EGameStatus GameStatus);
+
+	UFUNCTION(Client, Reliable)
+		void GettingKicked();
+
+	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category = "Chat")
+		void RequestPlayerKick(FPlayerInfo Player);
+
+	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category = "Chat")
+		void SubmitMessage(const FText& Message);
+
+
+protected:
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "Lobby")
 		void ToggleReadyStatus();
