@@ -38,6 +38,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Zeds")
 		AActor* GetFreeAISpawnPoint();
 
+	APlayerController* GetControllerByID(FString PlayerID);
+
+	FTransform GetRandomPlayerSpawn();
+
 	virtual void Logout(AController* Exiting) override;
 
 	void GameStart(const TArray<FPlayerInfo>& LobbyPlayers);

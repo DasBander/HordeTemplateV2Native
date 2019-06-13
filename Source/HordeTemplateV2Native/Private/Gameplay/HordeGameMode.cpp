@@ -6,6 +6,7 @@
 #include "Gameplay/HordeGameState.h"
 #include "AI/AISpawnPoint.h"
 #include "Gameplay/HordePlayerState.h"
+#include "GameFramework/PlayerStart.h"
 #include "HUD/HordeBaseHUD.h"
 #include "AI/ZedPawn.h"
 #include "Runtime/Engine/Public/EngineUtils.h"
@@ -45,6 +46,38 @@ AActor* AHordeGameMode::GetFreeAISpawnPoint()
 	return nullptr;
 }
 
+APlayerController* AHordeGameMode::GetControllerByID(FString PlayerID)
+{
+	APlayerController* TempCTRL = nullptr;
+	for (TActorIterator<APlayerController> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		APlayerController* APC = *ActorItr;
+		if (APC)
+		{
+			if (APC->PlayerState->UniqueId->ToString() == PlayerID)
+			{
+				TempCTRL = APC;
+			}
+		}
+	}
+	return TempCTRL;
+}
+
+FTransform AHordeGameMode::GetRandomPlayerSpawn()
+{
+	TArray<FTransform> SpawnPoints;
+	for (TActorIterator<APlayerStart> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+
+		APlayerStart* SpawnPoint = *ActorItr;
+		if (SpawnPoint)
+		{
+			SpawnPoints.Add(SpawnPoint->GetActorTransform());
+		}
+	}
+	return SpawnPoints[FMath::RandRange(0, (SpawnPoints.Num() - 1))];
+}
+
 void AHordeGameMode::Logout(AController* Exiting)
 {
 	FTimerHandle DelayedRemove;
@@ -62,7 +95,19 @@ void AHordeGameMode::Logout(AController* Exiting)
 
 void AHordeGameMode::GameStart(const TArray<FPlayerInfo>& LobbyPlayers)
 {
-
+	for (auto PLY : LobbyPlayers)
+	{
+		APlayerController* PC = GetControllerByID(PLY.PlayerID);
+		if (PC)
+		{
+			AHordeBaseCharacter* Character = GetWorld()->SpawnActorDeferred<AHordeBaseCharacter>(AHordeBaseCharacter::StaticClass(), FTransform(), nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
+			if (Character)
+			{
+				Character->FinishSpawning(GetRandomPlayerSpawn(), false, nullptr);
+			}
+			PC->Possess(Character);
+		}
+	}
 }
 
 void AHordeGameMode::InitiateZombieSpawning(int32 Amount)

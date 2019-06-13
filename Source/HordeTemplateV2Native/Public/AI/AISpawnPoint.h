@@ -7,7 +7,7 @@
 #include "Components/BillboardComponent.h"
 #include "AISpawnPoint.generated.h"
 
-UCLASS()
+UCLASS(ClassGroup="Horde AI")
 class HORDETEMPLATEV2NATIVE_API AAISpawnPoint : public AActor
 {
 	GENERATED_BODY()

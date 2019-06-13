@@ -48,6 +48,14 @@ public:
 	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category = "Chat")
 		void SubmitMessage(const FText& Message);
 
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Score")
+		int32 ZedKills = 0;
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Score")
+		int32 Points = 0;
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Score")
+		int32 HeadShots = 0;
 
 protected:
 

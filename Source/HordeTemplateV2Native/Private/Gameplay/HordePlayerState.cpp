@@ -10,6 +10,9 @@ void AHordePlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AHordePlayerState, Player);
+	DOREPLIFETIME(AHordePlayerState, ZedKills);
+	DOREPLIFETIME(AHordePlayerState, Points);
+	DOREPLIFETIME(AHordePlayerState, HeadShots);
 }
 
 void AHordePlayerState::ClientUpdateGameStatus_Implementation(EGameStatus GameStatus)

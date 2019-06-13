@@ -4,6 +4,10 @@
 #include "HordeTemplateV2Native.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Gameplay/HordeWorldSettings.h"
+#include "Gameplay/HordeBaseController.h"
+#include "Character/HordeBaseCharacter.h"
+#include "Runtime/Engine/Public/EngineUtils.h"
+#include "Misc/HordeTrader.h"
 
 void AHordeGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -118,6 +122,20 @@ void AHordeGameState::ProcessPauseTime()
 			GetWorld()->GetTimerManager().ClearTimer(PauseTimer);
 			IsRoundPaused = false;
 
+			for (TActorIterator<AHordeBaseController> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+			{
+				AHordeBaseController* CTRL = *ActorItr;
+				if (CTRL)
+				{
+					USoundCue* NewRoundSound = ObjectFromPath<USoundCue>(TEXT("SoundCue'/Game/HordeTemplateBP/Assets/Sounds/A_RoundWarmup_Cue.A_RoundWarmup_Cue'"));
+					if (NewRoundSound)
+					{
+						CTRL->ClientPlay2DSound(NewRoundSound);
+					}
+				}
+
+			}
+
 			StartGameRound();
 		}
 		else 
@@ -129,17 +147,63 @@ void AHordeGameState::ProcessPauseTime()
 
 void AHordeGameState::StartGameRound()
 {
+	if (!GetWorld()->GetTimerManager().IsTimerActive(RoundTimer))
+	{
+		GetWorld()->GetTimerManager().SetTimer(RoundTimer, this, &AHordeGameState::ProcessRoundTime, 1.f, true);
+	}
 
+	AHordeGameMode* GMO = Cast<AHordeGameMode>(GetWorld()->GetAuthGameMode());
+	if (GMO)
+	{
+		AHordeWorldSettings* HWS = Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings(false, true));
+		if (HWS)
+		{
+			GMO->InitiateZombieSpawning(GameRound * HWS->ZedMultiplier);
+		}
+	}
+	for (auto& PLY : PlayerArray)
+	{
+		AHordeBaseController* PC = Cast<AHordeBaseController>(PLY->GetOwner());
+		if (PC)
+		{
+			PC->ClientCloseTraderUI();
+		}
+	}
+
+	for (TActorIterator<AHordeTrader> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		AHordeTrader* Trader = *ActorItr;
+		if (Trader)
+		{
+			Trader->PlayGoodBye();
+		}
+		
+	}
 }
 
 void AHordeGameState::ProcessRoundTime()
 {
-
+	AHordeWorldSettings* HWS = Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings(false, true));
+	if (HWS)
+	{
+		if (HWS->RoundTime >= RoundTime)
+		{
+			EndGameRound();
+		}
+		else 
+		{
+			RoundTime++;
+		}
+	}
 }
 
 void AHordeGameState::EndGameRound()
 {
-
+	if (GetWorld()->GetTimerManager().IsTimerActive(RoundTimer))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(RoundTimer);
+	}
+	StartGameRound();
 }
 
 void AHordeGameState::StartLobbyTimer()
@@ -432,6 +496,33 @@ FName AHordeGameState::GetFreeCharacter()
 		}
 	}
 	return TempChar;
+}
+
+void AHordeGameState::AllPlayerDeadCheck()
+{
+	if (CountAlivePlayers() < 1)
+	{
+		EndGame(true);
+	}
+}
+
+void AHordeGameState::EndGame(bool ResetLevel)
+{
+
+}
+
+int32 AHordeGameState::CountAlivePlayers()
+{
+	int32 TempAliveCount = 0;
+	for (TActorIterator<AHordeBaseCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		AHordeBaseCharacter* PLYChar = *ActorItr;
+		if (PLYChar && !PLYChar->GetIsDead())
+		{
+			TempAliveCount++;
+		}
+	}
+	return TempAliveCount;
 }
 
 void AHordeGameState::StartCharacterTrade(FString InstigatorPlayer, FString TargetPlayer)

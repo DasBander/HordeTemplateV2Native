@@ -11,6 +11,13 @@ enum class EGameStatus : uint8
 	ESERVERTRAVEL UMETA(DisplayName = "Server Travel")
 };
 
+UENUM(BlueprintType)
+enum class EPointType : uint8
+{
+	EPointCasual UMETA(DisplayName = "Casual Kill"),
+	EPointHeadShot UMETA(DisplayName = "Headshot")
+};
+
 USTRUCT(BlueprintType)
 struct FChatMessage
 {
@@ -160,5 +167,38 @@ public:
 		Target = InTarget;
 		TimeLeft = InTimeLeft;
 	}
+
+};
+
+USTRUCT(BlueprintType)
+struct FPlayerScore
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Score")
+		FString ScoreType = "None";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Score")
+		FString PlayerID = "";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Score")
+		int32 Score = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Score")
+		FName Character;
+
+	FPlayerScore() {}
+
+	FPlayerScore(FString InScoreType, FString InPlayerID, int32 InScore, FName InCharacter)
+	{
+		ScoreType = InScoreType;
+		PlayerID = InPlayerID;
+		Score = InScore;
+		Character = InCharacter;
+	}
+
+	
 
 };

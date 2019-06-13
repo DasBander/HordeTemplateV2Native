@@ -95,6 +95,15 @@ public:
 	UFUNCTION()
 	FName GetFreeCharacter();
 
+	UFUNCTION()
+		void AllPlayerDeadCheck();
+
+	UFUNCTION()
+		void EndGame(bool ResetLevel);
+
+	UFUNCTION()
+		int32 CountAlivePlayers();
+
 	/*
 	Lobby Character Trading
 	*/
