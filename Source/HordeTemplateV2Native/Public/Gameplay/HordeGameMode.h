@@ -38,6 +38,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Zeds")
 		AActor* GetFreeAISpawnPoint();
 
+	UFUNCTION()
+		void CheckGameOver();
+
 	APlayerController* GetControllerByID(FString PlayerID);
 
 	FTransform GetRandomPlayerSpawn();

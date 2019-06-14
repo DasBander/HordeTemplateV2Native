@@ -25,7 +25,13 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Zed AI")
+		float Health = 100.f;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Zed AI")
+		bool IsDead = false;
+
 public:	
-
-
+	FORCEINLINE float GetHealth() { return Health; };
+	FORCEINLINE bool GetIsDead() { return IsDead; };
 };

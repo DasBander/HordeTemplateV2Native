@@ -6,6 +6,7 @@
 #include "Gameplay/HordeWorldSettings.h"
 #include "Gameplay/HordeBaseController.h"
 #include "Character/HordeBaseCharacter.h"
+#include "AI/ZedPawn.h"
 #include "Runtime/Engine/Public/EngineUtils.h"
 #include "Misc/HordeTrader.h"
 
@@ -23,6 +24,12 @@ void AHordeGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(AHordeGameState, RoundTime);
 	DOREPLIFETIME(AHordeGameState, IsRoundPaused);
 	DOREPLIFETIME(AHordeGameState, GameRound);
+	DOREPLIFETIME(AHordeGameState, ZedsLeft);
+	DOREPLIFETIME(AHordeGameState, Score_MVP);
+	DOREPLIFETIME(AHordeGameState, Score_MostHeadshots);
+	DOREPLIFETIME(AHordeGameState, Score_MostKills);
+	DOREPLIFETIME(AHordeGameState, NextLevel);
+	DOREPLIFETIME(AHordeGameState, EndTime);
 }
 
 void AHordeGameState::BeginPlay()
@@ -195,6 +202,30 @@ void AHordeGameState::ProcessRoundTime()
 			RoundTime++;
 		}
 	}
+}
+
+FName AHordeGameState::GetNextLevelInRotation(bool ResetLevel)
+{
+	FName NextLevel = *GetWorld()->GetMapName();
+	if (!ResetLevel)
+	{
+		int32 CurLevelIndex = LobbyInformation.LobbyMapRotation.Find(NextLevel);
+		if (CurLevelIndex >= (LobbyInformation.LobbyMapRotation.Num() - 1))
+		{
+			if (LobbyInformation.LobbyMapRotation.IsValidIndex(0))
+			{
+				NextLevel = LobbyInformation.LobbyMapRotation[0];
+			}
+		}
+		else
+		{
+			if (LobbyInformation.LobbyMapRotation.IsValidIndex(CurLevelIndex + 1))
+			{
+				NextLevel = LobbyInformation.LobbyMapRotation[CurLevelIndex + 1];
+			}
+		}
+	}
+	return NextLevel;
 }
 
 void AHordeGameState::EndGameRound()
@@ -508,10 +539,143 @@ void AHordeGameState::AllPlayerDeadCheck()
 
 void AHordeGameState::EndGame(bool ResetLevel)
 {
+	if (ResetLevel)
+	{
+		GameStatus = EGameStatus::EGAMEOVER;
+		CalcEndScore(Score_MostKills, Score_MostHeadshots, Score_MostKills);
+		NextLevel = GetNextLevelInRotation(ResetLevel);
+
+		for (auto& PS : PlayerArray)
+		{
+			AHordePlayerState* PLY = Cast<AHordePlayerState>(PS);
+			if (PLY)
+			{
+				PLY->ClientUpdateGameStatus(GameStatus);
+			}
+		}
+
+		for (TActorIterator<AHordeBaseCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			AHordeBaseCharacter* PLYChar = *ActorItr;
+			if (PLYChar)
+			{
+				PLYChar->GetCurrentFirearm()->Destroy();
+				PLYChar->Destroy();
+			}
+		}
+
+		if (!GetWorld()->GetTimerManager().IsTimerActive(EndGameTimer))
+		{
+			GetWorld()->GetTimerManager().SetTimer(EndGameTimer, this, &AHordeGameState::ProcessEndTime, 1.f, true);
+		}
+	}
+	else
+	{
+		AHordeWorldSettings* WS = Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings(false, true));
+		if (WS)
+		{
+			if (ZedsLeft > 0 && WS->MatchMode != EMatchMode::EMatchModeNonLinear)
+			{
+				PopMessage(FChatMessage("SERVER", FText::FromString("All Zombies needs to be killed to end the Map.")));
+			}
+		}
+	
+	}
 
 }
 
+void AHordeGameState::ProcessEndTime()
+{
+	if (EndTime <= 0.f)
+	{
+		if (GetWorld()->GetTimerManager().IsTimerActive(EndGameTimer))
+		{
+			GetWorld()->GetTimerManager().ClearTimer(EndGameTimer);
+		}
+		GameStatus = EGameStatus::ESERVERTRAVEL;
+		for (auto& PS : PlayerArray)
+		{
+			AHordePlayerState* PLY = Cast<AHordePlayerState>(PS);
+			if (PLY)
+			{
+				PLY->ClientUpdateGameStatus(GameStatus);
+			}
+		}
+		GetWorld()->Exec(GetWorld(), *FString("servertravel " + NextLevel.ToString()));
+		ResetLobby();
+	}
+	else 
+	{
+		EndTime--;
+	}
+}
+
+void AHordeGameState::ResetLobby()
+{
+	AHordeWorldSettings* WS = Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings(false, true));
+	if (WS)
+	{
+		LobbyTime = 300.f;
+		GameStarting = false;
+		BlockDisconnect = false;
+		GameStatus = EGameStatus::ELOBBY;
+	}
+}
+
+void AHordeGameState::CalcEndScore(FPlayerScore& MVP, FPlayerScore& HS, FPlayerScore& KS)
+{
+	FPlayerScore LocalMVP("MVP");
+	FPlayerScore LocalHS("Most Headshots");
+	FPlayerScore LocalKS("Most Kills");
+
+	for (auto& PS : PlayerArray)
+	{
+		AHordePlayerState * PLY = Cast<AHordePlayerState>(PS);
+		if (PLY)
+		{
+			if (PLY->Points > MVP.Score)
+			{
+				MVP.Score = PLY->Points;
+				MVP.PlayerID = PLY->GetPlayerInfo().PlayerID;
+				MVP.Character = PLY->GetPlayerInfo().SelectedCharacter;
+			}
+			if (PLY->HeadShots > HS.Score)
+			{
+				HS.Score = PLY->HeadShots;
+				HS.PlayerID = PLY->GetPlayerInfo().PlayerID;
+				HS.Character = PLY->GetPlayerInfo().SelectedCharacter;
+			}
+			if (PLY->ZedKills > KS.Score)
+			{
+				KS.Score = PLY->ZedKills;
+				KS.PlayerID = PLY->GetPlayerInfo().PlayerID;
+				KS.Character = PLY->GetPlayerInfo().SelectedCharacter;
+			}
+		}
+	}
+
+	MVP = LocalMVP;
+	HS = LocalHS;
+	KS = LocalKS;
+	
+}
+
 int32 AHordeGameState::CountAlivePlayers()
+{
+	int32 TempAliveCount = 0;
+	for (TActorIterator<AZedPawn> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		AZedPawn* Zed = *ActorItr;
+		if (Zed && !Zed->GetIsDead())
+		{
+			TempAliveCount++;
+		}
+		
+	}
+	return TempAliveCount;
+}
+
+int32 AHordeGameState::CountAliveZeds()
 {
 	int32 TempAliveCount = 0;
 	for (TActorIterator<AHordeBaseCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
@@ -523,6 +687,16 @@ int32 AHordeGameState::CountAlivePlayers()
 		}
 	}
 	return TempAliveCount;
+}
+
+void AHordeGameState::UpdateAliveZeds()
+{
+	ZedsLeft = CountAliveZeds();
+	AHordeGameMode* GMO = Cast<AHordeGameMode>(GetWorld()->GetAuthGameMode());
+	if (GMO)
+	{
+		GMO->CheckGameOver();
+	}
 }
 
 void AHordeGameState::StartCharacterTrade(FString InstigatorPlayer, FString TargetPlayer)

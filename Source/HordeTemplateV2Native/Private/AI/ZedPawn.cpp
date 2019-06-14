@@ -1,6 +1,7 @@
 
 
 #include "ZedPawn.h"
+#include "HordeTemplateV2Native.h"
 
 AZedPawn::AZedPawn()
 {
@@ -16,6 +17,14 @@ AZedPawn::AZedPawn()
 	PlayerRangeCollision->SetRelativeScale3D(FVector(3.8125f, 4.75f, 7.75f));
 
 	
+}
+
+void AZedPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AZedPawn, Health);
+	DOREPLIFETIME(AZedPawn, IsDead);
 }
 
 void AZedPawn::BeginPlay()

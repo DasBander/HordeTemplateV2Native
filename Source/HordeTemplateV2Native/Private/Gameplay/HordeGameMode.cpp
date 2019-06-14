@@ -46,6 +46,11 @@ AActor* AHordeGameMode::GetFreeAISpawnPoint()
 	return nullptr;
 }
 
+void AHordeGameMode::CheckGameOver()
+{
+
+}
+
 APlayerController* AHordeGameMode::GetControllerByID(FString PlayerID)
 {
 	APlayerController* TempCTRL = nullptr;

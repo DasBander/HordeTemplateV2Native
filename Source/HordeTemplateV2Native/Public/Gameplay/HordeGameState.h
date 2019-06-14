@@ -102,7 +102,22 @@ public:
 		void EndGame(bool ResetLevel);
 
 	UFUNCTION()
+		void ProcessEndTime();
+
+	UFUNCTION()
+		void ResetLobby();
+
+	UFUNCTION()
+		void CalcEndScore(FPlayerScore& MVP, FPlayerScore& HS, FPlayerScore& KS);
+
+	UFUNCTION()
 		int32 CountAlivePlayers();
+
+	UFUNCTION()
+		int32 CountAliveZeds();
+
+	UFUNCTION()
+		void UpdateAliveZeds();
 
 	/*
 	Lobby Character Trading
@@ -128,6 +143,7 @@ public:
 	UFUNCTION()
 		void AbortLobbyTrade();
 
+
 	/*
 	Round Base Game ( Non Linear )
 	*/
@@ -143,6 +159,9 @@ public:
 
 	UFUNCTION()
 		void ProcessRoundTime();
+
+	UFUNCTION()
+		FName GetNextLevelInRotation(bool ResetLevel);
 
 	UFUNCTION()
 		void EndGameRound();
@@ -165,4 +184,24 @@ public:
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Round Based")
 		int32 GameRound = 0;
 
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Game")
+		int32 ZedsLeft = 0;
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Score")
+		FPlayerScore Score_MVP;
+	
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Score")
+		FPlayerScore Score_MostHeadshots;
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Score")
+		FPlayerScore Score_MostKills;
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Game")
+		FName NextLevel = TEXT("None");
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Game")
+		float EndTime = 20.f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Game")
+		FTimerHandle EndGameTimer;
 };

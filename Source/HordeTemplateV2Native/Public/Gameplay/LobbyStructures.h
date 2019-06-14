@@ -132,10 +132,10 @@ public:
 		FName RawLevelName = "TestingMap";
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Playable Levels")
-		UTexture2D* LevelImage;
+		UTexture2D* LevelImage = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Playable Levels")
-		UTexture2D* LobbyImage;
+		UTexture2D* LobbyImage = nullptr;
 
 	FPlayableLevel() {}
 
@@ -190,6 +190,11 @@ public:
 		FName Character;
 
 	FPlayerScore() {}
+
+	FPlayerScore(FString InScoreType)
+	{
+		ScoreType = InScoreType;
+	}
 
 	FPlayerScore(FString InScoreType, FString InPlayerID, int32 InScore, FName InCharacter)
 	{
