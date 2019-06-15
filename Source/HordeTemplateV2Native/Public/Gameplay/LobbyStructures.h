@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine/DataTable.h"
+#include "GameFramework/Character.h"
 #include "LobbyStructures.generated.h"
 
 UENUM(BlueprintType)
@@ -32,6 +33,11 @@ public:
 
 	FChatMessage() {}
 
+	FChatMessage(FString InMessage)
+	{
+		Message = FText::FromString(InMessage);
+	}
+
 	FChatMessage(FString InSender, FText InMessage)
 	{
 		Sender = InSender;
@@ -60,6 +66,30 @@ public:
 		bool PlayerReady = false;
 
 	FPlayerInfo() {}
+
+
+};
+
+USTRUCT(BlueprintType)
+struct FPlayableCharacter : public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Info")
+		FName CharacterID = "None";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Info")
+		FString CharacterTitle = "None";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Info")
+		UTexture2D * CharacterImage = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Info")
+		TSubclassOf<ACharacter> CharacterClass = nullptr;
+
+	FPlayableCharacter() {}
 
 
 };

@@ -102,7 +102,7 @@ void AHordeGameState::KickPlayer(const FString& PlayerID)
 	AHordePlayerState* PS = GetPlayerStateByID(PlayerID);
 	if (PS)
 	{
-		PopMessage(FChatMessage("SERVER", FText::FromString(PS->GetPlayerInfo().UserName + " got kicked.")));
+		PopMessage(FChatMessage(PS->GetPlayerInfo().UserName + " got kicked."));
 		PS->GettingKicked();
 	}
 }
@@ -252,7 +252,7 @@ void AHordeGameState::ProcessLobbyTime()
 		LobbyTime--;
 		if (FMath::RoundToInt(LobbyTime) <= 10 && FMath::RoundToInt(LobbyTime) > 0)
 		{
-			PopMessage(FChatMessage("SERVER", FText::FromString("Game starting in " + FString::FromInt(FMath::RoundToInt(LobbyTime)) + " seconds.")));
+			PopMessage(FChatMessage("Game starting in " + FString::FromInt(FMath::RoundToInt(LobbyTime)) + " seconds."));
 			if (FMath::RoundToInt(LobbyTime) <= 5)
 			{
 				BlockDisconnect = true;
@@ -261,7 +261,7 @@ void AHordeGameState::ProcessLobbyTime()
 		else {
 			if (FMath::RoundToInt(LobbyTime) == 0)
 			{
-				PopMessage(FChatMessage("SERVER", FText::FromString("Game starting....")));
+				PopMessage(FChatMessage("Game starting...."));
 			}
 		}
 	}
@@ -283,7 +283,7 @@ void AHordeGameState::ResetLobbyTime()
 		GetWorld()->GetTimerManager().ClearTimer(LobbyTimer);
 	}
 	LobbyTime = LobbyInformation.DefaultLobbyTime;
-	PopMessage(FChatMessage("SERVER", FText::FromString("Game Start was interrupted.")));
+	PopMessage(FChatMessage("Game Start was interrupted."));
 	BlockDisconnect = false;
 }
 
@@ -399,7 +399,7 @@ void AHordeGameState::FreeupUnassignedCharacters()
 		if (LocalCharacters[PlyID].PlayerID != "" && LocalCharacters[PlyID].PlayerUsername != "")
 		{
 			//Display Disconnect Message.
-			PopMessage(FChatMessage("SERVER", FText::FromString(LocalCharacters[PlyID].PlayerUsername + " has disconnected")));
+			PopMessage(FChatMessage(LocalCharacters[PlyID].PlayerUsername + " has disconnected"));
 
 			//Abort Character Trade if Player was involved.
 			if (IsTradeInProgress && TradeProgress.Instigator == LocalCharacters[PlyID].PlayerID || TradeProgress.Target == LocalCharacters[PlyID].PlayerID)
@@ -576,7 +576,7 @@ void AHordeGameState::EndGame(bool ResetLevel)
 		{
 			if (ZedsLeft > 0 && WS->MatchMode != EMatchMode::EMatchModeNonLinear)
 			{
-				PopMessage(FChatMessage("SERVER", FText::FromString("All Zombies needs to be killed to end the Map.")));
+				PopMessage(FChatMessage("All Zombies needs to be killed to end the Map."));
 			}
 		}
 	
@@ -663,21 +663,6 @@ void AHordeGameState::CalcEndScore(FPlayerScore& MVP, FPlayerScore& HS, FPlayerS
 int32 AHordeGameState::CountAlivePlayers()
 {
 	int32 TempAliveCount = 0;
-	for (TActorIterator<AZedPawn> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-	{
-		AZedPawn* Zed = *ActorItr;
-		if (Zed && !Zed->GetIsDead())
-		{
-			TempAliveCount++;
-		}
-		
-	}
-	return TempAliveCount;
-}
-
-int32 AHordeGameState::CountAliveZeds()
-{
-	int32 TempAliveCount = 0;
 	for (TActorIterator<AHordeBaseCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
 		AHordeBaseCharacter* PLYChar = *ActorItr;
@@ -685,6 +670,21 @@ int32 AHordeGameState::CountAliveZeds()
 		{
 			TempAliveCount++;
 		}
+	}
+	return TempAliveCount;
+}
+
+int32 AHordeGameState::CountAliveZeds()
+{
+	int32 TempAliveCount = 0;
+	for (TActorIterator<AZedPawn> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		AZedPawn* Zed = *ActorItr;
+		if (Zed && !Zed->GetIsDead())
+		{
+			TempAliveCount++;
+		}
+
 	}
 	return TempAliveCount;
 }

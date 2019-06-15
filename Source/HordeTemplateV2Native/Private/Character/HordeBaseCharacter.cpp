@@ -4,6 +4,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Runtime/UMG/Public/UMG.h"
 #include "Inventory/InventoryHelpers.h"
+#include "Gameplay/HordeGameMode.h"
 #include "Weapons/BaseFirearm.h"
 #include "HUD/Widgets/PlayerHeadDisplay.h"
 #include "AIModule/Classes/Perception/AISense_Sight.h"
@@ -197,11 +198,17 @@ void AHordeBaseCharacter::CharacterDie()
 		Inventory->ServerDropItem(CurrentSelectedFirearm);
 	}
 
-
+	AHordeGameMode* GM = Cast<AHordeGameMode>(GetWorld()->GetAuthGameMode());
+	if (GM)
+	{
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		if (PC)
+		{
+			GM->SpawnSpectator(PC);
+		}
+	}
 	/*
 	Set Dead in PlayerState
-	Spawn Spectator 
-
 	*/
 	RagdollPlayer();
 	SetLifeSpan(20.f);

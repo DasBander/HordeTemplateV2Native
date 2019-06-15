@@ -41,6 +41,11 @@ public:
 	UFUNCTION()
 		void CheckGameOver();
 
+	UFUNCTION()
+		void SpawnSpectator(APlayerController* PC);
+
+	FVector GetSpectatorSpawnLocation();
+
 	APlayerController* GetControllerByID(FString PlayerID);
 
 	FTransform GetRandomPlayerSpawn();

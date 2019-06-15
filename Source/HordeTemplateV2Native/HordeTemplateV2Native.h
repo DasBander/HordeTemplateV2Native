@@ -9,10 +9,11 @@
 */
 
 //Inventory
-#define INVENTORY_DATATABLE_PATH TEXT("DataTable'/Game/HordeTemplateBP/CppTesting/HordeInventoryItems.HordeInventoryItems'")
+#define INVENTORY_DATATABLE_PATH TEXT("DataTable'/Game/HordeTemplateBP/Data/HordeInventoryItems.HordeInventoryItems'")
 
 //Lobby
-#define MAPS_DATATABLE_PATH TEXT("DataTable'/Game/HordeTemplateBP/CppTesting/PlayableLevels.PlayableLevels'")
+#define MAPS_DATATABLE_PATH TEXT("DataTable'/Game/HordeTemplateBP/Data/PlayableLevels.PlayableLevels'")
+#define CHARACTER_DATATABLE_PATH TEXT("DataTable'/Game/HordeTemplateBP/Data/PlayableCharacters.PlayableCharacters'")
 
 //Tracing
 #define DROP_TRACE_CHANNEL ECC_GameTraceChannel1

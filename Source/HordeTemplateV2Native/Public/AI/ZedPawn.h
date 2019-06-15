@@ -22,6 +22,9 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Zed AI")
 		class USphereComponent* PlayerRangeCollision;
 
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Zed AI")
+		FName PatrolTag;
+
 protected:
 	virtual void BeginPlay() override;
 
