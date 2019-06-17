@@ -11,6 +11,13 @@
 //Inventory
 #define INVENTORY_DATATABLE_PATH TEXT("DataTable'/Game/HordeTemplateBP/Data/HordeInventoryItems.HordeInventoryItems'")
 
+//Zombie AI
+#define ZED_BEHAVIORTREE_ASSET_PATH TEXT("BehaviorTree'/Game/HordeTemplateBP/Blueprint/Ai/BT/BT_Zed.BT_Zed'")
+#define ZED_LOSE_SIGHT_TIME_MIN 6.f
+#define ZED_LOSE_SIGHT_TIME_MAX 12.f
+#define ZED_LOSE_SIGHT_RADIUS 2500.f
+#define ZED_SIGHT_RADIUS 1000.f
+
 //Lobby
 #define MAPS_DATATABLE_PATH TEXT("DataTable'/Game/HordeTemplateBP/Data/PlayableLevels.PlayableLevels'")
 #define CHARACTER_DATATABLE_PATH TEXT("DataTable'/Game/HordeTemplateBP/Data/PlayableCharacters.PlayableCharacters'")

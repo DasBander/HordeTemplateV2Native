@@ -57,6 +57,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Score")
 		int32 HeadShots = 0;
 
+	UFUNCTION(BlueprintCallable, Category = "Score")
+		void AddPoints(int32 InPoints, EPointType PointsType);
+
+
 protected:
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "Lobby")
@@ -70,6 +74,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "Lobby|Trade")
 		void CancelCharacterTrade();
+
+	UFUNCTION(BlueprintCallable, Client, Reliable, Category = "HUD")
+		void ClientNotifyPoints(EPointType PointType, int32 OutPoints);
 
 	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, Category = "Player Info")
 		FPlayerInfo Player;

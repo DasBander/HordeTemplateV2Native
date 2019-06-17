@@ -20,12 +20,18 @@ class HORDETEMPLATEV2NATIVE_API AHordeBaseCharacter : public ACharacter
 public:
 	AHordeBaseCharacter();
 
+	
+
+	UFUNCTION(BlueprintPure, Category = "Animation")
+		float GetRemotePitch();
+
 protected:
 	virtual void BeginPlay() override;
 
 	/*
 	Character Basic Stuff
 	*/
+	virtual void Tick(float DeltaSeconds) override;
 
 	UPROPERTY(BlueprintReadWrite, Replicated, Category = "Character|Stamina")
 		float Health = 100.f;

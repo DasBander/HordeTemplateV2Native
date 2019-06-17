@@ -30,10 +30,13 @@ void AHordeGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(AHordeGameState, Score_MostKills);
 	DOREPLIFETIME(AHordeGameState, NextLevel);
 	DOREPLIFETIME(AHordeGameState, EndTime);
+	DOREPLIFETIME(AHordeGameState, PauseTime);
 }
 
 void AHordeGameState::BeginPlay()
 {
+	Super::BeginPlay();
+
 	if (HasAuthority())
 	{
 		GameStatus = EGameStatus::ELOBBY;

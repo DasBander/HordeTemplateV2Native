@@ -10,6 +10,7 @@
 #include "AIModule/Classes/Perception/AISense_Sight.h"
 #include "CameraShake_Damage.h"
 
+
 void AHordeBaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -26,7 +27,10 @@ void AHordeBaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 // Sets default values
 AHordeBaseCharacter::AHordeBaseCharacter()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
+
+
 	const ConstructorHelpers::FObjectFinder<USkeletalMesh> PlayerMeshAsset(TEXT("SkeletalMesh'/Game/HordeTemplateBP/Assets/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin'"));
 	if (PlayerMeshAsset.Succeeded()) {
 		GetMesh()->SetSkeletalMesh(PlayerMeshAsset.Object);
@@ -45,9 +49,14 @@ AHordeBaseCharacter::AHordeBaseCharacter()
 	CameraBoom->TargetArmLength = 90.f;
 	CameraBoom->SetRelativeLocation(FVector(0.f, 49.f, 70.f));
 	CameraBoom->bUsePawnControlRotation = true;
+	CameraBoom->bInheritPitch = true;
+	CameraBoom->bInheritRoll = true;
+	CameraBoom->bInheritYaw = true;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom);
+	FollowCamera->bUsePawnControlRotation = false;
+
 
 	PlayerNameWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Player 3D Name Widget"));
 	PlayerNameWidget->SetupAttachment(RootComponent);
@@ -83,6 +92,16 @@ AHordeBaseCharacter::AHordeBaseCharacter()
 
 }
 
+/*
+Hacky methode for GetBaseAimRotation() (Pitch).
+
+Pitch is somehow 2 instead of 0 by default which means it doesn't use the replicated value for it even if it should at that point inside the anim bp.
+That's why we get it here and transform it into the value we need. We have no idea why the pitch is by default 2. If we find a fix for it we can remove that.
+*/
+float AHordeBaseCharacter::GetRemotePitch()
+{
+	return RemoteViewPitch * 360.0f / 255.0f;
+}
 
 void AHordeBaseCharacter::BeginPlay()
 {
@@ -108,6 +127,12 @@ void AHordeBaseCharacter::BeginPlay()
 	
 }
 
+
+void AHordeBaseCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+}
 
 void AHordeBaseCharacter::ServerInteract_Implementation(AActor* ActorToInteractWith)
 {
@@ -176,6 +201,7 @@ void AHordeBaseCharacter::PlayAnimationAllClients_Implementation(class UAnimMont
 {
 	UAnimMontage* Mont = ObjectFromPath<UAnimMontage>(TEXT("AnimMontage'/Game/HordeTemplateBP/Assets/Animations/AM_Reload_Rifle.AM_Reload_Rifle'"));
 	GetMesh()->GetAnimInstance()->Montage_Play(Mont, 1.f, EMontagePlayReturnType::Duration, 0.f, false);
+
 }
 
 bool AHordeBaseCharacter::PlayAnimationAllClients_Validate(class UAnimMontage* Montage)

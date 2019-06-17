@@ -36,6 +36,7 @@ ABaseProjectile::ABaseProjectile()
 	CollisionSphere->SetSphereRadius(2.f);
 	CollisionSphere->CanCharacterStepUpOn = ECB_No;
 	CollisionSphere->bReturnMaterialOnMove = true;
+	CollisionSphere->SetNotifyRigidBodyCollision(true);
 	ProjectileMovement->UpdatedComponent = CollisionSphere;
 
 	TracerMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tracer Mesh"));

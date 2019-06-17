@@ -151,6 +151,32 @@ bool AHordePlayerState::RequestPlayerKick_Validate(FPlayerInfo Player)
 	return true;
 }
 
+void AHordePlayerState::AddPoints(int32 InPoints, EPointType PointsType)
+{
+	switch (PointsType)
+	{
+	case  EPointType::EPointCasual:
+		ZedKills++;
+	break;
+
+	case EPointType::EPointHeadShot:
+		ZedKills++;
+		HeadShots++;
+	break;
+
+	default:
+	break;
+	}
+	Points = InPoints + Points;
+
+	ClientNotifyPoints(PointsType, InPoints);
+}
+
+void AHordePlayerState::ClientNotifyPoints_Implementation(EPointType PointType, int32 OutPoints)
+{
+
+}
+
 void AHordePlayerState::BeginPlay()
 {
 	Super::BeginPlay();

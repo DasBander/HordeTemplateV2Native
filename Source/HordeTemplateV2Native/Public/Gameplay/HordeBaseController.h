@@ -17,6 +17,8 @@ class HORDETEMPLATEV2NATIVE_API AHordeBaseController : public APlayerController
 	
 public:
 
+	AHordeBaseController();
+
 	UFUNCTION(BlueprintCallable, Client, Reliable, Category = "UI")
 		void ClientCloseTraderUI();
 
