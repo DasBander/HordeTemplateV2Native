@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/BillboardComponent.h"
 #include "AICorePoint.generated.h"
 
 UCLASS()
@@ -12,15 +13,19 @@ class HORDETEMPLATEV2NATIVE_API AAICorePoint : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Target")
+		FName PatrolTag = NAME_None;
+
+
 	AAICorePoint();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Components")
+		class UBillboardComponent* Icon;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+
 
 };

@@ -6,6 +6,8 @@
 #include "Materials/MaterialInstanceConstant.h"
 #include "Character/HordeBaseCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Animation/AnimInstance.h"
+#include "Animation/AnimBlueprintGeneratedClass.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 #include "Sound/SoundCue.h"
@@ -213,6 +215,7 @@ void AZedPawn::OnCharacterInRange(UPrimitiveComponent* OverlappedComponent, AAct
 		AZedAIController* AIC = Cast<AZedAIController>(GetController());
 		if (AIC && AIC->GetBlackboardComponent())
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Enemy is in Range."));
 			AIC->GetBlackboardComponent()->SetValueAsBool("PlayerInRange", true);
 		}
 	}
@@ -226,6 +229,7 @@ void AZedPawn::OnCharacterOutRange(UPrimitiveComponent* OverlappedComponent, AAc
 		AZedAIController* AIC = Cast<AZedAIController>(GetController());
 		if (AIC && AIC->GetBlackboardComponent())
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Enemy is out of Range."));
 			AIC->GetBlackboardComponent()->SetValueAsBool("PlayerInRange", false);
 		}
 	}

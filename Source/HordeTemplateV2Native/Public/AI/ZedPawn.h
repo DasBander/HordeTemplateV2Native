@@ -32,6 +32,9 @@ public:
 	UFUNCTION(NetMulticast, Unreliable, WithValidation, BlueprintCallable, Category = "Zed AI")
 		void ModifyWalkSpeed(float MaxWalkSpeed);
 
+	UFUNCTION(NetMulticast, WithValidation, Unreliable, BlueprintCallable, Category = "Zed AI|FX")
+		void PlayAttackFX();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -48,9 +51,6 @@ protected:
 
 	UFUNCTION(NetMulticast, WithValidation, Unreliable, BlueprintCallable, Category = "Zed AI|FX")
 		void PlayHeadShotFX();
-
-	UFUNCTION(NetMulticast, WithValidation, Unreliable, BlueprintCallable, Category = "Zed AI|FX")
-		void PlayAttackFX();
 
 	UFUNCTION(NetMulticast, WithValidation, Unreliable, BlueprintCallable, Category = "Zed AI|FX")
 		void DeathFX(FVector Direction);

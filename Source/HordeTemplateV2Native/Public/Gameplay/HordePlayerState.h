@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Runtime/CoreUObject/Public/UObject/TextProperty.h"
 #include "GameFramework/PlayerState.h"
 #include "LobbyStructures.h"
 #include "HordePlayerState.generated.h"
