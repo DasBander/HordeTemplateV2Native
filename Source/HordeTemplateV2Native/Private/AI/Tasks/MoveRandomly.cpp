@@ -20,7 +20,7 @@ void UMoveRandomly::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 	AAIController* MyController = Cast<AAIController>(OwnerComp.GetAIOwner());
 	if (MyController)
 	{
-		UBlackboardComponent* BCP = Cast<UBlackboardComponent>(MyController->GetBlackboardComponent());
+		UBlackboardComponent* BCP = Cast<UBlackboardComponent>(OwnerComp.GetBlackboardComponent());
 		if (BCP)
 		{
 			if (BCP->GetValueAsObject("Enemy") != nullptr)
