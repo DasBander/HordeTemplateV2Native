@@ -8,6 +8,13 @@
 	Default Project Definitions
 */
 
+/*
+	Notes:
+		- On Widget Blueprints or Blueprints don't forget the _C to get the Compiled Asset Reference. 
+*/
+//General
+#define GAME_VERSION 2.5
+
 //Inventory
 #define INVENTORY_DATATABLE_PATH TEXT("DataTable'/Game/HordeTemplateBP/Data/HordeInventoryItems.HordeInventoryItems'")
 
@@ -30,6 +37,14 @@
 //Default Map Settings
 #define DEFAULT_STARTING_ITEMS {"Item_Hands"}
 #define DEFAULT_AVAILABLE_PLAYERCHARACTERS { "Char_Matt", "Char_Louis", "Char_Jacob", "Char_Joshua" }
+
+//Widgets & HUD 
+#define WIDGET_TRADER_UI_PATH TEXT("WidgetBlueprint'/Game/HordeTemplateBP/Blueprint/Widgets/Trader/WBP_Trader_Main.WBP_Trader_Main_C'")
+#define WIDGET_HUD_MAIN_UI_PATH TEXT("WidgetBlueprint'/Game/HordeTemplateBP/Blueprint/Widgets/WBP_HUDCpp.WBP_HUDCpp_C'")
+#define WIDGET_LOBBY_UI_PATH TEXT("WidgetBlueprint'/Game/HordeTemplateBP/Blueprint/Widgets/Lobby/WBP_Lobby_Main.WBP_Lobby_Main_C'")
+#define WIDGET_ENDSCREEN_UI_PATH TEXT("WidgetBlueprint'/Game/HordeTemplateBP/Blueprint/Widgets/Game/WBP_EndScreen.WBP_EndScreen_C'")
+#define WIDGET_SERVERTRAVEL_UI_PATH TEXT("WidgetBlueprint'/Game/HordeTemplateBP/Blueprint/Widgets/Game/WBP_ServerTravel.WBP_ServerTravel_C'")
+#define CROSSHAIR_TEXTURE_PATH TEXT("Texture2D'/Game/HordeTemplateBP/Assets/Textures/Hud/center_dot.center_dot'")
 
 /*
 	Loads object dynamically from a given path.

@@ -145,7 +145,7 @@ float AZedPawn::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent,
 					ACharacter* PLY = Cast<ACharacter>(DamageCauser);
 					if (PLY)
 					{
-						KillAI(PLY, EPointType::EPointCasual);
+						KillAI(PLY, EPointType::EPointHeadShot);
 					}
 				}
 				else
@@ -215,7 +215,6 @@ void AZedPawn::OnCharacterInRange(UPrimitiveComponent* OverlappedComponent, AAct
 		AZedAIController* AIC = Cast<AZedAIController>(GetController());
 		if (AIC && AIC->GetBlackboardComponent())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Enemy is in Range."));
 			AIC->GetBlackboardComponent()->SetValueAsBool("PlayerInRange", true);
 		}
 	}
@@ -229,7 +228,6 @@ void AZedPawn::OnCharacterOutRange(UPrimitiveComponent* OverlappedComponent, AAc
 		AZedAIController* AIC = Cast<AZedAIController>(GetController());
 		if (AIC && AIC->GetBlackboardComponent())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Enemy is out of Range."));
 			AIC->GetBlackboardComponent()->SetValueAsBool("PlayerInRange", false);
 		}
 	}

@@ -6,7 +6,11 @@
 #include "GameFramework/HUD.h"
 #include "Widgets/PlayerHUDWidget.h"
 #include "Widgets/PlayerLobbyWidget.h"
+#include "Widgets/PlayerTraderWidget.h"
+#include "Widgets/PlayerEndScreen.h"
+#include "Widgets/PlayerTravelWidget.h"
 #include "Gameplay/LobbyStructures.h"
+#include "HordeTemplateV2Native.h"
 #include "HordeBaseHUD.generated.h"
 
 /**
@@ -29,6 +33,16 @@ protected:
 	UPROPERTY()
 		UPlayerLobbyWidget * PlayerLobbyWidget;
 
+	UPROPERTY()
+		UPlayerTraderWidget* PlayerTraderWidget;
+
+	UPROPERTY()
+		UPlayerEndScreen* PlayerEndScreenWidget;
+
+	UPROPERTY()
+		UPlayerTravelWidget* PlayerTravelWidget;
+
+
 
 	UPROPERTY()
 		TSubclassOf<class UPlayerHUDWidget> PlayerHUDWidgetClass;
@@ -36,8 +50,19 @@ protected:
 	UPROPERTY()
 		TSubclassOf<class UPlayerLobbyWidget> PlayerLobbyWidgetClass;
 
+	UPROPERTY()
+		TSubclassOf<class UPlayerTraderWidget> PlayerTraderWidgetClass;
+
+
+	UPROPERTY()
+		TSubclassOf<class UPlayerEndScreen> PlayerEndScreenClass;
+
+	UPROPERTY()
+		TSubclassOf<class UPlayerTravelWidget> PlayerTravelWidgetClass;
+
 	UFUNCTION()
 		void GameStatusChanged(uint8 GameStatus);
+
 
 	UPROPERTY()
 		bool FirstTimeGameStatusChange = false;
@@ -48,6 +73,9 @@ public:
 
 	AHordeBaseHUD();
 
+
+	UPROPERTY(BlueprintReadOnly, Category = "HUD")
+		bool IsInChat = false;
 
 	UPROPERTY()
 		FOnGameStatusChanged OnGameStatusChanged;

@@ -16,7 +16,7 @@ void UHordeCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (Character)
 	{
 		bIsInAir = Character->GetCharacterMovement()->IsFalling();
-		Speed = Character->GetVelocity().SizeSquared();
+		Speed = Character->GetVelocity().Size();
 		AnimationType = Character->AnimMode;
 
 		float AimPitch = (Character->IsLocallyControlled()) ? Character->GetControlRotation().Pitch : Character->GetRemotePitch();

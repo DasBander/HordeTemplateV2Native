@@ -44,7 +44,7 @@ public:
 		void GettingKicked();
 
 	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category = "Chat")
-		void RequestPlayerKick(FPlayerInfo Player);
+		void RequestPlayerKick(FPlayerInfo InPlayer);
 
 	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category = "Chat")
 		void SubmitMessage(const FText& Message);

@@ -2,8 +2,11 @@
 
 #include "HordePlayerState.h"
 #include "HordeGameState.h"
+#include "TimerManager.h"
 #include "HUD/HordeBaseHUD.h"
 #include "HordeTemplateV2Native.h"
+#include "Gameplay/HordeBaseController.h"
+#include "HUD/HordeBaseHUD.h"
 
 void AHordePlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -30,7 +33,20 @@ void AHordePlayerState::ClientUpdateGameStatus_Implementation(EGameStatus GameSt
 
 void AHordePlayerState::OnMessageReceived_Implementation(FChatMessage Msg)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Message Received: %s"), *Msg.Message.ToString());
+	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
+	AHordeBaseController* PC = Cast<AHordeBaseController>(GetOwner());
+	if (GS && PC)
+	{
+		switch (GS->GameStatus) {
+		case EGameStatus::ELOBBY:
+			PC->OnLobbyMessageReceivedDelegate.Broadcast(Msg);
+			break;
+
+		case EGameStatus::EINGAME:
+			PC->OnMessageReceivedDelegate.Broadcast(Msg);
+			break;
+		}
+	}
 }
 
 void AHordePlayerState::UpdateLobbyPlayerList_Implementation(const TArray<FPlayerInfo>& Players)
@@ -134,19 +150,19 @@ bool AHordePlayerState::SubmitMessage_Validate(const FText& Message)
 	return true;
 }
 
-void AHordePlayerState::RequestPlayerKick_Implementation(FPlayerInfo Player)
+void AHordePlayerState::RequestPlayerKick_Implementation(FPlayerInfo InPlayer)
 {
 	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
 	if (GS)
 	{
-		if (GS->LobbyInformation.OwnerID == Player.PlayerID)
+		if (GS->LobbyInformation.OwnerID == InPlayer.PlayerID)
 		{
-			GS->KickPlayer(Player.PlayerID);
+			GS->KickPlayer(InPlayer.PlayerID);
 		}
 	}
 }
 
-bool AHordePlayerState::RequestPlayerKick_Validate(FPlayerInfo Player)
+bool AHordePlayerState::RequestPlayerKick_Validate(FPlayerInfo InPlayer)
 {
 	return true;
 }

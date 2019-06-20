@@ -26,7 +26,7 @@ public:
 		FLobbyInfo LobbyInformation;
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Lobby")
-		EGameStatus GameStatus;
+		EGameStatus GameStatus  = EGameStatus::ELOBBY;
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Lobby")
 		bool GameStarting = false;

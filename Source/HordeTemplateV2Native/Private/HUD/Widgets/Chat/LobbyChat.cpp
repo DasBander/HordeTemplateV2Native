@@ -1,21 +1,21 @@
 
 
-#include "GameChat.h"
+#include "LobbyChat.h"
+
 #include "Gameplay/HordePlayerState.h"
 
-void UGameChat::NativeConstruct()
+void ULobbyChat::NativeConstruct()
 {
 	Super::NativeConstruct();
 
 	AHordeBaseController* PC = Cast<AHordeBaseController>(GetOwningPlayer());
 	if (PC)
 	{
-		PC->OnMessageReceivedDelegate.AddDynamic(this, &UGameChat::OnMessageReceived);
-		PC->OnFocusGameChat.AddDynamic(this, &UGameChat::OnGameFocusChat);
+		PC->OnLobbyMessageReceivedDelegate.AddDynamic(this, &ULobbyChat::OnMessageReceived);
 	}
 }
 
-void UGameChat::SubmitChatMessage(const FText& Message)
+void ULobbyChat::SubmitChatMessage(const FText& Message)
 {
 	AHordeBaseController* PC = Cast<AHordeBaseController>(GetOwningPlayer());
 	if (PC)
@@ -24,7 +24,6 @@ void UGameChat::SubmitChatMessage(const FText& Message)
 		if (PS)
 		{
 			PS->SubmitMessage(Message);
-			PC->CloseChat();
 		}
 	}
 }

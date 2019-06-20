@@ -209,26 +209,26 @@ void AHordeGameState::ProcessRoundTime()
 
 FName AHordeGameState::GetNextLevelInRotation(bool ResetLevel)
 {
-	FName NextLevel = *GetWorld()->GetMapName();
+	FName RNextLevel = *UGameplayStatics::GetCurrentLevelName(GetWorld(), true);
 	if (!ResetLevel)
 	{
-		int32 CurLevelIndex = LobbyInformation.LobbyMapRotation.Find(NextLevel);
+		int32 CurLevelIndex = LobbyInformation.LobbyMapRotation.Find(RNextLevel);
 		if (CurLevelIndex >= (LobbyInformation.LobbyMapRotation.Num() - 1))
 		{
 			if (LobbyInformation.LobbyMapRotation.IsValidIndex(0))
 			{
-				NextLevel = LobbyInformation.LobbyMapRotation[0];
+				RNextLevel = LobbyInformation.LobbyMapRotation[0];
 			}
 		}
 		else
 		{
 			if (LobbyInformation.LobbyMapRotation.IsValidIndex(CurLevelIndex + 1))
 			{
-				NextLevel = LobbyInformation.LobbyMapRotation[CurLevelIndex + 1];
+				RNextLevel = LobbyInformation.LobbyMapRotation[CurLevelIndex + 1];
 			}
 		}
 	}
-	return NextLevel;
+	return RNextLevel;
 }
 
 void AHordeGameState::EndGameRound()
@@ -534,7 +534,7 @@ FName AHordeGameState::GetFreeCharacter()
 
 void AHordeGameState::AllPlayerDeadCheck()
 {
-	if (CountAlivePlayers() < 1)
+	if (CountAlivePlayers() < 1 && GameStatus == EGameStatus::EINGAME)
 	{
 		EndGame(true);
 	}
@@ -545,7 +545,7 @@ void AHordeGameState::EndGame(bool ResetLevel)
 	if (ResetLevel)
 	{
 		GameStatus = EGameStatus::EGAMEOVER;
-		CalcEndScore(Score_MostKills, Score_MostHeadshots, Score_MostKills);
+		CalcEndScore(Score_MVP, Score_MostHeadshots, Score_MostKills);
 		NextLevel = GetNextLevelInRotation(ResetLevel);
 
 		for (auto& PS : PlayerArray)
@@ -636,23 +636,26 @@ void AHordeGameState::CalcEndScore(FPlayerScore& MVP, FPlayerScore& HS, FPlayerS
 		AHordePlayerState * PLY = Cast<AHordePlayerState>(PS);
 		if (PLY)
 		{
-			if (PLY->Points > MVP.Score)
+			if (PLY->Points > LocalMVP.Score)
 			{
-				MVP.Score = PLY->Points;
-				MVP.PlayerID = PLY->GetPlayerInfo().PlayerID;
-				MVP.Character = PLY->GetPlayerInfo().SelectedCharacter;
+				LocalMVP.Score = PLY->Points;
+				LocalMVP.PlayerID = PLY->GetPlayerInfo().PlayerID;
+				LocalMVP.Character = PLY->GetPlayerInfo().SelectedCharacter;
+				LocalMVP.ScoreType = PLY->GetPlayerInfo().UserName;
 			}
-			if (PLY->HeadShots > HS.Score)
+			if (PLY->HeadShots > LocalHS.Score)
 			{
-				HS.Score = PLY->HeadShots;
-				HS.PlayerID = PLY->GetPlayerInfo().PlayerID;
-				HS.Character = PLY->GetPlayerInfo().SelectedCharacter;
+				LocalHS.Score = PLY->HeadShots;
+				LocalHS.PlayerID = PLY->GetPlayerInfo().PlayerID;
+				LocalHS.Character = PLY->GetPlayerInfo().SelectedCharacter;
+				LocalHS.ScoreType = PLY->GetPlayerInfo().UserName;
 			}
-			if (PLY->ZedKills > KS.Score)
+			if (PLY->ZedKills > LocalKS.Score)
 			{
-				KS.Score = PLY->ZedKills;
-				KS.PlayerID = PLY->GetPlayerInfo().PlayerID;
-				KS.Character = PLY->GetPlayerInfo().SelectedCharacter;
+				LocalKS.Score = PLY->ZedKills;
+				LocalKS.PlayerID = PLY->GetPlayerInfo().PlayerID;
+				LocalKS.Character = PLY->GetPlayerInfo().SelectedCharacter;
+				LocalKS.ScoreType = PLY->GetPlayerInfo().UserName;
 			}
 		}
 	}

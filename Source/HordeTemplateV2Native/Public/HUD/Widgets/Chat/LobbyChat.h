@@ -5,28 +5,23 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Gameplay/HordeBaseController.h"
-#include "GameChat.generated.h"
+#include "LobbyChat.generated.h"
 
 /**
  * 
  */
-
-
 UCLASS()
-class HORDETEMPLATEV2NATIVE_API UGameChat : public UUserWidget
+class HORDETEMPLATEV2NATIVE_API ULobbyChat : public UUserWidget
 {
 	GENERATED_BODY()
-
-
+	
 public:
 	virtual void NativeConstruct() override;
-	
-	UFUNCTION(BlueprintImplementableEvent, Category = "Chat")
-		void OnMessageReceived(const FChatMessage& Message);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Chat")
-		void OnGameFocusChat();
+		void OnMessageReceived(const FChatMessage& Message);
 
 	UFUNCTION(BlueprintCallable, Category = "Chat")
 		void SubmitChatMessage(const FText& Message);
 };
+

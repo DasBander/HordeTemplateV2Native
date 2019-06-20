@@ -37,7 +37,20 @@ void AHordeBaseHUD::GameStatusChanged(uint8 GameStatus)
 				GetOwningPlayerController()->SetInputMode(PlyInput);
 				GetOwningPlayerController()->bShowMouseCursor = true;
 			} 
+			break;
+		case EGameStatus::EGAMEOVER:
+			if (PlayerEndScreenWidget)
+			{
+				PlayerEndScreenWidget->AddToViewport();
+				GetOwningPlayerController()->SetInputMode(FInputModeGameOnly());
+				GetOwningPlayerController()->bShowMouseCursor = false;
+			}
+			break;
 
+		case EGameStatus::ESERVERTRAVEL:
+			PlayerTravelWidget->AddToViewport();
+			GetOwningPlayerController()->SetInputMode(FInputModeGameOnly());
+			GetOwningPlayerController()->bShowMouseCursor = false;
 			break;
 
 		default:
@@ -47,19 +60,37 @@ void AHordeBaseHUD::GameStatusChanged(uint8 GameStatus)
 
 AHordeBaseHUD::AHordeBaseHUD()
 {
-	const ConstructorHelpers::FClassFinder<UPlayerHUDWidget> PlayerHUDAsset(TEXT("WidgetBlueprint'/Game/HordeTemplateBP/Blueprint/Widgets/WBP_HUDCpp.WBP_HUDCpp_C'"));
+	const ConstructorHelpers::FClassFinder<UPlayerHUDWidget> PlayerHUDAsset(WIDGET_HUD_MAIN_UI_PATH);
 	if (PlayerHUDAsset.Class)
 	{
 		PlayerHUDWidgetClass = PlayerHUDAsset.Class;
 	}
 
-	const ConstructorHelpers::FClassFinder<UPlayerLobbyWidget> PlayerLobbyAsset(TEXT("WidgetBlueprint'/Game/HordeTemplateBP/Blueprint/Widgets/Lobby/WBP_Lobby_Main.WBP_Lobby_Main_C'"));
+	const ConstructorHelpers::FClassFinder<UPlayerLobbyWidget> PlayerLobbyAsset(WIDGET_LOBBY_UI_PATH);
 	if (PlayerLobbyAsset.Class)
 	{
 		PlayerLobbyWidgetClass = PlayerLobbyAsset.Class;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UTexture2D> CrosshairTexAsset(TEXT("Texture2D'/Game/HordeTemplateBP/Assets/Textures/Hud/center_dot.center_dot'"));
+	const ConstructorHelpers::FClassFinder<UPlayerTraderWidget> PlayerTraderAsset(WIDGET_TRADER_UI_PATH);
+	if (PlayerTraderAsset.Class)
+	{
+		PlayerTraderWidgetClass = PlayerTraderAsset.Class;
+	}
+
+	const ConstructorHelpers::FClassFinder<UPlayerEndScreen> PlayerEndScreenAsset(WIDGET_ENDSCREEN_UI_PATH);
+	if (PlayerEndScreenAsset.Class)
+	{
+		PlayerEndScreenClass = PlayerEndScreenAsset.Class;
+	}
+
+	const ConstructorHelpers::FClassFinder<UPlayerTravelWidget> PlayerTravelWidgetAsset(WIDGET_SERVERTRAVEL_UI_PATH);
+	if (PlayerTravelWidgetAsset.Class)
+	{
+		PlayerTravelWidgetClass = PlayerTravelWidgetAsset.Class;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UTexture2D> CrosshairTexAsset(CROSSHAIR_TEXTURE_PATH);
 	if (CrosshairTexAsset.Succeeded())
 	{
 		CrosshairTex = CrosshairTexAsset.Object;
@@ -91,7 +122,9 @@ void AHordeBaseHUD::BeginPlay()
 
 	PlayerHUDWidget = CreateWidget<UPlayerHUDWidget>(GetOwningPlayerController(), PlayerHUDWidgetClass);
 	PlayerLobbyWidget = CreateWidget<UPlayerLobbyWidget>(GetOwningPlayerController(), PlayerLobbyWidgetClass);
-
+	PlayerTraderWidget = CreateWidget<UPlayerTraderWidget>(GetOwningPlayerController(), PlayerTraderWidgetClass);
+	PlayerEndScreenWidget = CreateWidget<UPlayerEndScreen>(GetOwningPlayerController(), PlayerEndScreenClass);
+	PlayerTravelWidget = CreateWidget<UPlayerTravelWidget>(GetOwningPlayerController(), PlayerTravelWidgetClass);
 }
 
 void AHordeBaseHUD::DrawHUD()

@@ -14,8 +14,8 @@ UCLASS()
 class HORDETEMPLATEV2NATIVE_API UPlayerLobbyWidget : public UUserWidget
 {
 	GENERATED_BODY()
+	
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLobbyPlayersUpdated, const TArray<FPlayerInfo>&, LobbyPlayers);
-
 protected:
 		virtual void NativeConstruct() override;
 
@@ -31,7 +31,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Lobby")
 		FPlayableLevel MapInfo;
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Interaction")
+	UFUNCTION(BlueprintImplementableEvent, Category = "Lobby")
 		void OnLobbyPlayersUpdated(const TArray<FPlayerInfo>& LobbyPlayers);
 
 	UFUNCTION(BlueprintPure, Category = "Lobby")
