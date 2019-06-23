@@ -48,6 +48,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Interaction")
 		void HideInteractionText();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Score")
+		void OnPointsReceived(EPointType PType, int32 Points);
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Interaction")
 		void VariablesBound();
 

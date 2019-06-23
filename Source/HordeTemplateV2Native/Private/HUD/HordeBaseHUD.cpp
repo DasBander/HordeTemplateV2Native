@@ -11,6 +11,7 @@
 void AHordeBaseHUD::GameStatusChanged(uint8 GameStatus)
 {
 	EGameStatus GS = (EGameStatus)GameStatus;
+	CurrentGameStatus = GS;
 	FirstTimeGameStatusChange = true;
 	//Remove All Widgets from Viewport.
 	UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport();
@@ -32,9 +33,9 @@ void AHordeBaseHUD::GameStatusChanged(uint8 GameStatus)
 			if (PlayerLobbyWidget)
 			{
 				PlayerLobbyWidget->AddToViewport();
-				FInputModeGameAndUI PlyInput = FInputModeGameAndUI();
-				PlyInput.SetWidgetToFocus(PlayerLobbyWidget->GetCachedWidget());
-				GetOwningPlayerController()->SetInputMode(PlyInput);
+				FInputModeGameAndUI * PlyInput = new FInputModeGameAndUI();
+				PlyInput->SetWidgetToFocus(PlayerLobbyWidget->GetCachedWidget());
+				GetOwningPlayerController()->SetInputMode(*PlyInput);
 				GetOwningPlayerController()->bShowMouseCursor = true;
 			} 
 			break;
@@ -55,6 +56,14 @@ void AHordeBaseHUD::GameStatusChanged(uint8 GameStatus)
 
 		default:
 			break;
+	}
+}
+
+void AHordeBaseHUD::OnPlayerPointsReceived(EPointType PointType, int32 Points)
+{
+	if (PlayerHUDWidget)
+	{
+		PlayerHUDWidget->OnPointsReceived(PointType, Points);
 	}
 }
 
@@ -97,7 +106,7 @@ AHordeBaseHUD::AHordeBaseHUD()
 	}
 
 	OnGameStatusChanged.AddDynamic(this, &AHordeBaseHUD::GameStatusChanged);
-
+	OnPlayerPointsReceivedDelegate.AddDynamic(this, &AHordeBaseHUD::OnPlayerPointsReceived);
 }
 
 UPlayerHUDWidget* AHordeBaseHUD::GetHUDWidget()
@@ -108,6 +117,30 @@ UPlayerHUDWidget* AHordeBaseHUD::GetHUDWidget()
 UPlayerLobbyWidget* AHordeBaseHUD::GetLobbyWidget()
 {
 	return (PlayerLobbyWidget) ? PlayerLobbyWidget : nullptr;
+}
+
+void AHordeBaseHUD::OpenTraderUI()
+{
+	if (!IsInChat && !bIsScoreboardOpen && CurrentGameStatus == EGameStatus::EINGAME && !bIsTraderUIOpen)
+	{
+		PlayerTraderWidget->AddToViewport(9999);
+		FInputModeUIOnly * InputMode = new FInputModeUIOnly();
+		InputMode->SetWidgetToFocus(PlayerTraderWidget->GetCachedWidget());
+		GetOwningPlayerController()->SetInputMode(*InputMode);
+		GetOwningPlayerController()->bShowMouseCursor = true;
+		bIsTraderUIOpen = true;
+	}
+}
+
+void AHordeBaseHUD::CloseTraderUI()
+{
+	if (bIsTraderUIOpen)
+	{
+		PlayerTraderWidget->RemoveFromParent();
+		GetOwningPlayerController()->SetInputMode(FInputModeGameOnly());
+		GetOwningPlayerController()->bShowMouseCursor = false;
+		bIsTraderUIOpen = false;
+	}
 }
 
 void AHordeBaseHUD::Tick(float DeltaSeconds)

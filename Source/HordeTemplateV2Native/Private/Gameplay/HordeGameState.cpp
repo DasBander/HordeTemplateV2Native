@@ -3,7 +3,6 @@
 #include "HordeGameState.h"
 #include "HordeTemplateV2Native.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Gameplay/HordeWorldSettings.h"
 #include "Gameplay/HordeBaseController.h"
 #include "Character/HordeBaseCharacter.h"
 #include "AI/ZedPawn.h"
@@ -31,6 +30,7 @@ void AHordeGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(AHordeGameState, NextLevel);
 	DOREPLIFETIME(AHordeGameState, EndTime);
 	DOREPLIFETIME(AHordeGameState, PauseTime);
+	DOREPLIFETIME(AHordeGameState, MatchMode);
 }
 
 void AHordeGameState::BeginPlay()
@@ -44,6 +44,7 @@ void AHordeGameState::BeginPlay()
 		AHordeWorldSettings* WorldSettings = Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings());
 		if (WorldSettings)
 		{
+			MatchMode = WorldSettings->MatchMode;
 			for (auto &Char : WorldSettings->PlayerCharacters)
 			{
 				FLobbyAvailableCharacters AChar;
@@ -61,9 +62,9 @@ void AHordeGameState::BeginPlay()
 				for (auto PLevel : PlayableLevels)
 				{
 					LobbyInformation.LobbyMapRotation.Add(PLevel->RawLevelName);
-					LobbyInformation.OwnerID = "Dedicated Server";
-					LobbyInformation.LobbyName = "Horde Game - Lobby";
 				}	
+				LobbyInformation.OwnerID = "Dedicated Server";
+				LobbyInformation.LobbyName = "Horde Game - Lobby";
 			}
 			else
 			{
@@ -110,6 +111,11 @@ void AHordeGameState::KickPlayer(const FString& PlayerID)
 	}
 }
 
+AHordeWorldSettings* AHordeGameState::GetHordeWorldSettings()
+{
+	return Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings());
+}
+
 void AHordeGameState::StartRoundBasedGame()
 {
 	if (!GetWorld()->GetTimerManager().IsTimerActive(PauseTimer))
@@ -125,7 +131,7 @@ void AHordeGameState::ProcessPauseTime()
 	AHordeWorldSettings* WS = Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings(false, true));
 	if (WS)
 	{
-		if (WS->PauseTime >= PauseTime)
+		if (PauseTime >= WS->PauseTime)
 		{
 			PauseTime = 0.f;
 			GameRound++;
@@ -196,7 +202,7 @@ void AHordeGameState::ProcessRoundTime()
 	AHordeWorldSettings* HWS = Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings(false, true));
 	if (HWS)
 	{
-		if (HWS->RoundTime >= RoundTime)
+		if (RoundTime >= HWS->RoundTime || ZedsLeft == 0)
 		{
 			EndGameRound();
 		}

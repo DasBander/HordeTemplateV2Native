@@ -13,6 +13,9 @@ public:
 		FText InteractionText;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+		bool HideKeyInText;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 		float InteractionTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
@@ -21,12 +24,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 		bool AllowedToInteract;
 
+
+
 	FInteractionInfo()
 	{
 		InteractionText = FText::FromString("None");
 		InteractionTime = 0.f;
 		InteractionSound = nullptr;
 		AllowedToInteract = true;
+		HideKeyInText = false;
 	}
 };
 

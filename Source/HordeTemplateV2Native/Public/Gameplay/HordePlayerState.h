@@ -6,6 +6,7 @@
 #include "Runtime/CoreUObject/Public/UObject/TextProperty.h"
 #include "GameFramework/PlayerState.h"
 #include "LobbyStructures.h"
+#include "HordeTemplateV2Native.h"
 #include "HordePlayerState.generated.h"
 
 /**
@@ -30,6 +31,9 @@ public:
 	{
 		Player.SelectedCharacter = Character;
 	}
+
+	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category = "Economy")
+		void ModifyMoney(int32 Modifier);
 
 	UFUNCTION(Client, Reliable)
 		void OnMessageReceived(FChatMessage Msg);
@@ -57,6 +61,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Score")
 		int32 HeadShots = 0;
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Economy")
+		int32 PlayerMoney = STARTING_MONEY;
 
 	UFUNCTION(BlueprintCallable, Category = "Score")
 		void AddPoints(int32 InPoints, EPointType PointsType);

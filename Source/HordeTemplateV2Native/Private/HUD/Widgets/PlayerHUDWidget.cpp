@@ -21,6 +21,7 @@ ESlateVisibility UPlayerHUDWidget::IsOwningCharacter()
 	return DefaultVisibilty;
 }
 
+
 void UPlayerHUDWidget::NativeConstruct()
 {
 	
@@ -50,6 +51,7 @@ void UPlayerHUDWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 
 	if (IsInteracting && ProgressCircleDynamic)
 	{
+
 		AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(GetOwningPlayerPawn());
 		if (PLY)
 		{

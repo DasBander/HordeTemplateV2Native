@@ -6,6 +6,8 @@
 #include "Gameplay/HordeBaseController.h"
 #include "Gameplay/HordeWorldSettings.h"
 #include "Kismet/GameplayStatics.h"
+#include "Animation/AnimBlueprintGeneratedClass.h"
+#include "Animation/AnimInstance.h"
 #include "ConstructorHelpers.h"
 
 AHordeTrader::AHordeTrader()
@@ -33,11 +35,7 @@ AHordeTrader::AHordeTrader()
 	TraderTextComponent->SetRelativeLocation(FVector(-29.f, 0.f, 180.f));
 	TraderTextComponent->SetRelativeRotation(FRotator(0.f, 90.f, 0.f).Quaternion());
 	TraderTextComponent->SetText(FText::FromString("Trader"));
-// 	const ConstructorHelpers::FObjectFinder<USoundCue> WelcomeSoundAsset(TEXT(""));
-// 	if (WelcomeSoundAsset.Succeeded())
-// 	{
-// 		WelcomeSound = WelcomeSoundAsset.Object;
-// 	}
+
 }
 
 void AHordeTrader::PlayGoodBye_Implementation()
@@ -53,14 +51,11 @@ bool AHordeTrader::PlayGoodBye_Validate()
 void AHordeTrader::PlayWelcome_Implementation()
 {
 	USoundCue* WelcomeSound = ObjectFromPath<USoundCue>(TEXT("SoundCue'/Game/HordeTemplateBP/Assets/Sounds/Trader/A_Trader_Welcome.A_Trader_Welcome'"));
-
-	if (WelcomeSound)
+	UAnimMontage* WelcomeAnimation = ObjectFromPath<UAnimMontage>(TEXT("AnimMontage'/Game/HordeTemplateBP/Assets/Mannequin/Animations/A_Trader_Welcome_Montage.A_Trader_Welcome_Montage'"));
+	if (WelcomeSound && WelcomeAnimation)
 	{
 		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), WelcomeSound, TraderMeshComponent->GetComponentLocation());
-	}
-	else 
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Could not find Welcome Sound."));
+		TraderMeshComponent->GetAnimInstance()->Montage_Play(WelcomeAnimation);
 	}
 }
 
@@ -74,7 +69,12 @@ void AHordeTrader::Interact_Implementation(AActor* InteractingOwner)
 	if (HasAuthority())
 	{
 		PlayWelcome();
-		UE_LOG(LogTemp, Warning, TEXT("Character Interacted with Trader."));
+	
+		AHordeBaseController* PC = Cast<AHordeBaseController>(InteractingOwner->GetInstigatorController());
+		if (PC)
+		{
+			PC->ClientOpenTraderUI();
+		}
 	}
 
 }

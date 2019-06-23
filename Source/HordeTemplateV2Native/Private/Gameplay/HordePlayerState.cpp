@@ -4,8 +4,8 @@
 #include "HordeGameState.h"
 #include "TimerManager.h"
 #include "HUD/HordeBaseHUD.h"
-#include "HordeTemplateV2Native.h"
 #include "Gameplay/HordeBaseController.h"
+#include "Runtime/Core/Public/Math/NumericLimits.h"
 #include "HUD/HordeBaseHUD.h"
 
 void AHordePlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -16,6 +16,7 @@ void AHordePlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(AHordePlayerState, ZedKills);
 	DOREPLIFETIME(AHordePlayerState, Points);
 	DOREPLIFETIME(AHordePlayerState, HeadShots);
+	DOREPLIFETIME(AHordePlayerState, PlayerMoney);
 }
 
 void AHordePlayerState::ClientUpdateGameStatus_Implementation(EGameStatus GameStatus)
@@ -167,6 +168,16 @@ bool AHordePlayerState::RequestPlayerKick_Validate(FPlayerInfo InPlayer)
 	return true;
 }
 
+void AHordePlayerState::ModifyMoney_Implementation(int32 Modifier)
+{
+	PlayerMoney = FMath::Clamp<int32>(PlayerMoney + Modifier, 0, MAX_int32);
+}
+
+bool AHordePlayerState::ModifyMoney_Validate(int32 Modifier)
+{
+	return true;
+}
+
 void AHordePlayerState::AddPoints(int32 InPoints, EPointType PointsType)
 {
 	switch (PointsType)
@@ -190,7 +201,15 @@ void AHordePlayerState::AddPoints(int32 InPoints, EPointType PointsType)
 
 void AHordePlayerState::ClientNotifyPoints_Implementation(EPointType PointType, int32 OutPoints)
 {
-
+	AHordeBaseController* PC = Cast<AHordeBaseController>(GetOwner());
+	if (PC)
+	{
+		AHordeBaseHUD* HUD = Cast<AHordeBaseHUD>(PC->GetHUD());
+		if (HUD)
+		{
+			HUD->OnPlayerPointsReceivedDelegate.Broadcast(PointType, OutPoints);
+		}
+	}
 }
 
 void AHordePlayerState::BeginPlay()

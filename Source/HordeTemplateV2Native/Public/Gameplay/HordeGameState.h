@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
 #include "HordePlayerState.h"
+#include "HordeGameMode.h"
+#include "HordeWorldSettings.h"
 #include "LobbyStructures.h"
 #include "HordeGameState.generated.h"
 
@@ -29,6 +31,9 @@ public:
 		EGameStatus GameStatus  = EGameStatus::ELOBBY;
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Lobby")
+		EMatchMode MatchMode = EMatchMode::EMatchModeLinear;
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Lobby")
 		bool GameStarting = false;
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Lobby")
@@ -45,7 +50,8 @@ public:
 	UFUNCTION()
 		void KickPlayer(const FString& PlayerID);
 
-
+	UFUNCTION(BlueprintPure, Category = "Settings")
+		AHordeWorldSettings* GetHordeWorldSettings();
 
 	UFUNCTION()
 	void StartLobbyTimer();

@@ -361,9 +361,22 @@ void AHordeBaseCharacter::InteractionDetection()
 				LastInteractionActor = HitResult.GetActor();
 				FInteractionInfo NewInfo = IInteractionInterface::Execute_GetInteractionInfo(LastInteractionActor);
 				AHordeBaseHUD* HUD = GetHUD();
-				if (HUD && HUD->GetHUDWidget())
+				UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
+
+				if (HUD && HUD->GetHUDWidget() && Settings)
 				{
-					HUD->GetHUDWidget()->OnSetInteractionText.Broadcast(NewInfo.InteractionText);
+					TArray<FInputActionKeyMapping> UseKeys;
+					Settings->GetActionMappingByName("Use", UseKeys);
+					FString InteractionText;
+					if (UseKeys.IsValidIndex(0) && !NewInfo.HideKeyInText)
+					{
+						InteractionText = "[" + UseKeys[0].Key.GetDisplayName().ToString() + "] " + NewInfo.InteractionText.ToString();
+					}
+					else
+					{
+						InteractionText = NewInfo.InteractionText.ToString();
+					}
+					HUD->GetHUDWidget()->OnSetInteractionText.Broadcast(FText::FromString(*InteractionText));
 				}
 
 			}

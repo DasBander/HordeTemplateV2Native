@@ -6,7 +6,11 @@
 
 void AHordeBaseController::ClientCloseTraderUI_Implementation()
 {
-
+	AHordeBaseHUD* HUD = Cast<AHordeBaseHUD>(GetHUD());
+	if (HUD)
+	{
+		HUD->CloseTraderUI();
+	}
 }
 
 void AHordeBaseController::ClientPlay2DSound_Implementation(USoundCue* Sound)
@@ -22,6 +26,15 @@ AHordeBaseController::AHordeBaseController()
 	bAttachToPawn = true;
 
 	
+}
+
+void AHordeBaseController::ClientOpenTraderUI_Implementation()
+{
+	AHordeBaseHUD* HUD = Cast<AHordeBaseHUD>(GetHUD());
+	if (HUD)
+	{
+		HUD->OpenTraderUI();
+	}
 }
 
 void AHordeBaseController::SetupInputComponent()

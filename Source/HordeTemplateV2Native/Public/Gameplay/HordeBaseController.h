@@ -35,6 +35,9 @@ public:
 	UFUNCTION(BlueprintCallable, Client, Reliable, Category = "UI")
 		void ClientCloseTraderUI();
 
+	UFUNCTION(BlueprintCallable, Client, Reliable, Category = "UI")
+		void ClientOpenTraderUI();
+
 	UFUNCTION(BlueprintCallable, Client, Reliable, Category = "Game")
 		void ClientPlay2DSound(USoundCue* Sound);
 

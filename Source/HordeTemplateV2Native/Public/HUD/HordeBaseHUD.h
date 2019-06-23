@@ -21,10 +21,13 @@ class HORDETEMPLATEV2NATIVE_API AHordeBaseHUD : public AHUD
 {
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameStatusChanged, uint8, GS);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerPointsReceived, EPointType, PointType, int32, Points);
 
 	GENERATED_BODY()
 
-
+public:
+	UPROPERTY()
+		FOnPlayerPointsReceived OnPlayerPointsReceivedDelegate;
 
 protected:
 	UPROPERTY()
@@ -63,6 +66,8 @@ protected:
 	UFUNCTION()
 		void GameStatusChanged(uint8 GameStatus);
 
+	UFUNCTION()
+		void OnPlayerPointsReceived(EPointType PointType, int32 Points);
 
 	UPROPERTY()
 		bool FirstTimeGameStatusChange = false;
@@ -73,9 +78,16 @@ public:
 
 	AHordeBaseHUD();
 
+	EGameStatus CurrentGameStatus = EGameStatus::ELOBBY;
 
 	UPROPERTY(BlueprintReadOnly, Category = "HUD")
 		bool IsInChat = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "HUD")
+		bool bIsScoreboardOpen = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "HUD")
+		bool bIsTraderUIOpen = false;
 
 	UPROPERTY()
 		FOnGameStatusChanged OnGameStatusChanged;
@@ -86,6 +98,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "HUD")
 		UPlayerLobbyWidget* GetLobbyWidget();
 
+	UFUNCTION(BlueprintCallable, Category="HUD")
+		void OpenTraderUI();
+
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+		void CloseTraderUI();
 
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;

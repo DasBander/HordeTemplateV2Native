@@ -15,6 +15,9 @@
 //General
 #define GAME_VERSION 2.5
 
+//Economy
+#define STARTING_MONEY 1500
+
 //Inventory
 #define INVENTORY_DATATABLE_PATH TEXT("DataTable'/Game/HordeTemplateBP/Data/HordeInventoryItems.HordeInventoryItems'")
 
