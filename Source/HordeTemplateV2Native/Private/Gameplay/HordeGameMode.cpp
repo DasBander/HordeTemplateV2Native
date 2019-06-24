@@ -41,11 +41,12 @@ void AHordeGameMode::GetAISpawner(TArray<AActor*>& Spawner, int32& FreePoints)
 		}
 	}
 	Spawner = TempSpawner;
-	FreePoints = FreePoints;
+	FreePoints = FreeSpawnPoints;
 }
 
 AActor* AHordeGameMode::GetFreeAISpawnPoint()
 {
+
 	return nullptr;
 }
 
@@ -57,7 +58,7 @@ void AHordeGameMode::CheckGameOver()
 		AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
 		if (GS && WS->MatchMode == EMatchMode::EMatchModeNonLinear)
 		{
-			if (ZedsLeftToSpawn == 0 && (GS->GameRound >= WS->MaxRounds))
+			if (GS->ZedsLeft == 0 && (GS->GameRound >= WS->MaxRounds) && ZedsLeftToSpawn == 0)
 			{
 				GS->EndGame(false);
 			}
@@ -68,7 +69,6 @@ void AHordeGameMode::CheckGameOver()
 					GS->EndGameRound();
 				}
 			}
-
 		}
 	}
 }
@@ -203,17 +203,21 @@ void AHordeGameMode::InitiateZombieSpawning(int32 Amount)
 	GetAISpawner(FreeSpawnPoints, AmountOfFreePoints);
 	if (ZedsLeftToSpawn > 0)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Should spawn Zeds. Remaining: %d - Free Spawn Points: %d"), ZedsLeftToSpawn, AmountOfFreePoints);
 		for (int32 i = 0; i < ((Amount > AmountOfFreePoints) ? AmountOfFreePoints : Amount); i++)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Should spawn Zombies."));
 			AZedPawn* NewZed = GetWorld()->SpawnActorDeferred<AZedPawn>(AZedPawn::StaticClass(), FTransform(), nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
 			if (NewZed)
 			{
-				AAISpawnPoint* Spawner = Cast<AAISpawnPoint>(FreeSpawnPoints[FMath::RandRange(0, FreeSpawnPoints.Num())]);
+				AAISpawnPoint* Spawner = Cast<AAISpawnPoint>(FreeSpawnPoints[FMath::RandRange(0, FreeSpawnPoints.Num() -1)]);
 				if (Spawner)
 				{
 					NewZed->PatrolTag = Spawner->PatrolTag;
 					ZedsLeftToSpawn--;
-					NewZed->FinishSpawning(Spawner->GetActorTransform(), false, nullptr);
+					FTransform SpawnTrans;
+					SpawnTrans.SetLocation(Spawner->GetActorLocation());
+					NewZed->FinishSpawning(SpawnTrans, false, nullptr);
 				}
 				else {
 					NewZed->Destroy();

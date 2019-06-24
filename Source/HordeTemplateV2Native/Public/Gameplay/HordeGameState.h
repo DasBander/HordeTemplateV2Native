@@ -57,6 +57,9 @@ public:
 	void StartLobbyTimer();
 
 	UFUNCTION()
+		void GameOver(FName NextMap);
+
+	UFUNCTION()
 		void ProcessLobbyTime();
 
 	UFUNCTION()

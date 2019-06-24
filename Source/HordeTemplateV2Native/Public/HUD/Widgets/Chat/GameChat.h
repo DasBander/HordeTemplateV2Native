@@ -29,4 +29,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Chat")
 		void SubmitChatMessage(const FText& Message);
+
+	virtual void NativeDestruct() override;
+
 };

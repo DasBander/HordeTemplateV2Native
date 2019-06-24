@@ -27,3 +27,8 @@ void ULobbyChat::SubmitChatMessage(const FText& Message)
 		}
 	}
 }
+
+void ULobbyChat::NativeDestruct()
+{
+	Super::NativeDestruct();
+}

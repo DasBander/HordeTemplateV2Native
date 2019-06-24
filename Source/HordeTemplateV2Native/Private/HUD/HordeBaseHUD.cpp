@@ -34,7 +34,7 @@ void AHordeBaseHUD::GameStatusChanged(uint8 GameStatus)
 			{
 				PlayerLobbyWidget->AddToViewport();
 				FInputModeGameAndUI * PlyInput = new FInputModeGameAndUI();
-				PlyInput->SetWidgetToFocus(PlayerLobbyWidget->GetCachedWidget());
+				PlyInput->SetWidgetToFocus(PlayerLobbyWidget->TakeWidget());
 				GetOwningPlayerController()->SetInputMode(*PlyInput);
 				GetOwningPlayerController()->bShowMouseCursor = true;
 			} 
@@ -125,7 +125,7 @@ void AHordeBaseHUD::OpenTraderUI()
 	{
 		PlayerTraderWidget->AddToViewport(9999);
 		FInputModeUIOnly * InputMode = new FInputModeUIOnly();
-		InputMode->SetWidgetToFocus(PlayerTraderWidget->GetCachedWidget());
+		InputMode->SetWidgetToFocus(PlayerTraderWidget->TakeWidget());
 		GetOwningPlayerController()->SetInputMode(*InputMode);
 		GetOwningPlayerController()->bShowMouseCursor = true;
 		bIsTraderUIOpen = true;
@@ -136,7 +136,7 @@ void AHordeBaseHUD::CloseTraderUI()
 {
 	if (bIsTraderUIOpen)
 	{
-		PlayerTraderWidget->RemoveFromParent();
+		PlayerTraderWidget->RemoveFromViewport();
 		GetOwningPlayerController()->SetInputMode(FInputModeGameOnly());
 		GetOwningPlayerController()->bShowMouseCursor = false;
 		bIsTraderUIOpen = false;
@@ -153,11 +153,18 @@ void AHordeBaseHUD::BeginPlay()
 {
 	Super::BeginPlay();
 
+
 	PlayerHUDWidget = CreateWidget<UPlayerHUDWidget>(GetOwningPlayerController(), PlayerHUDWidgetClass);
+
 	PlayerLobbyWidget = CreateWidget<UPlayerLobbyWidget>(GetOwningPlayerController(), PlayerLobbyWidgetClass);
+
 	PlayerTraderWidget = CreateWidget<UPlayerTraderWidget>(GetOwningPlayerController(), PlayerTraderWidgetClass);
-	PlayerEndScreenWidget = CreateWidget<UPlayerEndScreen>(GetOwningPlayerController(), PlayerEndScreenClass);
+
+	PlayerEndScreenWidget =CreateWidget<UPlayerEndScreen>(GetOwningPlayerController(), PlayerEndScreenClass);
+	
 	PlayerTravelWidget = CreateWidget<UPlayerTravelWidget>(GetOwningPlayerController(), PlayerTravelWidgetClass);
+	
+
 }
 
 void AHordeBaseHUD::DrawHUD()
@@ -181,5 +188,21 @@ void AHordeBaseHUD::DrawHUD()
 		//Draw Message if player is not Ready.
 		DrawText("Waiting for Server...", FLinearColor(FVector4(1.f, 1.f, 1.f, 1.f)), 10.f, 10.f, nullptr, 3.f, false);
 	}
+}
+
+void AHordeBaseHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	PlayerHUDWidget->ReleaseSlateResources(true);
+	PlayerLobbyWidget->ReleaseSlateResources(true);
+	PlayerTraderWidget->ReleaseSlateResources(true);
+	PlayerEndScreenWidget->ReleaseSlateResources(true);
+	PlayerTravelWidget->ReleaseSlateResources(true);
+	PlayerHUDWidget = nullptr;
+	PlayerLobbyWidget = nullptr;
+	PlayerTraderWidget = nullptr;
+	PlayerEndScreenWidget = nullptr;
+	PlayerTravelWidget = nullptr;
+
+	Super::EndPlay(EndPlayReason);
 }
 

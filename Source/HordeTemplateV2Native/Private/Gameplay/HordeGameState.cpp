@@ -199,10 +199,10 @@ void AHordeGameState::StartGameRound()
 
 void AHordeGameState::ProcessRoundTime()
 {
-	AHordeWorldSettings* HWS = Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings(false, true));
+	AHordeWorldSettings* HWS = Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings());
 	if (HWS)
 	{
-		if (RoundTime >= HWS->RoundTime || ZedsLeft == 0)
+		if (RoundTime >= HWS->RoundTime)
 		{
 			EndGameRound();
 		}
@@ -243,7 +243,19 @@ void AHordeGameState::EndGameRound()
 	{
 		GetWorld()->GetTimerManager().ClearTimer(RoundTimer);
 	}
-	StartGameRound();
+	AHordeWorldSettings* HWS = Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings());
+	if (HWS)
+	{
+		if (GameRound >= HWS->MaxRounds)
+		{
+			EndGame(ZedsLeft > 0);
+		}
+		else 
+		{
+			StartRoundBasedGame();
+		}
+	}
+	
 }
 
 void AHordeGameState::StartLobbyTimer()
@@ -251,6 +263,35 @@ void AHordeGameState::StartLobbyTimer()
 	if (!GetWorld()->GetTimerManager().IsTimerActive(LobbyTimer))
 	{
 		GetWorld()->GetTimerManager().SetTimer(LobbyTimer, this, &AHordeGameState::ProcessLobbyTime, 1.f, true);
+	}
+}
+
+void AHordeGameState::GameOver(FName NextMap)
+{
+	GameStatus = EGameStatus::EGAMEOVER;
+	NextLevel = NextMap;
+	CalcEndScore(Score_MVP, Score_MostHeadshots, Score_MostKills);
+	for (auto& PS : PlayerArray)
+	{
+		AHordePlayerState* PLY = Cast<AHordePlayerState>(PS);
+		if (PLY)
+		{
+			PLY->ClientUpdateGameStatus(GameStatus);
+		}
+	}
+
+	for (TActorIterator<AHordeBaseCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		AHordeBaseCharacter* PLYChar = *ActorItr;
+		if (PLYChar)
+		{
+			PLYChar->GetCurrentFirearm()->Destroy();
+			PLYChar->Destroy();
+		}
+	}
+	if (!GetWorld()->GetTimerManager().IsTimerActive(EndGameTimer))
+	{
+		GetWorld()->GetTimerManager().SetTimer(EndGameTimer, this, &AHordeGameState::ProcessEndTime, 1.f, true);
 	}
 }
 
@@ -546,52 +587,45 @@ void AHordeGameState::AllPlayerDeadCheck()
 	}
 }
 
+
+
 void AHordeGameState::EndGame(bool ResetLevel)
 {
+
+	//Reset Round Based Timers if active, so we do not have any problems running any round end logic twice.
+	if (GetWorld()->GetTimerManager().IsTimerActive(PauseTimer))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(PauseTimer);
+	}
+	if (GetWorld()->GetTimerManager().IsTimerActive(RoundTimer))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(RoundTimer);
+	}
+
+	//If Force Reset Reset Game Instantly
 	if (ResetLevel)
 	{
-		GameStatus = EGameStatus::EGAMEOVER;
-		CalcEndScore(Score_MVP, Score_MostHeadshots, Score_MostKills);
-		NextLevel = GetNextLevelInRotation(ResetLevel);
-
-		for (auto& PS : PlayerArray)
-		{
-			AHordePlayerState* PLY = Cast<AHordePlayerState>(PS);
-			if (PLY)
-			{
-				PLY->ClientUpdateGameStatus(GameStatus);
-			}
-		}
-
-		for (TActorIterator<AHordeBaseCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-		{
-			AHordeBaseCharacter* PLYChar = *ActorItr;
-			if (PLYChar)
-			{
-				PLYChar->GetCurrentFirearm()->Destroy();
-				PLYChar->Destroy();
-			}
-		}
-
-		if (!GetWorld()->GetTimerManager().IsTimerActive(EndGameTimer))
-		{
-			GetWorld()->GetTimerManager().SetTimer(EndGameTimer, this, &AHordeGameState::ProcessEndTime, 1.f, true);
-		}
+		GameOver(*UGameplayStatics::GetCurrentLevelName(GetWorld(), true));
 	}
 	else
 	{
 		AHordeWorldSettings* WS = Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings(false, true));
 		if (WS)
 		{
+			//If Linear Gameplay check if all Zombies are dead. If yes Reset Game with Next Map in Rotation.
 			if (ZedsLeft > 0 && WS->MatchMode != EMatchMode::EMatchModeNonLinear)
 			{
 				PopMessage(FChatMessage("All Zombies needs to be killed to end the Map."));
+			}
+			else {
+				GameOver(GetNextLevelInRotation(ResetLevel));
 			}
 		}
 	
 	}
 
 }
+
 
 void AHordeGameState::ProcessEndTime()
 {
@@ -610,6 +644,7 @@ void AHordeGameState::ProcessEndTime()
 				PLY->ClientUpdateGameStatus(GameStatus);
 			}
 		}
+		UE_LOG(LogTemp, Log, TEXT("ServerTravel to: %s"), *NextLevel.ToString());
 		GetWorld()->Exec(GetWorld(), *FString("servertravel " + NextLevel.ToString()));
 		ResetLobby();
 	}

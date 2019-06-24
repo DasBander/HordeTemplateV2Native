@@ -28,3 +28,8 @@ void UGameChat::SubmitChatMessage(const FText& Message)
 		}
 	}
 }
+
+void UGameChat::NativeDestruct()
+{
+	Super::NativeDestruct();
+}

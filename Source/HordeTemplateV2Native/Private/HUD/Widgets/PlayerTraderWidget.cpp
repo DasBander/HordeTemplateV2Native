@@ -2,6 +2,14 @@
 
 #include "PlayerTraderWidget.h"
 #include "Gameplay/HordePlayerState.h"
+
+void UPlayerTraderWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	bIsFocusable = true;
+}
+
 FText UPlayerTraderWidget::GetPlayerMoney()
 {
 	FText PlayerMoney;

@@ -29,23 +29,21 @@ public:
 	UPROPERTY()
 		FOnPlayerPointsReceived OnPlayerPointsReceivedDelegate;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Widget")
+		class UPlayerHUDWidget* PlayerHUDWidget;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Widget")
+		class UPlayerLobbyWidget* PlayerLobbyWidget;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Widget")
+		class UPlayerTraderWidget* PlayerTraderWidget;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Widget")
+		class UPlayerEndScreen* PlayerEndScreenWidget;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Widget")
+		class UPlayerTravelWidget* PlayerTravelWidget;
 protected:
-	UPROPERTY()
-		UPlayerHUDWidget* PlayerHUDWidget;
-
-	UPROPERTY()
-		UPlayerLobbyWidget * PlayerLobbyWidget;
-
-	UPROPERTY()
-		UPlayerTraderWidget* PlayerTraderWidget;
-
-	UPROPERTY()
-		UPlayerEndScreen* PlayerEndScreenWidget;
-
-	UPROPERTY()
-		UPlayerTravelWidget* PlayerTravelWidget;
-
-
 
 	UPROPERTY()
 		TSubclassOf<class UPlayerHUDWidget> PlayerHUDWidgetClass;
@@ -107,4 +105,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;
 	virtual void DrawHUD() override;
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 };
