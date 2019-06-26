@@ -20,7 +20,8 @@ class HORDETEMPLATEV2NATIVE_API AHordeBaseCharacter : public ACharacter
 public:
 	AHordeBaseCharacter();
 
-	
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Firearm")
+		bool Reloading = false;
 
 	UFUNCTION(BlueprintPure, Category = "Animation")
 		float GetRemotePitch();
@@ -181,8 +182,7 @@ protected:
 	UFUNCTION()
 		void TriggerWeaponFire();
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Firearm")
-		bool Reloading = false;
+	
 
 	UPROPERTY(BlueprintReadOnly, Category = "Firearm")
 		bool IsBursting = false;
@@ -256,7 +256,12 @@ public:
 	ABaseFirearm* GetCurrentFirearm();
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	
+	void SwitchToPrimary();
+	void SwitchToSecondary();
+	void SwitchToHealing();
+	void ScrollUpItems();
+	void ScrollDownItems();
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	

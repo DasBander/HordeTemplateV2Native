@@ -43,6 +43,8 @@ public:
 		TArray<FPlayerInfo> LobbyPlayers;
 
 	virtual void BeginPlay() override;
+
+	void ParseChatCommand(FString PlayerID, FString Command);
 	
 	UFUNCTION()
 	void TakePlayer(FPlayerInfo Player);

@@ -60,6 +60,12 @@ public:
 		void ServerDropItem(ABaseFirearm* Firearm);
 
 	/*
+	Drops Weapon on given index to the ground.
+	*/
+	UFUNCTION(Server, WithValidation, Reliable, Category = "Inventory")
+		void ServerDropItemAtIndex(int32 IndexToDrop);
+
+	/*
 	Checks if Item exists in Inventory and returns Index as well as the Item Type
 	*/
 	UFUNCTION(BlueprintCallable, Category="Inventory")
@@ -83,11 +89,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 		bool RemoveAmmoByType(FName AmmoType, int32 AmountToRemove);
 
+	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "Inventory")
+		void ScrollItems(bool ScrollUp);
+
+	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "Inventory")
+		void SwitchWeapon(EActiveType ItemType);
 	/*
 	Data Table where we have all Item Base Values stored.
 	*/
 	UPROPERTY(EditAnywhere, Category="Inventory")
 		UDataTable* DataTable;
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+		void FindItemByCategory(EActiveType IType, FItem& OutItem, int32& OutIndex);
 
 protected:
 	virtual void BeginPlay() override;

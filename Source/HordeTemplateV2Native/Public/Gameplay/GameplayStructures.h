@@ -3,6 +3,7 @@
 #include "Weapons/BaseFirearm.h"
 #include "Inventory/InteractionInterface.h"
 #include "Projectiles/BaseProjectile.h"
+#include "Camera/CameraShake.h"
 #include "GameplayStructures.generated.h"
 
 USTRUCT(BlueprintType)
@@ -63,6 +64,9 @@ public:
 		TSubclassOf<ABaseFirearm> FirearmClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Firearm Settings")
+		TSubclassOf<UCameraShake> VisualRecoilClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Firearm Settings")
 		FName AttachmentPoint;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Firearm Settings")
@@ -113,6 +117,7 @@ public:
 		FireModes.Add(EFireMode::EFireModeSingle);
 		WorldModel = nullptr;
 		DefaultFireMode = EFireMode::EFireModeSingle;
+		VisualRecoilClass = nullptr;
 	}
 
 	void UpdateAmmo(int32 Ammo) {

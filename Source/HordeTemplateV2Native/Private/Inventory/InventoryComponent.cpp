@@ -61,7 +61,14 @@ void UInventoryComponent::ServerAddItem_Implementation(const FString& ItemID, bo
 				AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(GetOwner());
 				if (PLY)
 				{
-					ServerDropItem(PLY->GetCurrentFirearm());
+					if (ItemID == PLY->GetCurrentFirearm()->WeaponID)
+					{
+						ServerDropItem(PLY->GetCurrentFirearm());
+					}
+					else {
+						ServerDropItemAtIndex(ExistingItemIndex);
+					}
+					
 					int32 NewAddedIndex = Inventory.Add((Custom) ? CustomItem : FoundItm);
 					if (FoundItm.Type != EActiveType::EActiveAmmo)
 					{
@@ -129,6 +136,31 @@ void UInventoryComponent::ServerDropItem_Implementation(ABaseFirearm* Firearm)
 			}
 		}
 	}
+}
+
+
+void UInventoryComponent::ServerDropItemAtIndex_Implementation(int32 IndexToDrop)
+{
+		if (Inventory.IsValidIndex(IndexToDrop) && (Inventory[IndexToDrop].ItemID != "Item_Hands" || Inventory[IndexToDrop].ItemID != "Hands"))
+		{
+			FItem ItemToDrop = Inventory[IndexToDrop];
+			FTransform TransformToSpawn = CalculateDropLocation();
+			AInventoryBaseItem* Item = GetWorld()->SpawnActorDeferred<AInventoryBaseItem>(AInventoryBaseItem::StaticClass(), TransformToSpawn, GetOwner(), nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
+			if (Item)
+			{
+				Item->ItemInfo = ItemToDrop;
+				Item->Spawned = true;
+				Item->ItemID = ItemToDrop.ItemID;
+				Inventory.RemoveAt(IndexToDrop);
+				Item->FinishSpawning(TransformToSpawn);
+
+			}
+		}
+}
+
+bool UInventoryComponent::ServerDropItemAtIndex_Validate(int32 IndexToDrop)
+{
+	return true;
 }
 
 bool UInventoryComponent::ServerDropItem_Validate(ABaseFirearm* Firearm)
@@ -232,6 +264,61 @@ bool UInventoryComponent::RemoveAmmoByType(FName AmmoType, int32 AmountToRemove)
 	else {
 		return false;
 	}
+}
+
+void UInventoryComponent::SwitchWeapon_Implementation(EActiveType ItemType)
+{
+	AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(GetOwner());
+	if (PLY && !PLY->Reloading && !PLY->GetIsDead())
+	{
+		FItem NewItem;
+		int32 NewIndex;
+		FindItemByCategory(ItemType, NewItem, NewIndex);
+		if (NewIndex > -1 && NewIndex != ActiveItemIndex)
+		{
+			ActiveItemIndex = NewIndex;
+			OnActiveItemChanged.Broadcast(Inventory[NewIndex].ItemID.ToString(), NewIndex, Inventory[NewIndex].DefaultLoadedAmmo);
+			RefreshCurrentAmmoForItem();
+		}
+	}
+}
+
+bool UInventoryComponent::SwitchWeapon_Validate(EActiveType ItemType)
+{
+	return true;
+}
+
+void UInventoryComponent::FindItemByCategory(EActiveType IType, FItem& OutItem, int32& OutIndex)
+{
+	int32 LIndex = -1;
+	FItem LItem;
+	for (auto Itm : Inventory)
+	{
+		LIndex++;
+		if (Itm.Type == IType && LIndex != ActiveItemIndex && Itm.ItemID != "Item_Hands")
+		{
+			LItem = Itm;
+			break;
+		}
+	}
+	OutItem = LItem;
+	OutIndex = LIndex;
+}
+
+void UInventoryComponent::ScrollItems_Implementation(bool ScrollUp)
+{
+	FItem CurrentActiveItem = Inventory[ActiveItemIndex];
+	TArray<EActiveType> FireModes = { EActiveType::EActiveRifle, EActiveType::EActivePistol, EActiveType::EActiveMed };
+	int32 FoundFireMode = -1;
+	if (FireModes.Find(CurrentActiveItem.Type))
+	{
+		
+	}
+}
+
+bool UInventoryComponent::ScrollItems_Validate(bool ScrollUp)
+{
+	return true;
 }
 
 void UInventoryComponent::BeginPlay()

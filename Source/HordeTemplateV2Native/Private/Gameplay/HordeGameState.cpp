@@ -5,6 +5,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Gameplay/HordeBaseController.h"
 #include "Character/HordeBaseCharacter.h"
+#include "HordeGameInstance.h"
 #include "AI/ZedPawn.h"
 #include "Runtime/Engine/Public/EngineUtils.h"
 #include "Misc/HordeTrader.h"
@@ -68,12 +69,23 @@ void AHordeGameState::BeginPlay()
 			}
 			else
 			{
-
+				UHordeGameInstance* GI = Cast<UHordeGameInstance>(GetGameInstance());
+				if (GI)
+				{
+					LobbyInformation.OwnerID = PlayerArray[0]->UniqueId.ToString();
+					LobbyInformation.LobbyName = GI->LobbyName;
+					LobbyInformation.LobbyMapRotation = GI->MapRotation;
+				}
 			}
 		}
 		
 		LobbyTime = LobbyInformation.DefaultLobbyTime;
 	}
+}
+
+void AHordeGameState::ParseChatCommand(FString PlayerID, FString Command)
+{
+
 }
 
 void AHordeGameState::TakePlayer(FPlayerInfo Player)
@@ -645,7 +657,17 @@ void AHordeGameState::ProcessEndTime()
 			}
 		}
 		UE_LOG(LogTemp, Log, TEXT("ServerTravel to: %s"), *NextLevel.ToString());
-		GetWorld()->Exec(GetWorld(), *FString("servertravel " + NextLevel.ToString()));
+
+		//Delay ServerTravel so our Loading Screen plays the animation.
+		FTimerHandle TravelTimer;
+		FTimerDelegate TravelTimerDelegate;
+
+		TravelTimerDelegate.BindLambda([=] {
+			GetWorld()->ServerTravel(NextLevel.ToString() + "?listen", false, false);
+		});
+
+		GetWorld()->GetTimerManager().SetTimer(TravelTimer, TravelTimerDelegate, 1.5f, false);
+	
 		ResetLobby();
 	}
 	else 

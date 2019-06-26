@@ -18,6 +18,7 @@ AZedPawn::AZedPawn()
 {
 	PrimaryActorTick.bStartWithTickEnabled = false;
 	PrimaryActorTick.bCanEverTick = false;
+	SetReplicates(true);
 
 	const ConstructorHelpers::FObjectFinder<USkeletalMesh> PlayerMeshAsset(TEXT("SkeletalMesh'/Game/HordeTemplateBP/Assets/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin'"));
 	if (PlayerMeshAsset.Succeeded()) {
@@ -288,7 +289,10 @@ void AZedPawn::PlayHeadShotFX_Implementation()
 	UParticleSystem* BloodSplat = ObjectFromPath<UParticleSystem>(TEXT("ParticleSystem'/Game/HordeTemplateBP/Assets/Effects/ParticleSystems/Gameplay/Player/P_bloodSplatter.P_bloodSplatter'"));
 	if (BloodSplat)
 	{
-		UGameplayStatics::SpawnEmitterAttached(BloodSplat, GetMesh(), "head", FVector(), FRotator(), EAttachLocation::SnapToTarget, true, EPSCPoolMethod::None);
+		/*
+		We need to use SpawnEmitterAtLocation instead of Attached. https://issues.unrealengine.com/issue/UE-29018
+		*/
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodSplat, GetMesh()->GetBoneLocation("head", EBoneSpaces::WorldSpace), FRotator(), true, EPSCPoolMethod::None);
 	}
 	
 	//Spawn Headshot Sound at head.

@@ -133,7 +133,10 @@ void AHordePlayerState::GettingKicked_Implementation()
 	APlayerController* PC = Cast<APlayerController>(GetOwner());
 	if (PC)
 	{
-		GetWorld()->Exec(GetWorld(), TEXT("disconnect?message=kicked"));
+		if (GetWorld())
+		{
+			GetWorld()->Exec(GetWorld(), TEXT("disconnect?message=kicked"));
+		}
 	}
 }
 
@@ -142,7 +145,14 @@ void AHordePlayerState::SubmitMessage_Implementation(const FText& Message)
 	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
 	if(GS)
 	{
-		GS->PopMessage(FChatMessage(Player.UserName, Message));
+		if (Message.ToString()[0] == *"/")
+		{
+			GS->ParseChatCommand(Player.PlayerID, Message.ToString());
+		}
+		else {
+			GS->PopMessage(FChatMessage(Player.UserName, Message));
+		}
+
 	}
 }
 

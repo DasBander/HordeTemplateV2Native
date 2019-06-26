@@ -8,7 +8,7 @@
 #include "Weapons/BaseFirearm.h"
 #include "HUD/Widgets/PlayerHeadDisplay.h"
 #include "AIModule/Classes/Perception/AISense_Sight.h"
-#include "CameraShake_Damage.h"
+#include "FX/Camera/CameraShake_Damage.h"
 
 
 void AHordeBaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -499,6 +499,7 @@ void AHordeBaseCharacter::IncreaseStamina()
 
 void AHordeBaseCharacter::ActiveItemChanged(FString ItemID, int32 ItemIndex, int32 LoadedAmmo)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Active Item has Changed: %s at Index: %d with LoadedAmmo of: %d"), *ItemID, ItemIndex, LoadedAmmo);
 	StopWeaponFire();
 	if (CurrentSelectedFirearm)
 	{
@@ -645,14 +646,7 @@ void AHordeBaseCharacter::FinishReload()
 	}
 }
 
-void AHordeBaseCharacter::DropCurrentItem()
-{
-	if (CurrentSelectedFirearm && !Reloading)
-	{
-		StopWeaponFire();
-		Inventory->ServerDropItem(CurrentSelectedFirearm);
-	}
-}
+
 
 void AHordeBaseCharacter::ServerReload_Implementation()
 {
@@ -695,7 +689,9 @@ ABaseFirearm* AHordeBaseCharacter::GetCurrentFirearm()
 	return CurrentSelectedFirearm;
 }
 
-// Called to bind functionality to input
+/*
+INPUT FUNCTIONS
+*/
 void AHordeBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -704,6 +700,13 @@ void AHordeBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAction("DropItem", IE_Pressed, this, &AHordeBaseCharacter::DropCurrentItem);
 
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &AHordeBaseCharacter::ServerReload);
+
+	PlayerInputComponent->BindAction("MouseUp", IE_Pressed, this, &AHordeBaseCharacter::ScrollUpItems);
+	PlayerInputComponent->BindAction("MouseDown", IE_Pressed, this, &AHordeBaseCharacter::ScrollDownItems);
+
+	PlayerInputComponent->BindAction("Primary", IE_Pressed, this, &AHordeBaseCharacter::SwitchToPrimary);
+	PlayerInputComponent->BindAction("Secondary", IE_Pressed, this, &AHordeBaseCharacter::SwitchToSecondary);
+	PlayerInputComponent->BindAction("Healing", IE_Pressed, this, &AHordeBaseCharacter::SwitchToHealing);
 
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AHordeBaseCharacter::TriggerWeaponFire);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AHordeBaseCharacter::StopWeaponFire);
@@ -725,6 +728,56 @@ void AHordeBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 
+}
+
+void AHordeBaseCharacter::DropCurrentItem()
+{
+	if (CurrentSelectedFirearm && !Reloading)
+	{
+		StopWeaponFire();
+		Inventory->ServerDropItem(CurrentSelectedFirearm);
+	}
+}
+
+void AHordeBaseCharacter::SwitchToPrimary()
+{
+	if (Inventory)
+	{
+		Inventory->SwitchWeapon(EActiveType::EActiveRifle);
+	}
+}
+
+void AHordeBaseCharacter::SwitchToSecondary()
+{
+	if (Inventory)
+	{
+		Inventory->SwitchWeapon(EActiveType::EActivePistol);
+	}
+}
+
+
+void AHordeBaseCharacter::SwitchToHealing()
+{
+	if (Inventory)
+	{
+		Inventory->SwitchWeapon(EActiveType::EActiveMed);
+	}
+}
+
+void AHordeBaseCharacter::ScrollUpItems()
+{
+	if (Inventory)
+	{
+		Inventory->ScrollItems(true);
+	}
+}
+
+void AHordeBaseCharacter::ScrollDownItems()
+{
+	if (Inventory)
+	{
+		Inventory->ScrollItems(false);
+	}
 }
 
 void AHordeBaseCharacter::MoveForward(float Value)
