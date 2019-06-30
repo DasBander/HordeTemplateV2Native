@@ -5,6 +5,7 @@
 #include "TimerManager.h"
 #include "HUD/HordeBaseHUD.h"
 #include "Gameplay/HordeBaseController.h"
+#include "Gameplay/HordeGameSession.h"
 #include "Runtime/Core/Public/Math/NumericLimits.h"
 #include "HUD/HordeBaseHUD.h"
 
@@ -32,7 +33,7 @@ void AHordePlayerState::ClientUpdateGameStatus_Implementation(EGameStatus GameSt
 	}
 }
 
-void AHordePlayerState::OnMessageReceived_Implementation(FChatMessage Msg)
+void AHordePlayerState::OnMessageReceived_Implementation(FHordeChatMessage Msg)
 {
 	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
 	AHordeBaseController* PC = Cast<AHordeBaseController>(GetOwner());
@@ -135,7 +136,17 @@ void AHordePlayerState::GettingKicked_Implementation()
 	{
 		if (GetWorld())
 		{
-			GetWorld()->Exec(GetWorld(), TEXT("disconnect?message=kicked"));
+			AHordeGameSession* GSS = Cast<AHordeGameSession>(GetWorld()->GetAuthGameMode()->GameSession);
+			if (GSS)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Ending Session."));
+				GSS->EndGameSession();
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Unable to get Game Session."));
+			}
+			PC->ConsoleCommand("disconnect?message=disconnectedfromgame", false);
 		}
 	}
 }
@@ -143,14 +154,14 @@ void AHordePlayerState::GettingKicked_Implementation()
 void AHordePlayerState::SubmitMessage_Implementation(const FText& Message)
 {
 	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
-	if(GS)
+	if(GS && Message.ToString() != "")
 	{
 		if (Message.ToString()[0] == *"/")
 		{
 			GS->ParseChatCommand(Player.PlayerID, Message.ToString());
 		}
 		else {
-			GS->PopMessage(FChatMessage(Player.UserName, Message));
+			GS->PopMessage(FHordeChatMessage(Player.UserName, Message));
 		}
 
 	}
@@ -242,7 +253,7 @@ void AHordePlayerState::BeginPlay()
 
 				GS->TakePlayer(Player);
 				GS->UpdatePlayerLobby();
-				GS->PopMessage(FChatMessage("SERVER", FText::FromString(GetPlayerName() + " has joined.")));
+				GS->PopMessage(FHordeChatMessage("SERVER", FText::FromString(GetPlayerName() + " has joined.")));
 
 			}
 		}

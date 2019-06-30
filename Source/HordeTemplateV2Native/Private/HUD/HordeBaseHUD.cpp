@@ -5,6 +5,7 @@
 #include "TextureResource.h"
 #include "CanvasItem.h"
 #include "Engine/Texture2D.h"
+#include "Gameplay/HordeGameState.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Character/HordeBaseCharacter.h"
 
@@ -99,10 +100,22 @@ AHordeBaseHUD::AHordeBaseHUD()
 		PlayerTravelWidgetClass = PlayerTravelWidgetAsset.Class;
 	}
 
+	const ConstructorHelpers::FClassFinder<UPlayerEscapeMenu> PlayerEscapeWidgetAsset(WIDGET_ESCAPEMENU_UI_PATH);
+	if (PlayerEscapeWidgetAsset.Class)
+	{
+		PlayerEscapeWidgetClass = PlayerEscapeWidgetAsset.Class;
+	}
+
 	static ConstructorHelpers::FObjectFinder<UTexture2D> CrosshairTexAsset(CROSSHAIR_TEXTURE_PATH);
 	if (CrosshairTexAsset.Succeeded())
 	{
 		CrosshairTex = CrosshairTexAsset.Object;
+	}
+
+	static ConstructorHelpers::FClassFinder<UPlayerScoreboardWidget> PlayerScoreboardAsset(WIDGET_SCOREBOARD_PATH);
+	if (PlayerScoreboardAsset.Succeeded())
+	{
+		PlayerScoreboardWidgetClass = PlayerScoreboardAsset.Class;
 	}
 
 	OnGameStatusChanged.AddDynamic(this, &AHordeBaseHUD::GameStatusChanged);
@@ -117,6 +130,62 @@ UPlayerHUDWidget* AHordeBaseHUD::GetHUDWidget()
 UPlayerLobbyWidget* AHordeBaseHUD::GetLobbyWidget()
 {
 	return (PlayerLobbyWidget) ? PlayerLobbyWidget : nullptr;
+}
+
+void AHordeBaseHUD::CloseEscapeMenu()
+{
+	if (PlayerEscapeWidget)
+	{
+		PlayerEscapeWidget->RemoveFromParent();
+		GetOwningPlayerController()->SetInputMode(FInputModeGameOnly());
+		GetOwningPlayerController()->bShowMouseCursor = false;
+	}
+}
+
+void AHordeBaseHUD::ToggleScoreboard()
+{
+	if (!IsInChat && !bIsTraderUIOpen && CurrentGameStatus == EGameStatus::EINGAME)
+	{
+		if (!bIsScoreboardOpen)
+		{
+			AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
+			if(GS)
+			{
+				PlayerScoreboardWidget->UpdatePlayerList(GS->PlayerArray);
+			}	
+			bIsScoreboardOpen = true;
+			PlayerScoreboardWidget->AddToViewport(9999);
+		}
+		else {
+			PlayerScoreboardWidget->RemoveFromParent();
+			bIsScoreboardOpen = false;
+		}
+	}
+}
+
+void AHordeBaseHUD::OpenEscapeMenu()
+{
+	if (!bIsScoreboardOpen && CurrentGameStatus != EGameStatus::ELOBBY)
+	{
+		if (IsInChat)
+		{
+			GetOwningPlayerController()->SetInputMode(FInputModeGameOnly());
+			GetOwningPlayerController()->bShowMouseCursor = false;
+			IsInChat = false;
+		}
+
+		if (bIsTraderUIOpen)
+		{
+			CloseTraderUI();
+		}
+
+		PlayerEscapeWidget->AddToViewport(9999);
+		FInputModeUIOnly* InputMode = new FInputModeUIOnly();
+		InputMode->SetWidgetToFocus(PlayerEscapeWidget->TakeWidget());
+		GetOwningPlayerController()->SetInputMode(*InputMode);
+		GetOwningPlayerController()->bShowMouseCursor = true;
+
+	}
 }
 
 void AHordeBaseHUD::OpenTraderUI()
@@ -164,6 +233,9 @@ void AHordeBaseHUD::BeginPlay()
 	
 	PlayerTravelWidget = CreateWidget<UPlayerTravelWidget>(GetOwningPlayerController(), PlayerTravelWidgetClass);
 	
+	PlayerEscapeWidget = CreateWidget<UPlayerEscapeMenu>(GetOwningPlayerController(), PlayerEscapeWidgetClass);
+
+	PlayerScoreboardWidget = CreateWidget<UPlayerScoreboardWidget>(GetOwningPlayerController(), PlayerScoreboardWidgetClass);
 
 }
 
@@ -197,6 +269,8 @@ void AHordeBaseHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	PlayerTraderWidget->ReleaseSlateResources(true);
 	PlayerEndScreenWidget->ReleaseSlateResources(true);
 	PlayerTravelWidget->ReleaseSlateResources(true);
+	PlayerScoreboardWidget->ReleaseSlateResources(true);
+	PlayerScoreboardWidget = nullptr;
 	PlayerHUDWidget = nullptr;
 	PlayerLobbyWidget = nullptr;
 	PlayerTraderWidget = nullptr;

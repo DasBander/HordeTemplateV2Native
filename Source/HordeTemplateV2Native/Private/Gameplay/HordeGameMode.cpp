@@ -8,6 +8,7 @@
 #include "AI/AISpawnPoint.h"
 #include "Gameplay/HordePlayerState.h"
 #include "GameFramework/PlayerStart.h"
+#include "HordeGameSession.h"
 #include "Character/BaseSpectator.h"
 #include "HUD/HordeBaseHUD.h"
 #include "Gameplay/HordeWorldSettings.h"
@@ -21,6 +22,7 @@ AHordeGameMode::AHordeGameMode()
 	PlayerControllerClass = AHordeBaseController::StaticClass();
 	PlayerStateClass = AHordePlayerState::StaticClass();
 	HUDClass = AHordeBaseHUD::StaticClass();
+	GameSessionClass = AHordeGameSession::StaticClass();
 
 	bUseSeamlessTravel = true;
 	bStartPlayersAsSpectators = 0;
@@ -149,18 +151,19 @@ FTransform AHordeGameMode::GetRandomPlayerSpawn()
 void AHordeGameMode::Logout(AController* Exiting)
 {
 	FTimerHandle DelayedRemove;
-	FTimerDelegate DelayedRemoveDel;
-	DelayedRemoveDel.BindLambda([=] {
-		AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
-		if (GS)
-		{
-			GS->UpdatePlayerLobby();
-		}
-		});
-	GetWorld()->GetTimerManager().SetTimer(DelayedRemove, DelayedRemoveDel, 1.f, false);
+
+	GetWorld()->GetTimerManager().SetTimer(DelayedRemove, this, &AHordeGameMode::UpdatePlayerLobby, 1.f, false);
 
 }
 
+void AHordeGameMode::UpdatePlayerLobby()
+{
+	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
+	if (GS)
+	{
+		GS->UpdatePlayerLobby();
+	}
+}
 void AHordeGameMode::GameStart(const TArray<FPlayerInfo>& LobbyPlayers)
 {
 	for (auto PLY : LobbyPlayers)
@@ -203,10 +206,8 @@ void AHordeGameMode::InitiateZombieSpawning(int32 Amount)
 	GetAISpawner(FreeSpawnPoints, AmountOfFreePoints);
 	if (ZedsLeftToSpawn > 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Should spawn Zeds. Remaining: %d - Free Spawn Points: %d"), ZedsLeftToSpawn, AmountOfFreePoints);
 		for (int32 i = 0; i < ((Amount > AmountOfFreePoints) ? AmountOfFreePoints : Amount); i++)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Should spawn Zombies."));
 			AZedPawn* NewZed = GetWorld()->SpawnActorDeferred<AZedPawn>(AZedPawn::StaticClass(), FTransform(), nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
 			if (NewZed)
 			{

@@ -499,7 +499,6 @@ void AHordeBaseCharacter::IncreaseStamina()
 
 void AHordeBaseCharacter::ActiveItemChanged(FString ItemID, int32 ItemIndex, int32 LoadedAmmo)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Active Item has Changed: %s at Index: %d with LoadedAmmo of: %d"), *ItemID, ItemIndex, LoadedAmmo);
 	StopWeaponFire();
 	if (CurrentSelectedFirearm)
 	{
@@ -677,6 +676,15 @@ void AHordeBaseCharacter::ServerReload_Implementation()
 bool AHordeBaseCharacter::ServerReload_Validate()
 {
 	return true;
+}
+
+void AHordeBaseCharacter::AddHealth(float InHealth)
+{
+	if (HasAuthority())
+	{
+		Health = FMath::Clamp<float>(Health + InHealth, 0.f, 100.f);
+		UpdateHeadDisplayWidget(GetPlayerState()->GetPlayerName(), Health);
+	}
 }
 
 UUserWidget* AHordeBaseCharacter::GetHeadDisplayWidget()

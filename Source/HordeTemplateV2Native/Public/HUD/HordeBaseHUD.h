@@ -9,6 +9,8 @@
 #include "Widgets/PlayerTraderWidget.h"
 #include "Widgets/PlayerEndScreen.h"
 #include "Widgets/PlayerTravelWidget.h"
+#include "Widgets/PlayerScoreboardWidget.h"
+#include "Widgets/PlayerEscapeMenu.h"
 #include "Gameplay/LobbyStructures.h"
 #include "HordeTemplateV2Native.h"
 #include "HordeBaseHUD.generated.h"
@@ -43,6 +45,12 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Widget")
 		class UPlayerTravelWidget* PlayerTravelWidget;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Widget")
+		class UPlayerEscapeMenu* PlayerEscapeWidget;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Widget")
+		class UPlayerScoreboardWidget* PlayerScoreboardWidget;
 protected:
 
 	UPROPERTY()
@@ -54,12 +62,18 @@ protected:
 	UPROPERTY()
 		TSubclassOf<class UPlayerTraderWidget> PlayerTraderWidgetClass;
 
+	UPROPERTY()
+		TSubclassOf<class UPlayerEscapeMenu> PlayerEscapeWidgetClass;
+
 
 	UPROPERTY()
 		TSubclassOf<class UPlayerEndScreen> PlayerEndScreenClass;
 
 	UPROPERTY()
 		TSubclassOf<class UPlayerTravelWidget> PlayerTravelWidgetClass;
+
+	UPROPERTY()
+		TSubclassOf<class UPlayerScoreboardWidget> PlayerScoreboardWidgetClass;
 
 	UFUNCTION()
 		void GameStatusChanged(uint8 GameStatus);
@@ -87,6 +101,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "HUD")
 		bool bIsTraderUIOpen = false;
 
+
 	UPROPERTY()
 		FOnGameStatusChanged OnGameStatusChanged;
 
@@ -95,6 +110,15 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "HUD")
 		UPlayerLobbyWidget* GetLobbyWidget();
+
+	UFUNCTION(BlueprintCallable, Category="HUD")
+		void CloseEscapeMenu();
+
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+		void ToggleScoreboard();
+
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+		void OpenEscapeMenu();
 
 	UFUNCTION(BlueprintCallable, Category="HUD")
 		void OpenTraderUI();

@@ -101,7 +101,10 @@ public:
 	bool CheckPlayersReady();
 
 	UFUNCTION()
-	void PopMessage(FChatMessage Message);
+		void MessagePlayer(FHordeChatMessage Message, FString PlayerID);
+
+	UFUNCTION()
+	void PopMessage(FHordeChatMessage Message);
 
 	UFUNCTION()
 	FName GetFreeCharacter();

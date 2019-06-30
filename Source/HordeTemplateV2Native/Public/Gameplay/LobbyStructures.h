@@ -20,7 +20,7 @@ enum class EPointType : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FChatMessage
+struct FHordeChatMessage
 {
 	GENERATED_USTRUCT_BODY()
 
@@ -31,14 +31,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Info")
 		FText Message;
 
-	FChatMessage() {}
+	FHordeChatMessage() {}
 
-	FChatMessage(FString InMessage)
+	FHordeChatMessage(FString InMessage)
 	{
 		Message = FText::FromString(InMessage);
 	}
 
-	FChatMessage(FString InSender, FText InMessage)
+	FHordeChatMessage(FString InSender, FText InMessage)
 	{
 		Sender = InSender;
 		Message = InMessage;

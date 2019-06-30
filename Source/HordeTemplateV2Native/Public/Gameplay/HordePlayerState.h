@@ -36,7 +36,7 @@ public:
 		void ModifyMoney(int32 Modifier);
 
 	UFUNCTION(Client, Reliable)
-		void OnMessageReceived(FChatMessage Msg);
+		void OnMessageReceived(FHordeChatMessage Msg);
 
 	UFUNCTION(Client, Reliable)
 		void UpdateLobbyPlayerList(const TArray<FPlayerInfo>& Players);

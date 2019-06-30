@@ -237,7 +237,7 @@ void AZedPawn::OnCharacterOutRange(UPrimitiveComponent* OverlappedComponent, AAc
 void AZedPawn::DeathFX_Implementation(FVector Direction)
 {
 	GetMesh()->SetSimulatePhysics(true);
-	GetMesh()->SetCollisionProfileName("DeadAI");
+	GetCapsuleComponent()->SetCollisionProfileName(FName(TEXT("DeadAI")));
 	ZedIdleSound->Stop();
 
 	USoundCue* DeathSound = ObjectFromPath<USoundCue>(TEXT("SoundCue'/Game/HordeTemplateBP/Assets/Sounds/A_ZedDeath.A_ZedDeath'"));

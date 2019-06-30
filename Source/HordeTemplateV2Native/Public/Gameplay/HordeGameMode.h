@@ -52,6 +52,7 @@ public:
 
 	virtual void Logout(AController* Exiting) override;
 
+	void UpdatePlayerLobby();
 	void GameStart(const TArray<FPlayerInfo>& LobbyPlayers);
 
 	void InitiateZombieSpawning(int32 Amount);

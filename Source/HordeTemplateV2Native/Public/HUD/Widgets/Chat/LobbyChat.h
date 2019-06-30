@@ -19,7 +19,7 @@ public:
 	virtual void NativeConstruct() override;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Chat")
-		void OnMessageReceived(const FChatMessage& Message);
+		void OnMessageReceived(const FHordeChatMessage& Message);
 
 	UFUNCTION(BlueprintCallable, Category = "Chat")
 		void SubmitChatMessage(const FText& Message);

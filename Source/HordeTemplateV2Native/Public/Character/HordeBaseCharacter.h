@@ -222,6 +222,8 @@ protected:
 		void DropCurrentItem();
 
 public:	
+	void AddHealth(float InHealth);
+	
 
 	FORCEINLINE float GetHealth()
 	{

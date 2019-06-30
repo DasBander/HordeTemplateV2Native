@@ -94,6 +94,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "Inventory")
 		void SwitchWeapon(EActiveType ItemType);
+
+	UFUNCTION()
+		EActiveType FindNextWeaponType();
+
+	UFUNCTION()
+		EActiveType FindLastWeaponType();
+
+	UFUNCTION()
+		TArray<EActiveType> GetAvailableCategories();
 	/*
 	Data Table where we have all Item Base Values stored.
 	*/

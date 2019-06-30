@@ -85,7 +85,23 @@ void AHordeGameState::BeginPlay()
 
 void AHordeGameState::ParseChatCommand(FString PlayerID, FString Command)
 {
-
+	FString ParsedCommand = Command;
+	ParsedCommand.RemoveAt(0);
+	TArray<FString> ParsedArray;
+	ParsedCommand.ParseIntoArray(ParsedArray, TEXT(" "), true);
+	if (ParsedArray.IsValidIndex(0))
+	{
+		if (ParsedArray[0] == "help")
+		{
+			MessagePlayer(FHordeChatMessage("List of Commands\n/votekick {PlayerName}- Votekick a Player\n/voteban {PlayerName} - Voteban a Player\n/kick {PlayerName} - Kicks a Player\n/ban {PlayerName} - Bans a Player\n/changelevel {levelname} - Changes Level of Server\n/votenextmap - Vote for Next Level in Map Rotation \n/endgame - Force Reset Map"), PlayerID);
+		}
+		else {
+			MessagePlayer(FHordeChatMessage("Unknown Command"), PlayerID);
+		}
+	}
+	else {
+		MessagePlayer(FHordeChatMessage("Unknown Command"), PlayerID);
+	}
 }
 
 void AHordeGameState::TakePlayer(FPlayerInfo Player)
@@ -118,7 +134,7 @@ void AHordeGameState::KickPlayer(const FString& PlayerID)
 	AHordePlayerState* PS = GetPlayerStateByID(PlayerID);
 	if (PS)
 	{
-		PopMessage(FChatMessage(PS->GetPlayerInfo().UserName + " got kicked."));
+		PopMessage(FHordeChatMessage(PS->GetPlayerInfo().UserName + " got kicked."));
 		PS->GettingKicked();
 	}
 }
@@ -314,7 +330,7 @@ void AHordeGameState::ProcessLobbyTime()
 		LobbyTime--;
 		if (FMath::RoundToInt(LobbyTime) <= 10 && FMath::RoundToInt(LobbyTime) > 0)
 		{
-			PopMessage(FChatMessage("Game starting in " + FString::FromInt(FMath::RoundToInt(LobbyTime)) + " seconds."));
+			PopMessage(FHordeChatMessage("Game starting in " + FString::FromInt(FMath::RoundToInt(LobbyTime)) + " seconds."));
 			if (FMath::RoundToInt(LobbyTime) <= 5)
 			{
 				BlockDisconnect = true;
@@ -323,7 +339,7 @@ void AHordeGameState::ProcessLobbyTime()
 		else {
 			if (FMath::RoundToInt(LobbyTime) == 0)
 			{
-				PopMessage(FChatMessage("Game starting...."));
+				PopMessage(FHordeChatMessage("Game starting...."));
 			}
 		}
 	}
@@ -345,7 +361,7 @@ void AHordeGameState::ResetLobbyTime()
 		GetWorld()->GetTimerManager().ClearTimer(LobbyTimer);
 	}
 	LobbyTime = LobbyInformation.DefaultLobbyTime;
-	PopMessage(FChatMessage("Game Start was interrupted."));
+	PopMessage(FHordeChatMessage("Game Start was interrupted."));
 	BlockDisconnect = false;
 }
 
@@ -461,7 +477,7 @@ void AHordeGameState::FreeupUnassignedCharacters()
 		if (LocalCharacters[PlyID].PlayerID != "" && LocalCharacters[PlyID].PlayerUsername != "")
 		{
 			//Display Disconnect Message.
-			PopMessage(FChatMessage(LocalCharacters[PlyID].PlayerUsername + " has disconnected"));
+			PopMessage(FHordeChatMessage(LocalCharacters[PlyID].PlayerUsername + " has disconnected"));
 
 			//Abort Character Trade if Player was involved.
 			if (IsTradeInProgress && TradeProgress.Instigator == LocalCharacters[PlyID].PlayerID || TradeProgress.Target == LocalCharacters[PlyID].PlayerID)
@@ -473,9 +489,9 @@ void AHordeGameState::FreeupUnassignedCharacters()
 			LocalCharacters[PlyID].PlayerUsername = "";
 			LocalCharacters[PlyID].PlayerID = "";
 			LocalCharacters[PlyID].CharacterTaken = false;
-
 		}
-		else {
+		else 
+		{
 			LocalCharacters[PlyID].PlayerUsername = "";
 			LocalCharacters[PlyID].PlayerID = "";
 			LocalCharacters[PlyID].CharacterTaken = false;
@@ -565,7 +581,19 @@ bool AHordeGameState::CheckPlayersReady()
 	return Ready;
 }
 
-void AHordeGameState::PopMessage(FChatMessage Message)
+void AHordeGameState::MessagePlayer(FHordeChatMessage Message, FString PlayerID)
+{
+	for (auto PLY: PlayerArray)
+	{
+		AHordePlayerState* PS = Cast<AHordePlayerState>(PLY);
+		if (PS && PS->GetPlayerInfo().PlayerID == PlayerID)
+		{
+			PS->OnMessageReceived(Message);
+		}
+	}
+}
+
+void AHordeGameState::PopMessage(FHordeChatMessage Message)
 {
 	for (auto& PS : PlayerArray)
 	{
@@ -627,7 +655,7 @@ void AHordeGameState::EndGame(bool ResetLevel)
 			//If Linear Gameplay check if all Zombies are dead. If yes Reset Game with Next Map in Rotation.
 			if (ZedsLeft > 0 && WS->MatchMode != EMatchMode::EMatchModeNonLinear)
 			{
-				PopMessage(FChatMessage("All Zombies needs to be killed to end the Map."));
+				PopMessage(FHordeChatMessage("All Zombies needs to be killed to end the Map."));
 			}
 			else {
 				GameOver(GetNextLevelInRotation(ResetLevel));

@@ -266,6 +266,51 @@ bool UInventoryComponent::RemoveAmmoByType(FName AmmoType, int32 AmountToRemove)
 	}
 }
 
+EActiveType UInventoryComponent::FindNextWeaponType()
+{
+	EActiveType RetType;
+	TArray<EActiveType> AvailableCategories = GetAvailableCategories();
+	int32 CurrentIndex = AvailableCategories.Find(Inventory[ActiveItemIndex].Type);
+	if (CurrentIndex == AvailableCategories.Num() - 1)
+	{
+		RetType = AvailableCategories[0];
+	}
+	else
+	{
+		RetType = AvailableCategories[CurrentIndex + 1];
+	}
+	return RetType;
+}
+
+EActiveType UInventoryComponent::FindLastWeaponType()
+{
+	EActiveType RetType;
+	TArray<EActiveType> AvailableCategories = GetAvailableCategories();
+	int32 CurrentIndex = AvailableCategories.Find(Inventory[ActiveItemIndex].Type);
+	if (CurrentIndex == 0)
+	{
+		RetType = AvailableCategories[AvailableCategories.Num() - 1];
+	}
+	else
+	{
+		RetType = AvailableCategories[CurrentIndex - 1];
+	}
+	return RetType;
+}
+
+TArray<EActiveType> UInventoryComponent::GetAvailableCategories()
+{
+	TArray<EActiveType> TempActiveTypes;
+	for (auto Itm : Inventory)
+	{
+		if (Itm.Type != EActiveType::EActiveAmmo)
+		{
+			TempActiveTypes.AddUnique(Itm.Type);
+		}
+	}
+	return TempActiveTypes;
+}
+
 void UInventoryComponent::SwitchWeapon_Implementation(EActiveType ItemType)
 {
 	AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(GetOwner());
@@ -307,12 +352,13 @@ void UInventoryComponent::FindItemByCategory(EActiveType IType, FItem& OutItem, 
 
 void UInventoryComponent::ScrollItems_Implementation(bool ScrollUp)
 {
-	FItem CurrentActiveItem = Inventory[ActiveItemIndex];
-	TArray<EActiveType> FireModes = { EActiveType::EActiveRifle, EActiveType::EActivePistol, EActiveType::EActiveMed };
-	int32 FoundFireMode = -1;
-	if (FireModes.Find(CurrentActiveItem.Type))
+	if (ScrollUp)
 	{
-		
+		SwitchWeapon(FindNextWeaponType());
+	}
+	else
+	{
+		SwitchWeapon(FindLastWeaponType());
 	}
 }
 
