@@ -17,6 +17,7 @@
 
 //Economy
 #define STARTING_MONEY 1500
+#define ECONOMY_DATATABLE_PATH TEXT("DataTable'/Game/HordeTemplateBP/Data/TraderItems.TraderItems'")
 
 //Inventory
 #define INVENTORY_DATATABLE_PATH TEXT("DataTable'/Game/HordeTemplateBP/Data/HordeInventoryItems.HordeInventoryItems'")
@@ -51,6 +52,9 @@
 #define WIDGET_ESCAPEMENU_UI_PATH TEXT("WidgetBlueprint'/Game/HordeTemplateBP/Blueprint/Widgets/Game/WBP_LeaveGame.WBP_LeaveGame_C'")
 #define CROSSHAIR_TEXTURE_PATH TEXT("Texture2D'/Game/HordeTemplateBP/Assets/Textures/Hud/center_dot.center_dot'")
 
+//Physics Materials
+#define SURFACE_CONCRETE SurfaceType1
+#define SURFACE_FLESH SurfaceType2
 /*
 	Loads object dynamically from a given path.
 */

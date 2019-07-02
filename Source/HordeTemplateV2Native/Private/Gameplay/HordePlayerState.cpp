@@ -5,8 +5,10 @@
 #include "TimerManager.h"
 #include "HUD/HordeBaseHUD.h"
 #include "Gameplay/HordeBaseController.h"
+#include "Character/HordeBaseCharacter.h"
 #include "Gameplay/HordeGameSession.h"
 #include "Runtime/Core/Public/Math/NumericLimits.h"
+#include "Misc/HordeTrader.h"
 #include "HUD/HordeBaseHUD.h"
 
 void AHordePlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -199,17 +201,52 @@ bool AHordePlayerState::ModifyMoney_Validate(int32 Modifier)
 	return true;
 }
 
+int32 AHordePlayerState::GetPlayerMoney()
+{
+	return PlayerMoney;
+}
+
+void AHordePlayerState::BuyItem_Implementation(FName SellItemID)
+{
+	UDataTable* TraderSellData = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, ECONOMY_DATATABLE_PATH));
+
+	if (TraderSellData) {
+		FTraderSellItem* ItemFromRow = TraderSellData->FindRow<FTraderSellItem>(SellItemID, "PlayerState - Buy Item", false);
+		if (ItemFromRow && PlayerMoney >= PlayerMoney - ItemFromRow->ItemPrice)
+		{
+			PlayerMoney = FMath::Clamp<int32>(PlayerMoney - ItemFromRow->ItemPrice, 0, MAX_int32);
+			AHordeBaseController* PC = Cast<AHordeBaseController>(GetOwner());
+			if (PC)
+			{
+				AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(PC->GetPawn());
+				if (PLY)
+				{
+					PLY->Inventory->ServerAddItem(ItemFromRow->ItemID.ToString(), false, FItem());
+				}
+			}
+		}
+	}
+
+}
+
+bool AHordePlayerState::BuyItem_Validate(FName SellItemID)
+{
+	return true;
+}
+
 void AHordePlayerState::AddPoints(int32 InPoints, EPointType PointsType)
 {
 	switch (PointsType)
 	{
 	case  EPointType::EPointCasual:
 		ZedKills++;
+		PlayerMoney = PlayerMoney + 150;
 	break;
 
 	case EPointType::EPointHeadShot:
 		ZedKills++;
 		HeadShots++;
+		PlayerMoney = PlayerMoney + 250;
 	break;
 
 	default:

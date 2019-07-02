@@ -2,6 +2,10 @@
 #include "BaseProjectile.h"
 #include "ConstructorHelpers.h"
 #include "Materials/MaterialInstanceConstant.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
+#include "Engine/StaticMesh.h"
+#include "FX/Impact/BloodImpact.h"
+#include "HordeTemplateV2Native.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -60,13 +64,25 @@ void ABaseProjectile::OnProjectileStop(const FHitResult& ImpactResult)
 
 void ABaseProjectile::OnProjectileBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity)
 {
+	UPhysicalMaterial* Phymat = Cast<UPhysicalMaterial>(ImpactResult.PhysMaterial);
+	if (Phymat && Phymat->DetermineSurfaceType(Phymat) == SURFACE_CONCRETE)
+	{
+		SpawnImpactFX(ImpactResult.ImpactPoint, ImpactResult.ImpactNormal.Rotation().Quaternion(), ABaseImpact::StaticClass());
+	}
+	else if (Phymat && Phymat->DetermineSurfaceType(Phymat) == SURFACE_FLESH)
+	{
+		SpawnImpactFX(ImpactResult.ImpactPoint, ImpactResult.ImpactNormal.Rotation().Quaternion(), ABloodImpact::StaticClass());
+	}
+	else {
+		SpawnImpactFX(ImpactResult.ImpactPoint, ImpactResult.ImpactNormal.Rotation().Quaternion(), ABaseImpact::StaticClass());
+	}
 	if (ImpactCounter > 0)
 	{
 		Destroy(true);
 	}
 	else
 	{
-		ImpactCounter = ImpactCounter + 1;
+		ImpactCounter++;
 		if (ImpactResult.GetActor() && ImpactResult.GetActor() != GetOwner())
 		{
 			TracerMesh->SetVisibility(false);
@@ -76,4 +92,17 @@ void ABaseProjectile::OnProjectileBounce(const FHitResult& ImpactResult, const F
 
 }
 
+void ABaseProjectile::SpawnImpactFX_Implementation(FVector ImpactLocation, FQuat ImpactRotation, TSubclassOf<ABaseImpact> ImpactClass)
+{
+	FActorSpawnParameters SpawnParam;
+	FTransform ImpactTrans(ImpactLocation);
+	ImpactTrans.SetRotation(ImpactRotation);
+	SpawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	GetWorld()->SpawnActor<ABaseImpact>(ImpactClass, ImpactTrans, SpawnParam);
+}
+
+bool ABaseProjectile::SpawnImpactFX_Validate(FVector ImpactLocation, FQuat ImpactRotation, TSubclassOf<ABaseImpact> ImpactClass)
+{
+	return true;
+}
 

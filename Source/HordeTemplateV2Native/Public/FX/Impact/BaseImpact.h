@@ -3,6 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Components/AudioComponent.h"
+#include "Sound/SoundCue.h"
 #include "GameFramework/Actor.h"
 #include "BaseImpact.generated.h"
 
@@ -12,15 +15,13 @@ class HORDETEMPLATEV2NATIVE_API ABaseImpact : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	ABaseImpact();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "FX")
+		class UParticleSystemComponent* ImpactFX;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "FX")
+		class UAudioComponent* ImpactSound;
 
 };

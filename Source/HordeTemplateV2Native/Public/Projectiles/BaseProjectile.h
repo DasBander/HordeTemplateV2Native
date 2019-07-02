@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "FX/Impact/BaseImpact.h"
 #include "BaseProjectile.generated.h"
 
 UCLASS()
@@ -40,4 +42,7 @@ protected:
 	UFUNCTION()
 		void OnProjectileBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity);
 
+	UFUNCTION(NetMulticast, WithValidation, Unreliable, Category = "FX")
+		void SpawnImpactFX(FVector ImpactLocation, FQuat ImpactRotation, TSubclassOf<ABaseImpact> ImpactClass);
+	
 };

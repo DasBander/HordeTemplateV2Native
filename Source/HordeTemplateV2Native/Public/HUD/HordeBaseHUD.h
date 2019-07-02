@@ -126,6 +126,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 		void CloseTraderUI();
 
+
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;
 	virtual void DrawHUD() override;

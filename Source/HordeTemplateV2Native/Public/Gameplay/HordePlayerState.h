@@ -22,6 +22,12 @@ public:
 		return Player;
 	}
 
+	UFUNCTION(BlueprintPure, Category = "Economy")
+		int32 GetPlayerMoney();
+
+	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category = "Economy")
+		void BuyItem(FName SellItemID);
+
 	FORCEINLINE void SwitchReady(bool State)
 	{
 		Player.PlayerReady = State;

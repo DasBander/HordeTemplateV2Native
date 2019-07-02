@@ -9,6 +9,31 @@
 #include "Inventory/InteractionInterface.h"
 #include "HordeTrader.generated.h"
 
+USTRUCT(BlueprintType)
+struct FTraderSellItem : public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trading Item")
+		FName ItemID = TEXT("None");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trading Item")
+		FText Name;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trading Item")
+		FText Description;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trading Item")
+		int32 ItemPrice = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trading Item")
+		UTexture2D* Icon = nullptr;
+
+	FTraderSellItem() {}
+
+};
+
 UCLASS()
 class HORDETEMPLATEV2NATIVE_API AHordeTrader : public AActor, public IInteractionInterface
 {
