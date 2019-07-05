@@ -34,6 +34,15 @@ public:
 		AllowedToInteract = true;
 		HideKeyInText = false;
 	}
+
+	FInteractionInfo(FString InInteractionText, float InInteractionTime, bool InAllowedToInteract)
+	{
+		InteractionText = FText::FromString(InInteractionText);
+		InteractionTime = InInteractionTime;
+		AllowedToInteract = InAllowedToInteract;
+		HideKeyInText = false;
+		InteractionSound = nullptr;
+	}
 };
 
 

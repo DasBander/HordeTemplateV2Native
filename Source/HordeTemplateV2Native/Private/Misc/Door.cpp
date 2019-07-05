@@ -1,26 +1,48 @@
 
 
 #include "Door.h"
+#include "ConstructorHelpers.h"
+#include "Animation/AnimInstance.h"
+#include "Animation/AnimBlueprintGeneratedClass.h"
 
-// Sets default values
 ADoor::ADoor()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	SetReplicates(true);
+	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
+
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Scene Root"));
+	DoorMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Door Mesh"));
+	DoorMesh->SetupAttachment(RootComponent);
+
+	const ConstructorHelpers::FObjectFinder<USkeletalMesh> DoorMeshAsset(TEXT("SkeletalMesh'/Game/HordeTemplateBP/Assets/Meshes/Misc/SK_BaseDoor_Blue.SK_BaseDoor_Blue'"));
+	if (DoorMeshAsset.Succeeded())
+	{
+		DoorMesh->SetSkeletalMesh(DoorMeshAsset.Object);
+	}
+
+	const ConstructorHelpers::FObjectFinder<UAnimBlueprintGeneratedClass> AnimBlueprint(TEXT("AnimBlueprint'/Game/HordeTemplateBP/Assets/Meshes/Misc/ABP_BaseDoor.ABP_BaseDoor_C'"));
+	if (AnimBlueprint.Succeeded())
+	{
+		DoorMesh->AnimClass = AnimBlueprint.Object;
+	}
 
 }
 
-// Called when the game starts or when spawned
-void ADoor::BeginPlay()
+void ADoor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	Super::BeginPlay();
-	
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ADoor, bIsOpen);
 }
 
-// Called every frame
-void ADoor::Tick(float DeltaTime)
+void ADoor::Interact_Implementation(AActor* InteractingOwner)
 {
-	Super::Tick(DeltaTime);
-
+	bIsOpen = !bIsOpen;
 }
 
+
+FInteractionInfo ADoor::GetInteractionInfo_Implementation()
+{
+	return FInteractionInfo((bIsOpen) ? "Close Door" : "Open Door", 2, true);
+}
