@@ -52,6 +52,11 @@ public:
 	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category = "Inventory")
 		void ServerAddItem(const FString &ItemID, bool Custom, FItem CustomItem);
 
+	/*
+	Available Ammo for Current Selected Weapon ( Used for HUD )
+	*/
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Inventory")
+		int32 AvailableAmmoForCurrentWeapon;
 
 	/*
 	Drops current selected Weapon on ground.
@@ -132,11 +137,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Inventory")
 		int32 ActiveItemIndex;
 
-	/*
-	Available Ammo for Current Selected Weapon ( Used for HUD )
-	*/
-	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Inventory")
-		int32 AvailableAmmoForCurrentWeapon;
+	
 
 		
 };

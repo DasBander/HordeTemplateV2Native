@@ -63,6 +63,42 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Interaction")
 		UMaterialInstanceDynamic* ProgressCircleDynamic;
 
+	UPROPERTY()
+		float HealthInterpolate = 100.f;
+
+	UPROPERTY()
+		float StaminaInterpolate = 100.f;
+
+	UFUNCTION(BlueprintPure, Category = "HUD")
+		float GetPlayerHealth();
+
+	UFUNCTION(BlueprintPure, Category = "HUD")
+		float GetPlayerStamina();
+
+	UFUNCTION(BlueprintPure, Category = "HUD")
+		ESlateVisibility bGetIsDead();
+
+	UFUNCTION(BlueprintPure, Category = "HUD")
+		FText GetWeaponText();
+
+	UFUNCTION(BlueprintPure, Category = "HUD")
+		FText GetHealthText();
+
+	UFUNCTION(BlueprintPure, Category = "HUD")
+		FText GetZedsLeft();
+
+	UFUNCTION(BlueprintPure, Category = "HUD")
+		FText GetRounds();
+
+	UFUNCTION(BlueprintPure, Category = "HUD")
+		ESlateVisibility bIsSpectator();
+
+	UFUNCTION(BlueprintPure, Category = "HUD")
+		ESlateVisibility bIsInteracting();
+
+	UFUNCTION(BlueprintPure, Category = "HUD")
+		FText GetWeaponFireMode();
+
 
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;

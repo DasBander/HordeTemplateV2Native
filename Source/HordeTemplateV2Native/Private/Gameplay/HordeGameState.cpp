@@ -311,10 +311,17 @@ void AHordeGameState::GameOver(FName NextMap)
 	for (TActorIterator<AHordeBaseCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
 		AHordeBaseCharacter* PLYChar = *ActorItr;
-		if (PLYChar)
+		if (*ActorItr && PLYChar)
 		{
-			PLYChar->GetCurrentFirearm()->Destroy();
-			PLYChar->Destroy();
+			ABaseFirearm* CharFirearm = PLYChar->GetCurrentFirearm();
+			if (CharFirearm)
+			{
+				CharFirearm->SetLifeSpan(0.1f);
+			}
+			PLYChar->SetLifeSpan(0.1f);
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("Could not Kill Player Characters. Not Valid."));
 		}
 	}
 	if (!GetWorld()->GetTimerManager().IsTimerActive(EndGameTimer))

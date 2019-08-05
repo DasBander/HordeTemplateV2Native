@@ -2,6 +2,8 @@
 
 #include "PlayerLobbyWidget.h"
 #include "Gameplay/HordeGameState.h"
+#include "Gameplay/HordePlayerState.h"
+#include "Gameplay/HordeBaseController.h"
 #include "HordeTemplateV2Native.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -50,4 +52,62 @@ FText UPlayerLobbyWidget::GetLobbyTime()
 		return FText::FromString("nA / nA");
 	}
 
+}
+
+bool UPlayerLobbyWidget::IsDisconnectBlocked()
+{
+	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
+	if (GS)
+	{
+		return !GS->BlockDisconnect;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+ESlateVisibility UPlayerLobbyWidget::IsCharacterTrading()
+{
+	AHordeBaseController* PC = Cast<AHordeBaseController>(GetOwningPlayer());
+	if (PC)
+	{
+		AHordePlayerState* PS = Cast<AHordePlayerState>(PC->PlayerState);
+		if (PS)
+		{
+			AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
+			if (GS)
+			{
+				if (GS->IsTradeInProgress && (GS->TradeProgress.Instigator == PS->GetPlayerInfo().PlayerID || GS->TradeProgress.Target == PS->GetPlayerInfo().PlayerID))
+				{
+					return ESlateVisibility::Visible;
+				}
+				else
+				{
+					return ESlateVisibility::Collapsed;
+				}
+			}
+			else {
+				return ESlateVisibility::Collapsed;
+			}
+		}
+		else {
+			return ESlateVisibility::Collapsed;
+		}
+	}
+	else {
+		return ESlateVisibility::Collapsed;
+	}
+}
+
+bool UPlayerLobbyWidget::bIsGameStarting()
+{
+	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
+	if (GS)
+	{
+		return !GS->GameStarting;
+	}
+	else {
+		return false;
+	}
 }

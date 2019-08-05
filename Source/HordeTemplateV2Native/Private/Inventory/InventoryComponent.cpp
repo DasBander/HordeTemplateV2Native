@@ -284,16 +284,20 @@ EActiveType UInventoryComponent::FindNextWeaponType()
 
 EActiveType UInventoryComponent::FindLastWeaponType()
 {
-	EActiveType RetType;
+	EActiveType RetType = EActiveType::EActiveRifle;
 	TArray<EActiveType> AvailableCategories = GetAvailableCategories();
 	int32 CurrentIndex = AvailableCategories.Find(Inventory[ActiveItemIndex].Type);
-	if (CurrentIndex == 0)
+	if (CurrentIndex == 0 && AvailableCategories.Num() > 0)
 	{
 		RetType = AvailableCategories[AvailableCategories.Num() - 1];
 	}
-	else
+	else 
 	{
-		RetType = AvailableCategories[CurrentIndex - 1];
+		if (AvailableCategories.IsValidIndex(CurrentIndex - 1))
+		{
+			RetType = AvailableCategories[CurrentIndex - 1];
+		}
+
 	}
 	return RetType;
 }

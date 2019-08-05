@@ -230,6 +230,11 @@ public:
 		return Health;
 	}
 
+	FORCEINLINE float GetStamina()
+	{
+		return Stamina;
+	}
+
 	FORCEINLINE bool GetIsDead()
 	{
 		return IsDead;

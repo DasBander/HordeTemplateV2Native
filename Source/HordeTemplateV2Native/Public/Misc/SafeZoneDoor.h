@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Inventory/InteractionInterface.h"
+#include "HordeTemplateV2Native.h"
 #include "SafeZoneDoor.generated.h"
 
 UCLASS()
-class HORDETEMPLATEV2NATIVE_API ASafeZoneDoor : public AActor
+class HORDETEMPLATEV2NATIVE_API ASafeZoneDoor : public AActor, public IInteractionInterface
 {
 	GENERATED_BODY()
 	
@@ -16,11 +18,17 @@ public:
 	ASafeZoneDoor();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		class USkeletalMeshComponent* DoorMesh;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interaction")
+		void Interact(AActor* InteractingOwner);
+	virtual void Interact_Implementation(AActor* InteractingOwner) override;
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interaction")
+		FInteractionInfo GetInteractionInfo();
+	virtual FInteractionInfo GetInteractionInfo_Implementation() override;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Door")
+		bool bIsOpen = false;
 };

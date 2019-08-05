@@ -14,7 +14,7 @@ ADoor::ADoor()
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Scene Root"));
 	DoorMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Door Mesh"));
 	DoorMesh->SetupAttachment(RootComponent);
-
+	DoorMesh->SetCollisionProfileName("BlockAll");
 	const ConstructorHelpers::FObjectFinder<USkeletalMesh> DoorMeshAsset(TEXT("SkeletalMesh'/Game/HordeTemplateBP/Assets/Meshes/Misc/SK_BaseDoor_Blue.SK_BaseDoor_Blue'"));
 	if (DoorMeshAsset.Succeeded())
 	{

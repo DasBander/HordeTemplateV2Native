@@ -15,7 +15,7 @@ class HORDETEMPLATEV2NATIVE_API AAISpawnPoint : public AActor
 public:	
 	AAISpawnPoint();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 		FName PatrolTag;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI")

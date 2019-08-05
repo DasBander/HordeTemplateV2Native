@@ -36,5 +36,13 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Lobby")
 		FText GetLobbyTime();
+
+	UFUNCTION(BlueprintPure, Category = "Lobby")
+		bool IsDisconnectBlocked();
+
+	UFUNCTION(BlueprintPure, Category = "Lobby")
+		ESlateVisibility IsCharacterTrading();
 	
+	UFUNCTION(BlueprintPure, Category = "Lobby")
+		bool bIsGameStarting();
 };
