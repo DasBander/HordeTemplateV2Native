@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Gameplay/LobbyStructures.h"
 #include "PlayerEndScreen.generated.h"
 
 /**
@@ -37,4 +38,9 @@ protected:
 	UFUNCTION(BlueprintPure, Category = "End Screen")
 		FText GetEndTime();
 
+	UFUNCTION(BlueprintPure, Category = "End Screen")
+		FText GetNextLevel();
+
+	UFUNCTION(BlueprintPure, Category = "End Screen")
+	FPlayableLevel FindLevelByID(FName LevelID);
 };

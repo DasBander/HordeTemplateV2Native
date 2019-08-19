@@ -2,6 +2,7 @@
 
 #include "PlayerEndScreen.h"
 #include "Gameplay/HordeGameState.h"
+#include "HordeTemplateV2Native.h"
 
 FText UPlayerEndScreen::GetMVPName()
 {
@@ -87,4 +88,39 @@ FText UPlayerEndScreen::GetEndTime()
 	else {
 		return FText::FromString("nA / nA");
 	}
+}
+
+FText UPlayerEndScreen::GetNextLevel()
+{
+	FString RetText = "NEXT: Not found!";
+	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
+	if (GS)
+	{
+		FPlayableLevel Ply = FindLevelByID(GS->NextLevel);
+		if (Ply.RawLevelName != NAME_None)
+		{
+			RetText = "NEXT: " + Ply.LevelName.ToString();
+		}
+	}
+
+	return FText::FromString(RetText);
+}
+
+FPlayableLevel UPlayerEndScreen::FindLevelByID(FName LevelID)
+{
+	UDataTable* InventoryData = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, MAPS_DATATABLE_PATH));
+	FPlayableLevel TempItem;
+
+	if (InventoryData) {
+		FPlayableLevel* ItemFromRow = InventoryData->FindRow<FPlayableLevel>(LevelID, "PlayerEndScreen Widget - Find Level By ID", false);
+		if (ItemFromRow)
+		{
+			TempItem = *ItemFromRow;
+		}
+	}
+	else {
+		GLog->Log("Player Maps Data not valid.");
+	}
+
+	return TempItem;
 }

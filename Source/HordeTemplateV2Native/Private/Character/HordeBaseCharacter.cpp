@@ -7,6 +7,7 @@
 #include "Gameplay/HordeGameMode.h"
 #include "Weapons/BaseFirearm.h"
 #include "HUD/Widgets/PlayerHeadDisplay.h"
+#include "HordePlayerState.h"
 #include "AIModule/Classes/Perception/AISense_Sight.h"
 #include "FX/Camera/CameraShake_Damage.h"
 
@@ -222,6 +223,11 @@ void AHordeBaseCharacter::CharacterDie()
 	if (CurrentSelectedFirearm)
 	{
 		Inventory->ServerDropItem(CurrentSelectedFirearm);
+	}
+	AHordePlayerState* PS = Cast<AHordePlayerState>(GetPlayerState());
+	if (PS)
+	{
+		PS->bIsDead = true;
 	}
 
 	AHordeGameMode* GM = Cast<AHordeGameMode>(GetWorld()->GetAuthGameMode());

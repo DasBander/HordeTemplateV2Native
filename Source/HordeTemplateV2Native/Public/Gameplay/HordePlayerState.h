@@ -74,14 +74,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Score")
 		void AddPoints(int32 InPoints, EPointType PointsType);
 
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Player Info")
+		bool bIsDead = false;
+
+	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "Lobby|Trade")
+		void RequestCharacterTrade(const FString& InstigatorPlayer, const FString& TargetPlayer);
 
 protected:
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "Lobby")
 		void ToggleReadyStatus();
-
-	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "Lobby|Trade")
-		void RequestCharacterTrade(const FString& InstigatorPlayer, const FString& TargetPlayer);
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "Lobby|Trade")
 		void AcceptCharacterTrade();

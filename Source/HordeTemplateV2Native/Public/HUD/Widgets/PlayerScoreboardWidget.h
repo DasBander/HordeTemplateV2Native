@@ -19,5 +19,7 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Player List")
 		void OnPlayerListUpdated(const TArray<APlayerState*>& PlayerList);
-	
+
+	UFUNCTION(BlueprintPure, Category = "Player List")
+		FText GetLobbyName();
 };

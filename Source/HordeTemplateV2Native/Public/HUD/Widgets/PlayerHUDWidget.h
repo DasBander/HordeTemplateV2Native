@@ -99,6 +99,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "HUD")
 		FText GetWeaponFireMode();
 
+	UFUNCTION(BlueprintPure, Category = "HUD")
+		ESlateVisibility GetGameType();
+
+	UFUNCTION(BlueprintPure, Category = "HUD")
+		FText GetRoundTime();
+
 
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;

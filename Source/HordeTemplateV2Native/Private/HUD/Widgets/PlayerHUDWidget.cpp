@@ -142,6 +142,38 @@ FText UPlayerHUDWidget::GetWeaponFireMode()
 	return FText::FromString(ReturnString);
 }
 
+ESlateVisibility UPlayerHUDWidget::GetGameType()
+{
+	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
+	if (GS)
+	{
+		return (GS->MatchMode == EMatchMode::EMatchModeNonLinear) ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
+	}
+	else {
+		return ESlateVisibility::Collapsed;
+	}
+}
+
+FText UPlayerHUDWidget::GetRoundTime()
+{
+	FFormatNamedArguments Args;
+	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
+	if (GS)
+	{
+		float LobbyTime = (GS->IsRoundPaused) ? GS->PauseTime : GS->RoundTime;
+
+		int32 Minutes = FMath::FloorToInt(LobbyTime / 60.f);
+		int32 Seconds = FMath::TruncToInt(LobbyTime - (Minutes * 60.f));
+
+		FString TimeStr = FString::Printf(TEXT("%s%s : %s%s"), (Minutes < 10) ? TEXT("0") : TEXT(""), *FString::FromInt(Minutes), (Seconds < 10) ? TEXT("0") : TEXT(""), *FString::FromInt(Seconds));
+
+		return FText::FromString(TimeStr + ((GS->IsRoundPaused) ? " Pause" : " Game Time"));
+	}
+	else {
+		return FText::FromString("nA / nA");
+	}
+}
+
 void UPlayerHUDWidget::NativeConstruct()
 {
 	

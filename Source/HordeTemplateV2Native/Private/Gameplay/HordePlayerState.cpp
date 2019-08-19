@@ -20,6 +20,7 @@ void AHordePlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(AHordePlayerState, Points);
 	DOREPLIFETIME(AHordePlayerState, HeadShots);
 	DOREPLIFETIME(AHordePlayerState, PlayerMoney);
+	DOREPLIFETIME(AHordePlayerState, bIsDead);
 }
 
 void AHordePlayerState::ClientUpdateGameStatus_Implementation(EGameStatus GameStatus)

@@ -37,5 +37,13 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Player Head Display")
 		float Health;
+
+	UFUNCTION(BlueprintPure, Category = "Player Head Display")
+		FText GetPlayerName();
 	
+	UFUNCTION(BlueprintPure, Category = "Player Head Display")
+		float GetPlayerHealth();
+
+	UPROPERTY()
+		float InterpHealth = 100.f;
 };

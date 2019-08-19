@@ -22,6 +22,9 @@
 //Inventory
 #define INVENTORY_DATATABLE_PATH TEXT("DataTable'/Game/HordeTemplateBP/Data/HordeInventoryItems.HordeInventoryItems'")
 
+//Trader
+#define TRADER_BUY_SOUND TEXT("SoundCue'/Game/HordeTemplateBP/Assets/Sounds/A_TraderBuy_Cue.A_TraderBuy_Cue'")
+
 //Zombie AI
 #define ZED_BEHAVIORTREE_ASSET_PATH TEXT("BehaviorTree'/Game/HordeTemplateBP/Blueprint/Ai/BT/BT_Zed.BT_Zed'")
 #define ZED_LOSE_SIGHT_TIME_MIN 6.f
@@ -55,12 +58,33 @@
 //Physics Materials
 #define SURFACE_CONCRETE SurfaceType1
 #define SURFACE_FLESH SurfaceType2
+
 /*
 	Loads object dynamically from a given path.
 */
-template <typename ObjClass>
-static FORCEINLINE ObjClass* ObjectFromPath(const FName& Path)
+template <typename ObjType>
+static FORCEINLINE ObjType* ObjectFromPath(const FName& Path)
 {
-	if (Path == NAME_None) return NULL;
-	return Cast<ObjClass>(StaticLoadObject(ObjClass::StaticClass(), NULL, *Path.ToString()));
+	if (Path == NAME_None) return nullptr;
+	return Cast<ObjType>(StaticLoadObject(ObjType::StaticClass(), nullptr, *Path.ToString()));
+}
+
+template <typename DatatableType>
+static FORCEINLINE DatatableType FromDatatable(const FString& DatatablePath, const FName& DatatableKey)
+{
+	if (DatatablePath == "" || DatatableKey == NAME_None) return DatatableType();
+	UDataTable* Data = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *DatatablePath));
+	if (Data) {
+		DatatableType * DTD = Data->FindRow<DatatableType>(DatatableKey, "FromDatatable Failed to Find", true);
+		if (DTD)
+		{
+			return *DTD;
+		}
+		else {
+			return DatatableType();
+		}
+	}
+	else {
+		return DatatableType();
+	}
 }
