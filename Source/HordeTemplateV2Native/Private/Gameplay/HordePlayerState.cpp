@@ -7,6 +7,7 @@
 #include "Gameplay/HordeBaseController.h"
 #include "Character/HordeBaseCharacter.h"
 #include "Gameplay/HordeGameSession.h"
+#include "GameFramework/GameMode.h"
 #include "Runtime/Core/Public/Math/NumericLimits.h"
 #include "Misc/HordeTrader.h"
 #include "HUD/HordeBaseHUD.h"
@@ -139,16 +140,21 @@ void AHordePlayerState::GettingKicked_Implementation()
 	{
 		if (GetWorld())
 		{
-			AHordeGameSession* GSS = Cast<AHordeGameSession>(GetWorld()->GetAuthGameMode()->GameSession);
-			if (GSS)
+			AGameMode* GM = Cast<AGameMode>(GetWorld()->GetAuthGameMode());
+			if (GM)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Ending Session."));
-				GSS->EndGameSession();
+				AHordeGameSession* GSS = Cast<AHordeGameSession>(GetWorld()->GetAuthGameMode()->GameSession);
+				if (GSS)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Ending Session."));
+					GSS->EndGameSession();
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Unable to get Game Session."));
+				}
 			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Unable to get Game Session."));
-			}
+
 			PC->ConsoleCommand("disconnect?message=disconnectedfromgame", false);
 		}
 	}
@@ -180,7 +186,7 @@ void AHordePlayerState::RequestPlayerKick_Implementation(FPlayerInfo InPlayer)
 	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
 	if (GS)
 	{
-		if (GS->LobbyInformation.OwnerID == InPlayer.PlayerID)
+		if (GS->LobbyInformation.OwnerID == Player.PlayerID)
 		{
 			GS->KickPlayer(InPlayer.PlayerID);
 		}
