@@ -5,6 +5,7 @@
 #include "AI/ZedPawn.h"
 #include "AI/ZedAIController.h"
 #include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
+
 UIsEnemyDead::UIsEnemyDead()
 {
 	NodeName = "Check: Is Enemy Dead?";

@@ -6,6 +6,9 @@
 #include "Character/HordeBaseCharacter.h"
 #include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
 
+/*
+	AI Controller Constructor
+*/
 AZedAIController::AZedAIController()
 {
 	PCC = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("Perception Component"));
@@ -23,6 +26,11 @@ AZedAIController::AZedAIController()
 	PCC->OnTargetPerceptionUpdated.AddDynamic(this, &AZedAIController::EnemyInSight);
 }
 
+/*
+	AI - Enemy in Sight.
+	
+	Set Enemy in Blackboard and set timer to loose sight after time.
+*/
 void AZedAIController::EnemyInSight(AActor* Actor, FAIStimulus Stimulus)
 {
 	AHordeBaseCharacter* Enemy = Cast<AHordeBaseCharacter>(Actor);
@@ -40,6 +48,11 @@ void AZedAIController::EnemyInSight(AActor* Actor, FAIStimulus Stimulus)
 	}
 }
 
+/*
+	AI - Clear Enemy Sight
+
+	Sets Enemy as nullptr in Blackboard
+*/
 void AZedAIController::ClearSight()
 {
 	UBlackboardComponent* BB = GetBlackboardComponent();
@@ -49,6 +62,11 @@ void AZedAIController::ClearSight()
 	}
 }
 
+/*
+	Begin Play
+
+	Runs Behavior Tree.
+*/
 void AZedAIController::BeginPlay()
 {
 	Super::BeginPlay();

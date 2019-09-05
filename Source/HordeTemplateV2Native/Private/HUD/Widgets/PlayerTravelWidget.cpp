@@ -4,6 +4,18 @@
 #include "Gameplay/HordeGameState.h"
 #include "Kismet/GameplayStatics.h"
 
+/*
+Loading Screen Widget
+*/
+
+
+/*
+	FUNCTION: Get Server Info
+	PARAM: None
+	RETURN : FText ( Server Loading Info )
+	DESC:
+	Displays the Current Map that is loading.
+*/
 FText UPlayerTravelWidget::GetServerInfo()
 {
 	FString RetInfo = "Getting Serverinfo.....";

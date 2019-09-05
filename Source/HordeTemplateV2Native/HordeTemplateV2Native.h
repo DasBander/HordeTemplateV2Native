@@ -68,7 +68,9 @@ static FORCEINLINE ObjType* ObjectFromPath(const FName& Path)
 	if (Path == NAME_None) return nullptr;
 	return Cast<ObjType>(StaticLoadObject(ObjType::StaticClass(), nullptr, *Path.ToString()));
 }
-
+/*
+	Get Datatable Row by Path and Row Name
+*/
 template <typename DatatableType>
 static FORCEINLINE DatatableType FromDatatable(const FString& DatatablePath, const FName& DatatableKey)
 {
