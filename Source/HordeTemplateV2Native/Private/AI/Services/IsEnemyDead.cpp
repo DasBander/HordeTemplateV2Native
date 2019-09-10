@@ -6,6 +6,14 @@
 #include "AI/ZedAIController.h"
 #include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
 
+/*
+	FUNCTION: Constructor UIsEnemyDead
+	PARAM: None
+	RETURN: None
+	DESC:
+	Constructor of Service IsEnemyDead
+
+*/
 UIsEnemyDead::UIsEnemyDead()
 {
 	NodeName = "Check: Is Enemy Dead?";
@@ -13,6 +21,13 @@ UIsEnemyDead::UIsEnemyDead()
 	RandomDeviation = 0.1f;
 }
 
+/*
+	FUNCTION: Tick Node
+	PARAM: UBehaviorTreeComponent (Owner Component), uint8 (Node Memory), float (Delta Seconds)
+	RETURN: void
+	DESC:
+	Tick Node which checks if Enemy is Dead ( Player Character ). If zombie killed player he ignores him.
+*/
 void UIsEnemyDead::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);

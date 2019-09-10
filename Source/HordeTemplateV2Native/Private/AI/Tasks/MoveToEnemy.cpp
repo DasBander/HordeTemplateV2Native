@@ -6,12 +6,28 @@
 #include "NavigationSystem/Public/NavigationSystem.h"
 #include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
 #include "Character/HordeBaseCharacter.h"
+
+/*
+	FUNCTION: Constructor UMoveToEnemy
+	PARAM: None
+	RETURN: None
+	DESC:
+	Default Constructor for UMoveToEnemy
+
+*/
 UMoveToEnemy::UMoveToEnemy()
 {
 	NodeName = "Move To Enemy Player";
 	bNotifyTick = true;
 }
 
+/*
+	FUNCTION: Tick Task
+	PARAM: UBehaviorTreeComponent ( Owner Component ), uint8 ( NodeMemory ), float( DeltaSeconds )
+	RETURN: void
+	DESC:
+	Finishes latent Task if Enemy is Set, the AI is dead, a player is in Range or if the movement status is idle.
+*/
 void UMoveToEnemy::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
@@ -44,6 +60,14 @@ void UMoveToEnemy::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory
 	}
 }
 
+/*
+	FUNCTION: Execute Task
+	PARAM: UBehaviorTreeComponent ( Owner Component ), uint8 ( NodeMemory )
+	RETURN: EBTNodeResult::Type
+	DESC:
+	Follows Characters Position.
+
+*/
 EBTNodeResult::Type UMoveToEnemy::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);

@@ -6,8 +6,14 @@
 #include "Character/HordeBaseCharacter.h"
 #include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
 
+
 /*
-	AI Controller Constructor
+	FUNCTION: Constructor for AZedAIController
+	PARAM: None
+	RETURN: None
+	DESC:
+	Default Constructor for AZedAIController. Populates Default Values for Component.
+
 */
 AZedAIController::AZedAIController()
 {
@@ -26,10 +32,14 @@ AZedAIController::AZedAIController()
 	PCC->OnTargetPerceptionUpdated.AddDynamic(this, &AZedAIController::EnemyInSight);
 }
 
+
 /*
-	AI - Enemy in Sight.
-	
-	Set Enemy in Blackboard and set timer to loose sight after time.
+	FUNCTION: Enemy In Sight
+	PARAM: AActor ( Enemy ), FAIStimulus ( Stimulus )
+	RETURN: void
+	DESC:
+	Detects Enemy Range Bases and sets it inside the Blackboard. Also starts clear sight timer in RandomRange Time Zone.
+
 */
 void AZedAIController::EnemyInSight(AActor* Actor, FAIStimulus Stimulus)
 {
@@ -48,10 +58,14 @@ void AZedAIController::EnemyInSight(AActor* Actor, FAIStimulus Stimulus)
 	}
 }
 
-/*
-	AI - Clear Enemy Sight
 
-	Sets Enemy as nullptr in Blackboard
+/*
+	FUNCTION: Clear Sight
+	PARAM: None
+	RETURN: void
+	DESC:
+	Sets Enemy as nullptr in Blackboard.
+
 */
 void AZedAIController::ClearSight()
 {
@@ -63,9 +77,12 @@ void AZedAIController::ClearSight()
 }
 
 /*
-	Begin Play
+	FUNCTION: Begin Play
+	PARAM: None
+	RETURN: void
+	DESC:
+	Runs Behavior Tree on Server.
 
-	Runs Behavior Tree.
 */
 void AZedAIController::BeginPlay()
 {

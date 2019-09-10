@@ -8,10 +8,26 @@
 #include "Character/HordeBaseCharacter.h"
 #include "Kismet/GameplayStatics.h"
 
+/*
+	FUNCTION: Constructor UAIAttackPlayer
+	PARAM: None
+	RETURN: None
+	DESC:
+	Default Constructor for UAIAttackPlayer
+
+*/
 UAIAttackPlayer::UAIAttackPlayer()
 {
 	NodeName = "Attack Player";
 }
+
+/*
+	FUNCTION: Execute Task
+	PARAM: UBehaviorTreeComponent ( Owner Component ), uint8 ( NodeMemory )
+	RETURN: EBTNodeResult::Type
+	DESC:
+	Executes Task to Attack the Player. Traces Player with SphereTraceSingle and applys damage to him.
+*/
 
 EBTNodeResult::Type UAIAttackPlayer::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {

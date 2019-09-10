@@ -6,12 +6,28 @@
 #include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
 #include "AIModule/Classes/AIController.h"
 
+/*
+	FUNCTION: Constructor for UMoveToPatrolPoint
+	PARAM: None
+	RETURN: None
+	DESC:
+	Default Constructor for UMoveToPatrolPoint
+
+*/
 UMoveToPatrolPoint::UMoveToPatrolPoint()
 {
 	NodeName = "Move to Patrol Point";
 	bNotifyTick = true;
 }
 
+/*
+	FUNCTION: Tick Task
+	PARAM: UBehaviorTreeComponent ( Owner Component ), uint8 ( NodeMemory ), float ( DeltaSeconds )
+	RETURN: void
+	DESC:
+	Finishes latent Task if Enemy is Set ort Move Status is Idle. Also clears Patrol Tag;
+
+*/
 void UMoveToPatrolPoint::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
@@ -36,6 +52,14 @@ void UMoveToPatrolPoint::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Node
 	}
 }
 
+/*
+	FUNCTION: Execute Task
+	PARAM: UBehaviorTreeComponent ( Owner Component ), uint8 ( NodeMemory )
+	RETURN: EBTNodeResult::Type
+	DESC:
+	Moves to Patrol Tag Location.
+
+*/
 EBTNodeResult::Type UMoveToPatrolPoint::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 
@@ -58,6 +82,14 @@ EBTNodeResult::Type UMoveToPatrolPoint::ExecuteTask(UBehaviorTreeComponent& Owne
 	return EBTNodeResult::Failed;
 }
 
+/*
+	FUNCTION: Get Patrol Location
+	PARAM: FName ( Patrol Tag )
+	RETURN: FVector ( Patrol Location )
+	DESC:
+	Returns random Patrol Location of AICorePoints by given Patrol Tag.
+
+*/
 FVector UMoveToPatrolPoint::GetPatrolLocation(FName PatrolTag)
 {
 	TArray<FVector> PatrolLocations;

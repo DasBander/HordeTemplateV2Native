@@ -14,6 +14,14 @@
 #include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
 #include "HordeTemplateV2Native.h"
 
+/*
+	FUNCTION: Constructor for AZedPawn
+	PARAM: None
+	RETURN: None
+	DESC:
+	Default Constructor for AZedPawn. Populating default values.
+
+*/
 AZedPawn::AZedPawn()
 {
 	PrimaryActorTick.bStartWithTickEnabled = false;
@@ -68,6 +76,15 @@ AZedPawn::AZedPawn()
 
 }
 
+
+/*
+	FUNCTION: Get Lifetime Replicated Props Const
+	PARAM: TArray - FLifetimeProperty ( Out Lifetime Props )
+	RETURN: void
+	DESC:
+	Sets replicated variables.
+
+*/
 void AZedPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -77,6 +94,15 @@ void AZedPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	DOREPLIFETIME(AZedPawn, PatrolTag);
 }
 
+
+/*
+	FUNCTION: Begin Play
+	PARAM: None
+	RETURN: void
+	DESC:
+	Sets Patrol Tag in Blackboard and Updates Alive Zombies in GameState.
+
+*/
 void AZedPawn::BeginPlay()
 {
 	Super::BeginPlay();
@@ -101,7 +127,14 @@ void AZedPawn::BeginPlay()
 }
 
 
+/*
+	FUNCTION: Give Player Points
+	PARAM: ACharacter ( Player ), int32 ( Points ), EPointType ( Point Type )
+	RETURN: void
+	DESC:
+	Gives specified player points.
 
+*/
 void AZedPawn::GivePlayerPoints(ACharacter* Player, int32 Points, EPointType PointType)
 {
 	AHordeBaseCharacter* Char = Cast<AHordeBaseCharacter>(Player);
@@ -115,6 +148,14 @@ void AZedPawn::GivePlayerPoints(ACharacter* Player, int32 Points, EPointType Poi
 	}
 }
 
+/*
+	FUNCTION: Take Damage
+	PARAM: float (Damage), FDamageEvent ( Damage Event ), AController ( Instigator Controller ), AActor ( Damage Causer )
+	RETURN: float ( Damage )
+	DESC:
+	Received Damage and executes the following functions depending on the AI's health. If AI got Headshot
+
+*/
 float AZedPawn::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
@@ -292,7 +333,7 @@ void AZedPawn::PlayHeadShotFX_Implementation()
 		/*
 		We need to use SpawnEmitterAtLocation instead of Attached. https://issues.unrealengine.com/issue/UE-29018
 		*/
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodSplat, GetMesh()->GetBoneLocation("head", EBoneSpaces::WorldSpace), FRotator(), true, EPSCPoolMethod::None);
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodSplat, GetMesh()->GetBoneLocation("head", EBoneSpaces::WorldSpace), FRotator(0.f, 0.f, 0.f), true, EPSCPoolMethod::None);
 	}
 	
 	//Spawn Headshot Sound at head.

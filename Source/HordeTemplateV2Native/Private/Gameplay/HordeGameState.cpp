@@ -701,6 +701,14 @@ FString AHordeGameState::GetUsernameBySteamID(FString ID, bool &FoundPlayer)
 	return RetUserName;
 }
 
+/*
+	FUNCTION: Update Player Lobby
+	PARAM: None
+	RETURN: void
+	DESC:
+	Updates Player List in Lobby. Also Checks if All Players are ready. If yes cuts the lobby time and sets game starting to true.
+
+*/
 void AHordeGameState::UpdatePlayerLobby()
 {
 	if (HasAuthority())
@@ -743,6 +751,14 @@ void AHordeGameState::UpdatePlayerLobby()
 	}
 }
 
+/*
+	FUNCTION: Check Player Ready
+	PARAM: None
+	RETURN: bool
+	DESC:
+	Returns if all players are ready.
+
+*/
 bool AHordeGameState::CheckPlayersReady()
 {
 	bool Ready = true;
@@ -757,6 +773,14 @@ bool AHordeGameState::CheckPlayersReady()
 	return Ready;
 }
 
+/*
+	FUNCTION: Message Player
+	PARAM: FHordeChatMessage Message Structure; FString PlayerID
+	RETURN: void
+	DESC:
+	Sends a chat message directly to a player by given playerid(steamid).
+
+*/
 void AHordeGameState::MessagePlayer(FHordeChatMessage Message, FString PlayerID)
 {
 	for (auto PLY: PlayerArray)
@@ -769,6 +793,14 @@ void AHordeGameState::MessagePlayer(FHordeChatMessage Message, FString PlayerID)
 	}
 }
 
+/*
+	FUNCTION: Pop Message
+	PARAM: FHordeChatMessage Message Structure
+	RETURN: void
+	DESC:
+	Sends Message to all Players.
+
+*/
 void AHordeGameState::PopMessage(FHordeChatMessage Message)
 {
 	for (auto& PS : PlayerArray)
@@ -781,6 +813,14 @@ void AHordeGameState::PopMessage(FHordeChatMessage Message)
 	}
 }
 
+/*
+	FUNCTION: Get Free Character
+	PARAM: None
+	RETURN: FName - ID of free Character. None if none is available.
+	DESC:
+	Returns ID of a Free Character.
+
+*/
 FName AHordeGameState::GetFreeCharacter()
 {
 	FName TempChar = "None";
@@ -795,6 +835,14 @@ FName AHordeGameState::GetFreeCharacter()
 	return TempChar;
 }
 
+/*
+	FUNCTION: All Player Dead Check
+	PARAM: None
+	RETURN: None
+	DESC:
+	Checks if all Players are dead. If so we want to End the Game with true so we Reset the Level.
+
+*/
 void AHordeGameState::AllPlayerDeadCheck()
 {
 	if (CountAlivePlayers() < 1 && GameStatus == EGameStatus::EINGAME)
@@ -804,7 +852,14 @@ void AHordeGameState::AllPlayerDeadCheck()
 }
 
 
+/*
+	FUNCTION: End Game
+	PARAM: bool ResetLevel
+	RETURN: void
+	DESC:
+	Ends the current game session, clears up all the game driven timers and sets the next level to be played.
 
+*/
 void AHordeGameState::EndGame(bool ResetLevel)
 {
 
@@ -842,7 +897,14 @@ void AHordeGameState::EndGame(bool ResetLevel)
 
 }
 
+/*
+	FUNCTION: Process End Time
+	PARAM: None
+	RETURN: void
+	DESC:
+	Removes Time from the End Screen Time. If over we want to update the client game status to EGameStatus::ServerTravel and ServerTravel to the next Map.
 
+*/
 void AHordeGameState::ProcessEndTime()
 {
 	if (EndTime <= 0.f)
@@ -880,6 +942,14 @@ void AHordeGameState::ProcessEndTime()
 	}
 }
 
+/*
+	FUNCTION: ResetLobby
+	PARAM: None
+	RETURN: void
+	DESC:
+	Resets the Lobby Time, the bool values and the GameStatus to EGameStatus::ELOBBY
+
+*/
 void AHordeGameState::ResetLobby()
 {
 	AHordeWorldSettings* WS = Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings(false, true));
@@ -892,6 +962,14 @@ void AHordeGameState::ResetLobby()
 	}
 }
 
+/*
+	FUNCTION: Calc End Score
+	PARAM: None
+	RETURN: FPlayerScore: MVP ( Most Valueble Player ), HS ( Most Headshots ), KS ( Most Kills ) 
+	DESC:
+	Returns score for the end of the game to display.
+
+*/
 void AHordeGameState::CalcEndScore(FPlayerScore& MVP, FPlayerScore& HS, FPlayerScore& KS)
 {
 	FPlayerScore LocalMVP("MVP");
@@ -933,6 +1011,14 @@ void AHordeGameState::CalcEndScore(FPlayerScore& MVP, FPlayerScore& HS, FPlayerS
 	
 }
 
+/*
+	FUNCTION: Count Alive Players
+	PARAM: None
+	RETURN: int32 Amount of Alive Players
+	DESC:
+	Returns amount of alive players in game.
+
+*/
 int32 AHordeGameState::CountAlivePlayers()
 {
 	int32 TempAliveCount = 0;
@@ -947,6 +1033,14 @@ int32 AHordeGameState::CountAlivePlayers()
 	return TempAliveCount;
 }
 
+/*
+	FUNCTION: Count Alive Zeds
+	PARAM: None
+	RETURN: int32 Amount of alive zombies.
+	DESC:
+	Counts alive zombies on the map and returns it.
+
+*/
 int32 AHordeGameState::CountAliveZeds()
 {
 	int32 TempAliveCount = 0;
@@ -962,6 +1056,14 @@ int32 AHordeGameState::CountAliveZeds()
 	return TempAliveCount;
 }
 
+/*
+	FUNCTION: Update Alive Zeds
+	PARAM: None
+	RETURN: void
+	DESC:
+	Updates ZedsLeft (Int32; Exposed to BP) and runs Check for Game Over.
+
+*/
 void AHordeGameState::UpdateAliveZeds()
 {
 	ZedsLeft = CountAliveZeds();
@@ -972,6 +1074,14 @@ void AHordeGameState::UpdateAliveZeds()
 	}
 }
 
+/*
+	FUNCTION: Start Character Trade
+	PARAM: FString Instigator Player ID, FString Target Player ID
+	RETURN: void
+	DESC:
+	Initiates Character Trade inside lobby with given Player IDs.
+
+*/
 void AHordeGameState::StartCharacterTrade(FString InstigatorPlayer, FString TargetPlayer)
 {
 	if (!IsTradeInProgress && InstigatorPlayer != "" && TargetPlayer != "" && !GetWorld()->GetTimerManager().IsTimerActive(LobbyTradeTimer))
@@ -984,6 +1094,14 @@ void AHordeGameState::StartCharacterTrade(FString InstigatorPlayer, FString Targ
 	}
 }
 
+/*
+	FUNCTION: Process Character Trade
+	PARAM: None
+	RETURN: void
+	DESC:
+	Calculates Character Trade Time left. When time is < 0 Character Trade gets canceled.
+
+*/
 void AHordeGameState::ProcessCharacterTrade()
 {
 	if (TradeProgress.TimeLeft > 0)
@@ -995,6 +1113,14 @@ void AHordeGameState::ProcessCharacterTrade()
 	}
 }
 
+/*
+	FUNCTION: Accept Character Trade
+	PARAM: None
+	RETURN: void
+	DESC:
+	Accepts Character Trade and Swaps Characters of Instigator and Target Player. After all that it updates the lobby.
+
+*/
 void AHordeGameState::AcceptCharacterTrade()
 {
 	
@@ -1023,6 +1149,14 @@ void AHordeGameState::AcceptCharacterTrade()
 
 }
 
+/*
+	FUNCTION: About Lobby Trade
+	PARAM: None
+	RETURN: void
+	DESC:
+	Stops Character Trade and resets Character Trade Structure.
+
+*/
 void AHordeGameState::AbortLobbyTrade()
 {
 	if (GetWorld()->GetTimerManager().IsTimerActive(LobbyTradeTimer))
