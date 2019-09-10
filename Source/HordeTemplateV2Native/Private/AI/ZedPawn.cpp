@@ -214,6 +214,13 @@ float AZedPawn::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent,
 	return Health;
 }
 
+/*
+    FUNCTION: Kill Ai
+    PARAM: ACharacter ( Killer ), EPointType ( Kill Type )
+    RETURN: void
+    DESC:
+	Sets AI as Dead. Gives killer points depending on killtype and updates alive zombies.
+*/
 void AZedPawn::KillAI(ACharacter* Killer, EPointType KillType)
 {
 	IsDead = true;
@@ -237,7 +244,7 @@ void AZedPawn::KillAI(ACharacter* Killer, EPointType KillType)
 	{
 		AIC->GetBlackboardComponent()->SetValueAsBool("IsDead", true);
 	}
-	DeathFX(FVector());
+	DeathFX(FVector(0.f, 0.f, 0.f));
 	SetLifeSpan(10.f);
 	
 
@@ -249,6 +256,13 @@ void AZedPawn::KillAI(ACharacter* Killer, EPointType KillType)
 
 }
 
+/*
+    FUNCTION: On Character In Range
+    PARAM: UPrimitiveComponent ( Overlapping Component ), AActor ( Other Actor ), UPrimitiveComponent ( Other Component ), int32 ( Other Body Index ), bool ( bFromSweep ), FHitResult ( Sweep Result )
+    RETURN: void
+    DESC:
+	Check if Player is colliding with AI. Sets the Blackboard Variable "PlayerInRange".
+*/
 void AZedPawn::OnCharacterInRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	AHordeBaseCharacter* Char = Cast<AHordeBaseCharacter>(OtherActor);
@@ -262,6 +276,13 @@ void AZedPawn::OnCharacterInRange(UPrimitiveComponent* OverlappedComponent, AAct
 	}
 }
 
+/*
+    FUNCTION: On Character Out Range
+    PARAM: UPrimitiveComponent ( Overlapping Component ), AActor ( Other Actor ), UPrimitiveComponent ( Other Component ), int32 ( Other Body Index )
+    RETURN: void
+    DESC:
+	Resets BlackboardKey "PlayerInRange" if Horde Character stepped out of collision.
+*/
 void AZedPawn::OnCharacterOutRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	AHordeBaseCharacter* Char = Cast<AHordeBaseCharacter>(OtherActor);
@@ -275,6 +296,13 @@ void AZedPawn::OnCharacterOutRange(UPrimitiveComponent* OverlappedComponent, AAc
 	}
 }
 
+/*
+    FUNCTION: Death FX ( Multicast )
+    PARAM: FVector ( Direction "Impact Direction where it got shot from.")
+    RETURN: void
+    DESC:
+	Simulates Physics - Stops Sounds and plays deathsound.
+*/
 void AZedPawn::DeathFX_Implementation(FVector Direction)
 {
 	GetMesh()->SetSimulatePhysics(true);
@@ -289,7 +317,7 @@ void AZedPawn::DeathFX_Implementation(FVector Direction)
 
 	if (GetMesh()->IsSimulatingPhysics(NAME_None))
 	{
-		GetMesh()->AddForce(Direction, NAME_None, true);
+		GetMesh()->AddForce(Direction * 500.f, NAME_None, true);
 	}
 }
 
@@ -298,6 +326,13 @@ bool AZedPawn::DeathFX_Validate(FVector Direction)
 	return true;
 }
 
+/*
+    FUNCTION: Play Attack FX ( Multicast )
+    PARAM: None
+    RETURN: void
+    DESC:
+	Plays Attack Animation on all Clients. Also plays randomly AttackSound.
+*/
 void AZedPawn::PlayAttackFX_Implementation()
 {
 	UAnimMontage* AttackAnimation = ObjectFromPath<UAnimMontage>(TEXT("AnimMontage'/Game/HordeTemplateBP/Assets/Animations/Zombie/A_UEZomb_Attack_Montage.A_UEZomb_Attack_Montage'"));
@@ -321,6 +356,13 @@ bool AZedPawn::PlayAttackFX_Validate()
 	return true;
 }
 
+/*
+    FUNCTION: Play Head Shot FX ( Multicast )
+    PARAM: None
+    RETURN: void
+    DESC:
+	Hides head bone and spawns headshot particle on the head bone. Also spawns headshot sound.
+*/
 void AZedPawn::PlayHeadShotFX_Implementation()
 {
 	//Hide Headbone
@@ -350,6 +392,14 @@ bool AZedPawn::PlayHeadShotFX_Validate()
 	return true;
 }
 
+/*
+    FUNCTION: Modify Walk Speed ( Multicast )
+    PARAM: float ( Max Walk Speed )
+    RETURN: void
+    DESC:
+	Sets the Walkspeed on all clients.
+
+*/
 void AZedPawn::ModifyWalkSpeed_Implementation(float MaxWalkSpeed)
 {
 	GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
