@@ -32,7 +32,6 @@ protected:
 	/*
 	Character Basic Stuff
 	*/
-	virtual void Tick(float DeltaSeconds) override;
 
 	UPROPERTY(BlueprintReadWrite, Replicated, Category = "Character|Stamina")
 		float Health = 100.f;

@@ -4,7 +4,13 @@
 #include "ConstructorHelpers.h"
 
 
-
+/*
+	FUNCTION: Constructor for ABaseImpact
+	PARAM: None
+	RETURN: None
+	DESC:
+	Constructor for ABaseImpact. Constructs Base Impact by setting the Particle and Impact Sound.
+*/
 ABaseImpact::ABaseImpact()
 {
 	/*

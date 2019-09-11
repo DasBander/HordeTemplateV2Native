@@ -2,6 +2,13 @@
 
 #include "CameraShake_Explosion.h"
 
+/*
+	FUNCTION: Constructor for UCameraShare_Explosion
+	PARAM: None
+	RETURN: None
+	DESC:
+	Constructor for UCameraShake_Explosion. Sets up default variables for the camera shake.
+*/
 UCameraShake_Explosion::UCameraShake_Explosion()
 {
 	bSingleInstance = true;

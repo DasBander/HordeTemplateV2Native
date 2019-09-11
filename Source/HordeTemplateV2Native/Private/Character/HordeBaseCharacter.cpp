@@ -12,6 +12,13 @@
 #include "FX/Camera/CameraShake_Damage.h"
 
 
+/*
+	FUNCTION: Get Lifetime Replicated Props
+	PARAM: TArray - FLifetimeProperty ( Out Lifetime Props ) const
+	RETURN: void
+	DESC:
+	Sets given variables as Replicated.
+*/
 void AHordeBaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -25,7 +32,13 @@ void AHordeBaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(AHordeBaseCharacter, CurrentSelectedFirearm);
 }
 
-// Sets default values
+/*
+	FUNCTION: Constructor for AHordeBaseCharacter
+	PARAM: None
+	RETURN: None
+	DESC:
+	Sets default values of the Character and creates Components.
+*/
 AHordeBaseCharacter::AHordeBaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -104,6 +117,13 @@ float AHordeBaseCharacter::GetRemotePitch()
 	return RemoteViewPitch * 360.0f / 255.0f;
 }
 
+/*
+	FUNCTION: Begin Play
+	PARAM: None
+	RETURN: void
+	DESC:
+	Starts Interaction & HeadDisplay Trace Timer. Also Updates on server the HeadDisplayWidget.
+*/
 void AHordeBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -129,12 +149,13 @@ void AHordeBaseCharacter::BeginPlay()
 }
 
 
-void AHordeBaseCharacter::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-
-}
-
+/*
+	FUNCTION: Server Interact ( Server )
+	PARAM: AActor ( Actor To Interact With )
+	RETURN: void
+	DESC:
+	Interacts with given Actor and makes an Interface Call. Plays Interaction Sound as well.
+*/
 void AHordeBaseCharacter::ServerInteract_Implementation(AActor* ActorToInteractWith)
 {
 	if (ActorToInteractWith)
@@ -153,6 +174,13 @@ bool AHordeBaseCharacter::ServerInteract_Validate(AActor* ActorToInteractWith)
 	return true;
 }
 
+/*
+	FUNCTION: Play Sound On All Clients ( Multicast )
+	PARAM: USoundCue ( Sound ), FVector ( Location )
+	RETURN: void
+	DESC:
+	Plays sound on all clients on given Location.
+*/
 void AHordeBaseCharacter::PlaySoundOnAllClients_Implementation(USoundCue* Sound, FVector Location)
 {
 	if (Sound)
@@ -170,6 +198,13 @@ bool AHordeBaseCharacter::PlaySoundOnAllClients_Validate(USoundCue* Sound, FVect
 	return true;
 }
 
+/*
+	FUNCTION: Take Damage
+	PARAM: float ( Damage ), FDamageEvent ( Damage Event ), AController ( Event Instigator ), AActor ( Damage Causer )
+	RETURN: float ( Health - Damage )
+	DESC:
+	Function to receive damage. Removes Health depending on the Damage. Runs CharacterDie() if Health is <= 0.f . Plays Camerashake on Client and Damage Sound on all clients.
+*/
 float AHordeBaseCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser)
 {
 	if (HasAuthority())
@@ -198,6 +233,13 @@ float AHordeBaseCharacter::TakeDamage(float Damage, struct FDamageEvent const& D
 	return Health;
 }
 
+/*
+	FUNCTION: Play Animation All Clients ( Multicast )
+	PARAM: UAnimMontage ( Animation Montage )
+	RETURN: void
+	DESC:
+	Plays Character Animation on all Clients.
+*/
 void AHordeBaseCharacter::PlayAnimationAllClients_Implementation(class UAnimMontage* Montage)
 {
 	UAnimMontage* Mont = ObjectFromPath<UAnimMontage>(TEXT("AnimMontage'/Game/HordeTemplateBP/Assets/Animations/AM_Reload_Rifle.AM_Reload_Rifle'"));
@@ -210,6 +252,13 @@ bool AHordeBaseCharacter::PlayAnimationAllClients_Validate(class UAnimMontage* M
 	return true;
 }
 
+/*
+	FUNCTION: Remove Health
+	PARAM: float ( Health To Remove )
+	RETURN: bool ( true if Health is <= 0.f )
+	DESC:
+	Updates Health and returns if the Character is dead or not.
+*/
 bool AHordeBaseCharacter::RemoveHealth(float HealthToRemove)
 {
 	Health = FMath::Clamp<float>((Health - HealthToRemove), 0.f, 100.f);
@@ -217,6 +266,13 @@ bool AHordeBaseCharacter::RemoveHealth(float HealthToRemove)
 	return (Health <= 0.f);
 }
 
+/*
+	FUNCTION: Character Die
+	PARAM: None
+	RETURN: void
+	DESC:
+	Drops Current Item and lets Character Die. Sets lifespan to 20 seconds and enables physics on character. Spawns Spectator on server to possess with. 
+*/
 void AHordeBaseCharacter::CharacterDie()
 {
 	IsDead = true;
@@ -239,13 +295,17 @@ void AHordeBaseCharacter::CharacterDie()
 			GM->SpawnSpectator(PC);
 		}
 	}
-	/*
-	Set Dead in PlayerState
-	*/
 	RagdollPlayer();
 	SetLifeSpan(20.f);
 }
 
+/*
+	FUNCTION: Start Interaction
+	PARAM: None
+	RETURN: void
+	DESC:
+	Starts Interaction with Last Interaction Actor that you where facing.
+*/
 void AHordeBaseCharacter::StartInteraction()
 {
 	if (!IsInteracting && LastInteractionActor)
@@ -262,6 +322,13 @@ void AHordeBaseCharacter::StartInteraction()
 	}
 }
 
+/*
+	FUNCTION: Stop Interaction
+	PARAM: None
+	RETURN: void
+	DESC:
+	Stops Interaction.
+*/
 void AHordeBaseCharacter::StopInteraction()
 {
 	if (GetWorld()->GetTimerManager().IsTimerActive(InteractionTimer))
@@ -275,6 +342,13 @@ void AHordeBaseCharacter::StopInteraction()
 	InteractionProgress = 0.f;
 }
 
+/*
+	FUNCTION: Process Interaction
+	PARAM: None
+	RETURN: void
+	DESC:
+	Removes time from the Interaction. If Character is Dead, Not Allowed to Interact or Last Interaction Actor not valid the Interaction will be stopped. If Interaction Time is over calls Interact on Actor.
+*/
 void AHordeBaseCharacter::ProcessInteraction()
 {
 	if (LastInteractionActor)
@@ -303,6 +377,14 @@ void AHordeBaseCharacter::ProcessInteraction()
 	
 }
 
+/*
+	FUNCTION: Head Display Trace
+	PARAM: None
+	RETURN: void
+	DESC:
+	Trace for Head Display Widget. Gets Information for other Players.
+
+*/
 void AHordeBaseCharacter::HeadDisplayTrace()
 {
 	FHitResult HitResult(ForceInit);
@@ -347,6 +429,13 @@ void AHordeBaseCharacter::HeadDisplayTrace()
 	}
 }
 
+/*
+	FUNCTION: Interaction Detection
+	PARAM: None
+	RETURN: void
+	DESC:
+	Trace for Items to Interact with. Also Updates HUD with text to Display.
+*/
 void AHordeBaseCharacter::InteractionDetection()
 {
 	FCollisionQueryParams TraceParams = FCollisionQueryParams(FName(TEXT("ItemTrace")), true, GetOwner());
@@ -407,7 +496,13 @@ void AHordeBaseCharacter::InteractionDetection()
 	}
 }
 
-
+/*
+	FUNCTION: Ragdoll Player ( Multicast )
+	PARAM: None
+	RETURN: void
+	DESC:
+	Enables Physics for Character Mesh on all Clients.
+*/
 void AHordeBaseCharacter::RagdollPlayer_Implementation()
 {
 	GetMesh()->SetSimulatePhysics(true);
@@ -419,6 +514,13 @@ bool AHordeBaseCharacter::RagdollPlayer_Validate()
 	return true;
 }
 
+/*
+	FUNCTION: Update Player Movement Speed
+	PARAM: float ( New Movement Speed )
+	RETURN: void
+	DESC:
+	Updates Characters Movement Speed on all clients.
+*/
 void AHordeBaseCharacter::UpdatePlayerMovementSpeed_Implementation(float NewMovementSpeed)
 {
 	GetCharacterMovement()->MaxWalkSpeed = NewMovementSpeed;
@@ -429,6 +531,13 @@ bool AHordeBaseCharacter::UpdatePlayerMovementSpeed_Validate(float NewMovementSp
 	return true;
 }
 
+/*
+	FUNCTION: Update Head Display Widget ( Multicast )
+	PARAM: FString ( Player Name ), float ( Player Health )
+	RETURN: void
+	DESC:
+	Updates Player Head Display Information on all clients.
+*/
 void AHordeBaseCharacter::UpdateHeadDisplayWidget_Implementation(const FString& PlayerName, float PlayerHealth)
 {
 	UPlayerHeadDisplay* PHD = Cast<UPlayerHeadDisplay>(PlayerNameWidget->GetUserWidgetObject());
@@ -445,7 +554,13 @@ bool AHordeBaseCharacter::UpdateHeadDisplayWidget_Validate(const FString& Player
 }
 
 
-
+/*
+	FUNCTION: Server Start Sprinting ( Server )
+	PARAM: None
+	RETURN: void
+	DESC:
+	Starts Sprinting Timer and Decreases Stamina. Also Updates Movement Speed on all Clients
+*/
 void AHordeBaseCharacter::ServerStartSprinting_Implementation()
 {
 	if (!IsSprinting && GetVelocity().SizeSquared() > 10.f && GetCharacterMovement()->IsMovingOnGround())
@@ -465,6 +580,13 @@ bool AHordeBaseCharacter::ServerStartSprinting_Validate()
 	return true;
 }
 
+/*
+	FUNCTION: Server Stop Sprinting
+	PARAM: None
+	RETURN: void
+	DESC:
+	Stops Sprinting Timer and starts Increasing Stamina. Updates Player Movement Speed on all Clients.
+*/
 void AHordeBaseCharacter::ServerStopSprinting_Implementation()
 {
 	if(IsSprinting)
@@ -484,6 +606,13 @@ bool AHordeBaseCharacter::ServerStopSprinting_Validate()
 	return true;
 }
 
+/*
+	FUNCTION: Decrease Stamina
+	PARAM: None
+	RETURN: void
+	DESC:
+	Decreases Stamina. If Velocity is under 10.f and stamina 0.f then it stops sprinting.
+*/
 void AHordeBaseCharacter::DecreaseStamina()
 {
 	if (Stamina > .0f && GetVelocity().SizeSquared() > 10.f)
@@ -495,6 +624,13 @@ void AHordeBaseCharacter::DecreaseStamina()
 	}
 }
 
+/*
+	FUNCTION: Increase Stamina
+	PARAM: None
+	RETURN: void
+	DESC:
+	Increases Stamina with given Increase Rate.
+*/
 void AHordeBaseCharacter::IncreaseStamina()
 {
 	if (Stamina < 100.f && !IsSprinting)
@@ -503,6 +639,13 @@ void AHordeBaseCharacter::IncreaseStamina()
 	}
 }
 
+/*
+	FUNCTION: Active Item Changed
+	PARAM: FString ( Item ID ), int32 ( Item Index ), int32 ( Loaded Ammo )
+	RETURN: void
+	DESC:
+	Function that gets called if the Active Item has been changed. Stops Weapon Fire and Destroys Firearm. Spawns new Firearm by given Item ID and updates Animation Mode.
+*/
 void AHordeBaseCharacter::ActiveItemChanged(FString ItemID, int32 ItemIndex, int32 LoadedAmmo)
 {
 	StopWeaponFire();
@@ -528,6 +671,13 @@ void AHordeBaseCharacter::ActiveItemChanged(FString ItemID, int32 ItemIndex, int
 	AnimMode = NewFirearmItem.AnimType;
 }
 
+/*
+	FUNCTION: Get HUD
+	PARAM: None
+	RETURN: AHordeBaseHUD ( HUD Object )
+	DESC:
+	Returns HUD Object.
+*/
 AHordeBaseHUD* AHordeBaseCharacter::GetHUD()
 {
 	AHordeBaseHUD* returnObj = nullptr;
@@ -538,6 +688,13 @@ AHordeBaseHUD* AHordeBaseCharacter::GetHUD()
 	return returnObj;
 }
 
+/*
+	FUNCTION: Stop Weapon Fire
+	PARAM: None
+	RETURN: void
+	DESC:
+	Stops Weapon Fire Timer.
+*/
 void AHordeBaseCharacter::StopWeaponFire()
 {
 	if (GetWorld()->GetTimerManager().IsTimerActive(WeaponFireTimer))
@@ -546,6 +703,13 @@ void AHordeBaseCharacter::StopWeaponFire()
 	}
 }
 
+/*
+	FUNCTION: Trigger Weapon Fire
+	PARAM: None
+	RETURN: void
+	DESC:
+	Starts Weapon Fire depending on the FireMode of the Current Selected Weapon.
+*/
 void AHordeBaseCharacter::TriggerWeaponFire()
 {
 	if (!(Reloading || IsBursting) && !IsDead)
@@ -580,6 +744,13 @@ void AHordeBaseCharacter::TriggerWeaponFire()
 	}
 }
 
+/*
+	FUNCTION: Burst Weapon
+	PARAM: None
+	RETURN: void
+	DESC:
+	Lets the Weapon burst depending on the Amount of Bursts defined in the Item Definition.
+*/
 void AHordeBaseCharacter::BurstWeapon()
 {
 	if (NumberOfBursts >= CurrentWeaponInfo.BurstFireAmount || IsDead)
@@ -597,6 +768,13 @@ void AHordeBaseCharacter::BurstWeapon()
 	}
 }
 
+/*
+	FUNCTION: Auto Fire Weapon
+	PARAM: None
+	RETURN: void
+	DESC:
+	Lets the Weapon Automatic Fire and stops if reloading or dead.
+*/
 void AHordeBaseCharacter::AutoFireWeapon()
 {
 	if (CurrentSelectedFirearm)
@@ -609,6 +787,13 @@ void AHordeBaseCharacter::AutoFireWeapon()
 	}
 }
 
+/*
+	FUNCTION: Toggle Firemode
+	PARAM: None
+	RETURN: void
+	DESC:
+	Switches Firemode in Firearm and plays sound on all clients.
+*/
 void AHordeBaseCharacter::ToggleFiremode()
 {
 	if(CurrentSelectedFirearm)
@@ -624,7 +809,13 @@ void AHordeBaseCharacter::ToggleFiremode()
 }
 
 
-
+/*
+	FUNCTION: Finish Reload
+	PARAM: None
+	RETURN: void
+	DESC:
+	Finishes Reload by clearing all timers and updates the Ammo.
+*/
 void AHordeBaseCharacter::FinishReload()
 {
 	if (GetWorld()->GetTimerManager().IsTimerActive(ReloadTimerHandle))
@@ -652,7 +843,13 @@ void AHordeBaseCharacter::FinishReload()
 }
 
 
-
+/*
+	FUNCTION: Server Reload ( Server )
+	PARAM: None
+	RETURN: void
+	DESC:
+	Initiates Reload for the Weapon and plays Animation.
+*/
 void AHordeBaseCharacter::ServerReload_Implementation()
 {
 	if (!Reloading)
@@ -684,6 +881,13 @@ bool AHordeBaseCharacter::ServerReload_Validate()
 	return true;
 }
 
+/*
+	FUNCTION: Add Health
+	PARAM: float ( Health to Add )
+	RETURN: void
+	DESC:
+	Adds Health and updates Head Display Widget.
+*/
 void AHordeBaseCharacter::AddHealth(float InHealth)
 {
 	if (HasAuthority())
@@ -693,11 +897,25 @@ void AHordeBaseCharacter::AddHealth(float InHealth)
 	}
 }
 
+/*
+	FUNCTION: Get Head Display Widget
+	PARAM: None
+	RETURN: UUserWidget ( Head Display Widget )
+	DESC:
+	Returns HeadDisplayWidget Object
+*/
 UUserWidget* AHordeBaseCharacter::GetHeadDisplayWidget()
 {
 	return PlayerNameWidget->GetUserWidgetObject();
 }
 
+/*
+	FUNCTION: Get Current Firearm
+	PARAM: None
+	RETURN: ABaseFirearm ( Firearm Object )
+	DESC:
+	Returns current Firearm Object.
+*/
 ABaseFirearm* AHordeBaseCharacter::GetCurrentFirearm()
 {
 	return CurrentSelectedFirearm;
@@ -705,6 +923,13 @@ ABaseFirearm* AHordeBaseCharacter::GetCurrentFirearm()
 
 /*
 INPUT FUNCTIONS
+*/
+/*
+	FUNCTION: Setup Player Input Component
+	PARAM: UInputComponent ( Player Input Component )
+	RETURN: void
+	DESC:
+	Sets Character Inputs and binds Functions to them.
 */
 void AHordeBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -744,6 +969,13 @@ void AHordeBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 }
 
+/*
+	FUNCTION: Drop Current Item
+	PARAM: None
+	RETURN: void
+	DESC:
+	Stops Weapon Fire and Drops Current Item. 
+*/
 void AHordeBaseCharacter::DropCurrentItem()
 {
 	if (CurrentSelectedFirearm && !Reloading)
@@ -753,6 +985,13 @@ void AHordeBaseCharacter::DropCurrentItem()
 	}
 }
 
+/*
+	FUNCTION: Switch to Primary
+	PARAM: None
+	RETURN: void
+	DESC:
+	Switches Weapon to Primary.
+*/
 void AHordeBaseCharacter::SwitchToPrimary()
 {
 	if (Inventory)
@@ -761,6 +1000,13 @@ void AHordeBaseCharacter::SwitchToPrimary()
 	}
 }
 
+/*
+	FUNCTION: Switch To Secondary
+	PARAM: None
+	RETURN: void
+	DESC:
+	Switches Weapon to Secondary.
+*/
 void AHordeBaseCharacter::SwitchToSecondary()
 {
 	if (Inventory)
@@ -769,7 +1015,13 @@ void AHordeBaseCharacter::SwitchToSecondary()
 	}
 }
 
-
+/*
+	FUNCTION: Switch To Healing
+	PARAM: None
+	RETURN: void
+	DESC:
+	Switches to Healing Item.
+*/
 void AHordeBaseCharacter::SwitchToHealing()
 {
 	if (Inventory)
@@ -778,6 +1030,13 @@ void AHordeBaseCharacter::SwitchToHealing()
 	}
 }
 
+/*
+	FUNCTION: Scroll Up Items
+	PARAM: None
+	RETURN: void
+	DESC:
+	Function for Mouse Wheel Up to scroll through Inventory.
+*/
 void AHordeBaseCharacter::ScrollUpItems()
 {
 	if (Inventory)
@@ -786,6 +1045,13 @@ void AHordeBaseCharacter::ScrollUpItems()
 	}
 }
 
+/*
+	FUNCTION: Scroll Down Items
+	PARAM: None
+	RETURN: void
+	DESC:
+	Function for Mouse Wheel Down to scroll through Inventory.
+*/
 void AHordeBaseCharacter::ScrollDownItems()
 {
 	if (Inventory)
@@ -794,6 +1060,13 @@ void AHordeBaseCharacter::ScrollDownItems()
 	}
 }
 
+/*
+	FUNCTION: Move Forward
+	PARAM: float ( Forward / Backward Axis )
+	RETURN: void
+	DESC:
+	Moves Character Forward and Backwards
+*/
 void AHordeBaseCharacter::MoveForward(float Value)
 {
 	if ((Controller != NULL) && (Value != 0.0f))
@@ -808,6 +1081,13 @@ void AHordeBaseCharacter::MoveForward(float Value)
 	}
 }
 
+/*
+	FUNCTION: Move Right
+	PARAM: float ( Left / Right Axis )
+	RETURN: void
+	DESC:
+	Moves Character Left and Right.
+*/
 void AHordeBaseCharacter::MoveRight(float Value)
 {
 	if ((Controller != NULL) && (Value != 0.0f))
