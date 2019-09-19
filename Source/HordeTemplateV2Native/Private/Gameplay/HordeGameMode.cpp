@@ -15,6 +15,13 @@
 #include "AI/ZedPawn.h"
 #include "Runtime/Engine/Public/EngineUtils.h"
 
+/*
+	FUNCTION: Constructor for AHordeGameMode
+	PARAM: None
+	RETURN: None
+	DESC:
+	Default Constructor for AHordeGameMode
+*/
 AHordeGameMode::AHordeGameMode()
 {
 	GameStateClass = AHordeGameState::StaticClass();
@@ -28,6 +35,13 @@ AHordeGameMode::AHordeGameMode()
 	bStartPlayersAsSpectators = 0;
 }
 
+/*
+	FUNCTION: Get AI Spawner
+	PARAM: None
+	RETURN: void, TArray - AActor ( Spawner ), int32 ( Free Points )
+	DESC:
+	Returns Free AI Spawner Actors and the amount of Free Points.
+*/
 void AHordeGameMode::GetAISpawner(TArray<AActor*>& Spawner, int32& FreePoints)
 {
 	int32 FreeSpawnPoints = 0;
@@ -46,12 +60,14 @@ void AHordeGameMode::GetAISpawner(TArray<AActor*>& Spawner, int32& FreePoints)
 	FreePoints = FreeSpawnPoints;
 }
 
-AActor* AHordeGameMode::GetFreeAISpawnPoint()
-{
 
-	return nullptr;
-}
-
+/*
+	FUNCTION: Check Game Over
+	PARAM: None
+	RETURN: void
+	DESC:
+	Checks if all Zombies are dead. If yes it should end the game or end the current game round.
+*/
 void AHordeGameMode::CheckGameOver()
 {
 	AHordeWorldSettings* WS = Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings());
@@ -76,7 +92,13 @@ void AHordeGameMode::CheckGameOver()
 }
 
 
-
+/*
+	FUNCTION: Spawn Spectator
+	PARAM: APlayerController ( Player Controller )
+	RETURN: void
+	DESC:
+	Spawns an Spectator Pawn and lets the Player Controller possess with.
+*/
 void AHordeGameMode::SpawnSpectator(APlayerController* PC)
 {
 	FTransform SpawnTransform;
@@ -94,6 +116,13 @@ void AHordeGameMode::SpawnSpectator(APlayerController* PC)
 	}
 }
 
+/*
+	FUNCTION: Get Spectator Spawn Location
+	PARAM: None
+	RETURN: FVector ( Random Spawn Location )
+	DESC:
+	Returns a Random Spawn Location depending on players that are still alive.
+*/
 FVector AHordeGameMode::GetSpectatorSpawnLocation()
 {
 	TArray<FVector> LocalLocations;
@@ -116,6 +145,13 @@ FVector AHordeGameMode::GetSpectatorSpawnLocation()
 	}
 }
 
+/*
+	FUNCTION: Get Controller By ID
+	PARAM: FString ( Player ID )
+	RETURN: APlayerController ( Player Controller Owned by Player ID )
+	DESC:
+	Returns Player Controller Object owned by the given Player ID.
+*/
 APlayerController* AHordeGameMode::GetControllerByID(FString PlayerID)
 {
 	APlayerController* TempCTRL = nullptr;
@@ -133,6 +169,13 @@ APlayerController* AHordeGameMode::GetControllerByID(FString PlayerID)
 	return TempCTRL;
 }
 
+/*
+	FUNCTION: Get Random Player Spawn
+	PARAM: None
+	RETURN: FTransform - Player Start Location
+	DESC:
+	Returns Random Location of a Spawn Point placed inside the world.
+*/
 FTransform AHordeGameMode::GetRandomPlayerSpawn()
 {
 	TArray<FTransform> SpawnPoints;
@@ -148,6 +191,13 @@ FTransform AHordeGameMode::GetRandomPlayerSpawn()
 	return SpawnPoints[FMath::RandRange(0, (SpawnPoints.Num() - 1))];
 }
 
+/*
+	FUNCTION: Logout
+	PARAM: AController ( Exiting Player Controller )
+	RETURN: void
+	DESC:
+	Updates Player Lobby when a Player Exits the game.
+*/
 void AHordeGameMode::Logout(AController* Exiting)
 {
 	FTimerHandle DelayedRemove;
@@ -156,6 +206,13 @@ void AHordeGameMode::Logout(AController* Exiting)
 
 }
 
+/*
+	FUNCTION: Update Player Lobby
+	PARAM: None
+	RETURN: void
+	DESC:
+	Runs Update Player Lobby inside Game State.
+*/
 void AHordeGameMode::UpdatePlayerLobby()
 {
 	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
@@ -164,6 +221,14 @@ void AHordeGameMode::UpdatePlayerLobby()
 		GS->UpdatePlayerLobby();
 	}
 }
+
+/*
+	FUNCTION: Game Start
+	PARAM: TArray - FPlayerInfo ( Lobby Players )
+	RETURN: void
+	DESC:
+	Spawns all Players inside World and possesses them with given Player Controller.
+*/
 void AHordeGameMode::GameStart(const TArray<FPlayerInfo>& LobbyPlayers)
 {
 	for (auto PLY : LobbyPlayers)
@@ -198,6 +263,13 @@ void AHordeGameMode::GameStart(const TArray<FPlayerInfo>& LobbyPlayers)
 	}
 }
 
+/*
+	FUNCTION: Initiate Zombie Spawning
+	PARAM: int32 ( Amount )
+	RETURN: void
+	DESC:
+	Starts Zombie Spawning with given amount. If no spawn point left we try to spawn until one is left.
+*/
 void AHordeGameMode::InitiateZombieSpawning(int32 Amount)
 {
 	ZedsLeftToSpawn = Amount;

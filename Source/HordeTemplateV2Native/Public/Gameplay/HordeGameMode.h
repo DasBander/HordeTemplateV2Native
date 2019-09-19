@@ -35,9 +35,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Zeds")
 	void GetAISpawner(TArray<AActor*>& Spawner, int32 &FreePoints);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Zeds")
-		AActor* GetFreeAISpawnPoint();
-
 	UFUNCTION()
 		void CheckGameOver();
 

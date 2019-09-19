@@ -12,6 +12,13 @@
 #include "Misc/HordeTrader.h"
 #include "HUD/HordeBaseHUD.h"
 
+/*
+	FUNCTION: Get Lifetime Replicated Props
+	PARAM: TArray - FLifetimeProperty ( Out Lifetime Props ) const
+	RETURN: void
+	DESC:
+	Define Replicated Props.
+*/
 void AHordePlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -24,6 +31,13 @@ void AHordePlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(AHordePlayerState, bIsDead);
 }
 
+/*
+	FUNCTION: Client Update Game Status ( Client )
+	PARAM: EGameStatus ( GameStatus )
+	RETURN: void
+	DESC:
+	Updates the Game Status on the client sides hud.
+*/
 void AHordePlayerState::ClientUpdateGameStatus_Implementation(EGameStatus GameStatus)
 {
 	APlayerController* PC = Cast<APlayerController>(GetOwner());
@@ -37,6 +51,13 @@ void AHordePlayerState::ClientUpdateGameStatus_Implementation(EGameStatus GameSt
 	}
 }
 
+/*
+	FUNCTION: On Message Received 
+	PARAM: FHordeChatMessage ( Message )
+	RETURN: void
+	DESC:
+	Gets called when client receives a message.
+*/
 void AHordePlayerState::OnMessageReceived_Implementation(FHordeChatMessage Msg)
 {
 	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
