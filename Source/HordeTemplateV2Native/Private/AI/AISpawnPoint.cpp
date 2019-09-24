@@ -6,13 +6,12 @@
 #include "GameFramework/Character.h"
 
 
-/*
-	FUNCTION: Constructor for AAISpawnPoint
-	PARAM: None
-	RETURN: None
-	DESC:
-	Create RootComponent, Capsule Component and Icon. Populates them with Default Values.
-*/
+/**
+ *	Constructor
+ *
+ * @param
+ * @return
+ */
 AAISpawnPoint::AAISpawnPoint()
 {
 	PrimaryActorTick.bStartWithTickEnabled = false;
@@ -45,14 +44,14 @@ AAISpawnPoint::AAISpawnPoint()
 
 }
 
-/*
-	FUNCTION: Character Overlap
-	PARAM: UPrimitiveComponent ( Overlapped Component ), AActor ( Other Actor ), UPrimitiveComponent ( Other Component ), int32 ( Other Body Index ), bool ( bFromSweep ), FHitResult ( Sweep Result ) 
-	RETURN: void
-	DESC:
-	Overlap with Spawn Collision.
-	If Character is inside this Collision Spawn wont be free.
-*/
+
+/**
+ *	Overlap with Spawn Collision.
+ *	If Character is inside this Collision Spawn wont be free.
+ *
+ * @param The Overlapping Component, Actor, Other Component, Other Body Index, FromSweep and the HitResult.
+ * @return void
+ */
 void AAISpawnPoint::CharacterOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor)
@@ -66,14 +65,13 @@ void AAISpawnPoint::CharacterOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 }
 
-/*
-	FUNCTION: Character End Overlap
-	PARAM: UPrimitiveComponent ( Overlapped Component ), AActor ( Other Actor ), UPrimitiveComponent ( Other Component ), int32 ( Other Body Index )
-	RETURN: void
-	DESC:
-	If Character leaves freeup the Spawn.
 
-*/
+/**
+ * If Character leaves free up the Spawn.
+ *
+ * @param The Overlapping Component, Other Actor, Other Component and Other Body Index
+ * @return void
+ */
 void AAISpawnPoint::CharacterEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	if (OtherActor)

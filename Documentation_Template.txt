@@ -7,8 +7,8 @@
 */
 
 /**
- * Sum numbers in a vector.
- *
- * @param values Container whose values are summed.
- * @return sum of `values`, or 0.0 if `values` is empty.
+ * 
+ * 
+ * @param
+ * @return
  */

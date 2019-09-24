@@ -10,17 +10,12 @@
 #include "Runtime/Engine/Public/EngineUtils.h"
 #include "Misc/HordeTrader.h"
 
-/*
-	Game State
-*/
-
-
-/*
-	FUNCTION: GetLifetimeReplicatedProps
-	PARAM: Array FLifetimeProperty
-	DESC:
-	Definition of Replicated Props
-*/
+/** ( Overridden )
+ *	Definition of Replicated Props
+ *
+ * @param Array FLifetimeProperty
+ * @return void
+ */
 void AHordeGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -45,14 +40,12 @@ void AHordeGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(AHordeGameState, MatchMode);
 }
 
-/*
-	FUNCTION: Begin Play
-	PARAM: None
-	RETURN: void
-	DESC:
-	Initializes Lobby and Game Settings.
-	Also sets the Lobby Owner.
-*/
+/** ( Virtual; Overridden )
+ *	Initializes Lobby and Game Settings. Also sets the Lobby Owner.
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::BeginPlay()
 {
 	Super::BeginPlay();
@@ -109,9 +102,12 @@ void AHordeGameState::BeginPlay()
 	}
 }
 
-/*
-@WIP - Parse Chat Commands and should run the Command
-*/
+/**
+ *	@WIP - Parse Chat Commands and should run the Command
+ *
+ * @param Player that Executes Command and the Command
+ * @return
+ */
 void AHordeGameState::ParseChatCommand(FString PlayerID, FString Command)
 {
 	FString ParsedCommand = Command;
@@ -133,13 +129,12 @@ void AHordeGameState::ParseChatCommand(FString PlayerID, FString Command)
 	}
 }
 
-/*
-	FUNCTION: TakePlayer
-	PARAM: FPlayerInfo of Player with selected Character
-	RETURN: void
-	DESC:
-	Takes Player Character in Lobby and Updates the Player Lobby List
-*/
+/**
+ * Takes Player Character in Lobby and Updates the Player Lobby List
+ *
+ * @param FPlayerInfo of Player with selected Character
+ * @return void
+ */
 void AHordeGameState::TakePlayer(FPlayerInfo Player)
 {
 	if (!IsCharacterTaken(Player.SelectedCharacter))
@@ -165,13 +160,12 @@ void AHordeGameState::TakePlayer(FPlayerInfo Player)
 	}
 }
 
-/*
-	FUNCTION: Kick Player
-	PARAM: String ( Player Steam ID )
-	RETURN: void
-	DESC:
-	Kicks player by SteamID or PlayerID Depending on Online Subsystem
-*/
+/**
+ *	Kicks player by SteamID or PlayerID Depending on Online Subsystem
+ *
+ * @param Player ID to Kick
+ * @return void
+ */
 void AHordeGameState::KickPlayer(const FString& PlayerID)
 {
 	AHordePlayerState* PS = GetPlayerStateByID(PlayerID);
@@ -182,25 +176,23 @@ void AHordeGameState::KickPlayer(const FString& PlayerID)
 	}
 }
 
-/*
-	FUNCTION: GetHordeWorldSettings
-	PARAM: None
-	RETURN: void
-	DESC:
-	Gets World Settings Object from World.
-*/
+/**
+ *	Gets World Settings Object from World.
+ *
+ * @param
+ * @return Returns World Settings Object.
+ */
 AHordeWorldSettings* AHordeGameState::GetHordeWorldSettings()
 {
 	return Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings());
 }
 
-/*
-	FUNCTION: StartRoundBasedGame
-	PARAM: None
-	RETURN: void
-	DESC:
-	Starts RoundBase Game Timer ( Linear )
-*/
+/**
+ *	Starts RoundBase Game Timer ( Linear )
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::StartRoundBasedGame()
 {
 	if (!GetWorld()->GetTimerManager().IsTimerActive(PauseTimer))
@@ -211,13 +203,12 @@ void AHordeGameState::StartRoundBasedGame()
 	}
 }
 
-/*
-	FUNCTION: Process Pause Time
-	PARAM: None
-	RETURN: void
-	DESC:
-	Processes Pause Time ( Linear ) and initiates new Game Round.
-*/
+/**
+ *	Processes Pause Time ( Linear ) and initiates new Game Round.
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::ProcessPauseTime()
 {
 	AHordeWorldSettings* WS = Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings(false, true));
@@ -253,13 +244,12 @@ void AHordeGameState::ProcessPauseTime()
 	}
 }
 
-/*
-	FUNCTION: Start Game Round
-	PARAM: None
-	RETURN: void
-	DESC:
-	Starts new GameRound and initiates Zombie Spawning. Closes Trader UI aswell.
-*/
+/**
+ *	Starts new GameRound and initiates Zombie Spawning. Closes Trader UI as well.
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::StartGameRound()
 {
 	if (!GetWorld()->GetTimerManager().IsTimerActive(RoundTimer))
@@ -296,13 +286,12 @@ void AHordeGameState::StartGameRound()
 	}
 }
 
-/*
-	FUNCTION: Process Round Time
-	PARAM: None
-	RETURN: void
-	DESC:
-	Ends Game Round ( Linear ) if roundtime is over.
-*/
+/**
+ *	Ends Game Round ( Linear ) if round time is over.
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::ProcessRoundTime()
 {
 	AHordeWorldSettings* HWS = Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings());
@@ -319,13 +308,12 @@ void AHordeGameState::ProcessRoundTime()
 	}
 }
 
-/*
-	FUNCITON: Get Next Level In Rotation
-	PARAM: Bool ResetLevel ( If it should return current LevelName )
-	RETURN: FName ( Raw Level Name )
-	DESC:
-	Get's next level from Lobby Map Rotation
-*/
+/**
+ *	Gets next level from Lobby Map Rotation
+ *
+ * @param Bool ResetLevel ( If it should return current LevelName )
+ * @return FName ( Raw Level Name )
+ */
 FName AHordeGameState::GetNextLevelInRotation(bool ResetLevel)
 {
 	FName RNextLevel = *UGameplayStatics::GetCurrentLevelName(GetWorld(), true);
@@ -350,13 +338,12 @@ FName AHordeGameState::GetNextLevelInRotation(bool ResetLevel)
 	return RNextLevel;
 }
 
-/*
-	FUNCTION: End Game Round
-	PARAM: None
-	RETURN: void
-	DESC:
-	Ends the Current In-Game Round ( Linear ) and Starts the Pause TImer
-*/
+/**
+ *	Ends the Current In-Game Round ( Linear ) and Starts the Pause Timer
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::EndGameRound()
 {
 	if (GetWorld()->GetTimerManager().IsTimerActive(RoundTimer))
@@ -378,13 +365,12 @@ void AHordeGameState::EndGameRound()
 	
 }
 
-/*
-	FUNCTION: Start Lobby Timer
-	PARAM: None
-	RETURN: void
-	DESC:
-	Starts the Lobby Timer
-*/
+/**
+ *	Starts the Lobby Timer
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::StartLobbyTimer()
 {
 	if (!GetWorld()->GetTimerManager().IsTimerActive(LobbyTimer))
@@ -393,13 +379,12 @@ void AHordeGameState::StartLobbyTimer()
 	}
 }
 
-/*
-	FUNCTION: Game Over
-	PARAM: FName Next Map to Play
-	RETURN: void
-	DESC:
-	Initiates Game Over and Calculates Score for the End Screen. Updates Game Status to Game Over and Kills all remaining Player Characters and Firearm. Also starts End Screen Timer.
-*/
+/**
+ *	Initiates Game Over and Calculates Score for the End Screen. Updates Game Status to Game Over and Kills all remaining Player Characters and Firearm. Also starts End Screen Timer.
+ *
+ * @param Next Level to be Played.
+ * @return void
+ */
 void AHordeGameState::GameOver(FName NextMap)
 {
 	GameStatus = EGameStatus::EGAMEOVER;
@@ -436,13 +421,12 @@ void AHordeGameState::GameOver(FName NextMap)
 	}
 }
 
-/*
-	FUNCTION: Process Lobby Time
-	PARAM: None
-	RETURN: void
-	DESC:
-	Processes Lobby Time. Starts Countdown and Starts Game if time is Over.
-*/
+/**
+ *	Processes Lobby Time. Starts Countdown and Starts Game if time is Over.
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::ProcessLobbyTime()
 {
 	if (LobbyTime > 0.f)
@@ -474,13 +458,12 @@ void AHordeGameState::ProcessLobbyTime()
 
 }
 
-/*
-	FUNCTION: Reset Lobby Time
-	PARAM: None
-	RETURN: void
-	DESC:
-	Resets Lobby Time and Stops Timer.
-*/
+/**
+ *	Resets Lobby Time and Stops Timer.
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::ResetLobbyTime()
 {
 	if (GetWorld()->GetTimerManager().IsTimerActive(LobbyTimer))
@@ -492,14 +475,12 @@ void AHordeGameState::ResetLobbyTime()
 	BlockDisconnect = false;
 }
 
-
-/*
-	FUNCTION: Unready All Players
-	PARAM: None
-	RETURN: void
-	DESC:
-	Switches all Players Ready Status to false
-*/
+/**
+ *	Switches all Players Ready Status to false
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::UnreadyAllPlayers()
 {
 	for (auto& PS : PlayerArray)
@@ -512,13 +493,12 @@ void AHordeGameState::UnreadyAllPlayers()
 	}
 }
 
-/*
-	FUNCTION: Start Game
-	PARAM: None
-	RETURN: void
-	DESC:
-	Aborts Character Trade and Starts Round Base Game or Non Linear Game.
-*/
+/**
+ * Aborts Character Trade and Starts Round Base Game or Non Linear Game.
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::StartGame()
 {
 	if (GameStatus != EGameStatus::EINGAME)
@@ -550,13 +530,12 @@ void AHordeGameState::StartGame()
 	}
 }
 
-/*
-	FUNCTION: IsCharacterTaken
-	PARAM: FName Character ID
-	RETURN: bool ( Availablilty )
-	DESC:
-	Returns if Character is Taken by a Player or not.
-*/
+/**
+ *	Returns if Character is Taken by a Player or not.
+ *
+ * @param The Character ID
+ * @return bool ( Availability )
+ */
 bool AHordeGameState::IsCharacterTaken(FName CharacterID)
 {
 	bool RetTaken = false;
@@ -570,13 +549,13 @@ bool AHordeGameState::IsCharacterTaken(FName CharacterID)
 	return RetTaken;
 }
 
-/*
-	FUNCTION: Get Character By ID
-	PARAM: String PlayerID
-	RETURN: FName Character; int Character Index of LobbyInformation.AvailableCharacters ( Array )
-	DESC:
-	Gets the Character by PlayerID.
-*/
+/**
+ *	Gets the Character by PlayerID.
+ *
+ * @param The PlayerID
+ * @output int32 Character Index of LobbyInformation.AvailableCharacters ( Array )
+ * @return The Character ID
+ */
 FName AHordeGameState::GetCharacterByID(FString PlayerID, int32 &CharacterIndex)
 {
 	int32 TempIndex = -1;
@@ -594,13 +573,12 @@ FName AHordeGameState::GetCharacterByID(FString PlayerID, int32 &CharacterIndex)
 	return RetTemp;
 }
 
-/*
-	FUNCTION: Get Player State By ID
-	PARAM: String PlayerID
-	RETURN: PlayerState (Object)
-	DESC:
-	Returns PlayerState by given PlayerID; Returns nullptr if doesn't exist;
-*/
+/**
+ *	Returns PlayerState by given PlayerID; Returns nullptr if doesn't exist;
+ *
+ * @param The Player ID we want the Player State of.
+ * @return PlayerState (Object) from given Player ID
+ */
 AHordePlayerState* AHordeGameState::GetPlayerStateByID(FString PlayerID)
 {
 	AHordePlayerState* RetPS = nullptr;
@@ -619,13 +597,12 @@ AHordePlayerState* AHordeGameState::GetPlayerStateByID(FString PlayerID)
 	return RetPS;
 }
 
-/*
-	FUNCTION: Freeup Unassigned Characters
-	PARAM: None
-	RETURN: void
-	DESC:
-	Searches for Characters that are not assigned to any player and/or if a player disconnects the character gets unassigned and the playerid gets cleared.
-*/
+/**
+ *	Searches for Characters that are not assigned to any player and/or if a player disconnects the character gets unassigned and the player id gets cleared.
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::FreeupUnassignedCharacters()
 {
 	TArray<FLobbyAvailableCharacters> LocalCharacters = LobbyInformation.AvailableCharacters;
@@ -673,14 +650,13 @@ void AHordeGameState::FreeupUnassignedCharacters()
 
 }
 
-
-/*
-	FUNCTION: Get Username by SteamID
-	PARAM: SteamID ( [String] PlayerID )
-	RETURN: bool FoundPlayer; FString PlayerUsername
-	DESC:
-	Returns if Player was found and the Username of it.
-*/
+/**
+ *	Returns if Player was found and the Username of it.
+ *
+ * @param The Player ID
+ * @output bool if Player was found.
+ * @return The Player Username
+ */
 FString AHordeGameState::GetUsernameBySteamID(FString ID, bool &FoundPlayer)
 {
 	FString RetUserName = "None";
@@ -701,14 +677,12 @@ FString AHordeGameState::GetUsernameBySteamID(FString ID, bool &FoundPlayer)
 	return RetUserName;
 }
 
-/*
-	FUNCTION: Update Player Lobby
-	PARAM: None
-	RETURN: void
-	DESC:
-	Updates Player List in Lobby. Also Checks if All Players are ready. If yes cuts the lobby time and sets game starting to true.
-
-*/
+/**
+ *	Updates Player List in Lobby. Also Checks if All Players are ready. If yes cuts the lobby time and sets game starting to true.
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::UpdatePlayerLobby()
 {
 	if (HasAuthority())
@@ -751,14 +725,12 @@ void AHordeGameState::UpdatePlayerLobby()
 	}
 }
 
-/*
-	FUNCTION: Check Player Ready
-	PARAM: None
-	RETURN: bool
-	DESC:
-	Returns if all players are ready.
-
-*/
+/**
+ *	Returns if all players are ready.
+ *
+ * @param 
+ * @return bool if all players are ready.
+ */
 bool AHordeGameState::CheckPlayersReady()
 {
 	bool Ready = true;
@@ -773,14 +745,12 @@ bool AHordeGameState::CheckPlayersReady()
 	return Ready;
 }
 
-/*
-	FUNCTION: Message Player
-	PARAM: FHordeChatMessage Message Structure; FString PlayerID
-	RETURN: void
-	DESC:
-	Sends a chat message directly to a player by given playerid(steamid).
-
-*/
+/**
+ *	Sends a chat message directly to a player by given player id ( steam id ).
+ *
+ * @param The Message and Player ID
+ * @return void
+ */
 void AHordeGameState::MessagePlayer(FHordeChatMessage Message, FString PlayerID)
 {
 	for (auto PLY: PlayerArray)
@@ -793,14 +763,12 @@ void AHordeGameState::MessagePlayer(FHordeChatMessage Message, FString PlayerID)
 	}
 }
 
-/*
-	FUNCTION: Pop Message
-	PARAM: FHordeChatMessage Message Structure
-	RETURN: void
-	DESC:
-	Sends Message to all Players.
-
-*/
+/**
+ *	Sends Message to all Players.
+ *
+ * @param The Message
+ * @return void
+ */
 void AHordeGameState::PopMessage(FHordeChatMessage Message)
 {
 	for (auto& PS : PlayerArray)
@@ -813,14 +781,12 @@ void AHordeGameState::PopMessage(FHordeChatMessage Message)
 	}
 }
 
-/*
-	FUNCTION: Get Free Character
-	PARAM: None
-	RETURN: FName - ID of free Character. None if none is available.
-	DESC:
-	Returns ID of a Free Character.
-
-*/
+/**
+ *	Returns ID of a Free Character.
+ *
+ * @param
+ * @return FName - ID of free Character. None if none is available.
+ */
 FName AHordeGameState::GetFreeCharacter()
 {
 	FName TempChar = "None";
@@ -835,14 +801,12 @@ FName AHordeGameState::GetFreeCharacter()
 	return TempChar;
 }
 
-/*
-	FUNCTION: All Player Dead Check
-	PARAM: None
-	RETURN: None
-	DESC:
-	Checks if all Players are dead. If so we want to End the Game with true so we Reset the Level.
-
-*/
+/**
+ *	Checks if all Players are dead. If so we want to End the Game with true so we Reset the Level.
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::AllPlayerDeadCheck()
 {
 	if (CountAlivePlayers() < 1 && GameStatus == EGameStatus::EINGAME)
@@ -851,15 +815,12 @@ void AHordeGameState::AllPlayerDeadCheck()
 	}
 }
 
-
-/*
-	FUNCTION: End Game
-	PARAM: bool ResetLevel
-	RETURN: void
-	DESC:
-	Ends the current game session, clears up all the game driven timers and sets the next level to be played.
-
-*/
+/**
+ *	Ends the current game session, clears up all the game driven timers and sets the next level to be played.
+ *
+ * @param bool if it should reset the level.
+ * @return void
+ */
 void AHordeGameState::EndGame(bool ResetLevel)
 {
 
@@ -897,14 +858,12 @@ void AHordeGameState::EndGame(bool ResetLevel)
 
 }
 
-/*
-	FUNCTION: Process End Time
-	PARAM: None
-	RETURN: void
-	DESC:
-	Removes Time from the End Screen Time. If over we want to update the client game status to EGameStatus::ServerTravel and ServerTravel to the next Map.
-
-*/
+/**
+ *	Removes Time from the End Screen Time. If over we want to update the client game status to EGameStatus::ServerTravel and ServerTravel to the next Map.
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::ProcessEndTime()
 {
 	if (EndTime <= 0.f)
@@ -942,14 +901,12 @@ void AHordeGameState::ProcessEndTime()
 	}
 }
 
-/*
-	FUNCTION: ResetLobby
-	PARAM: None
-	RETURN: void
-	DESC:
-	Resets the Lobby Time, the bool values and the GameStatus to EGameStatus::ELOBBY
-
-*/
+/**
+ *	Resets the Lobby Time, the bool values and the GameStatus to EGameStatus::ELOBBY
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::ResetLobby()
 {
 	AHordeWorldSettings* WS = Cast<AHordeWorldSettings>(GetWorld()->GetWorldSettings(false, true));
@@ -962,14 +919,13 @@ void AHordeGameState::ResetLobby()
 	}
 }
 
-/*
-	FUNCTION: Calc End Score
-	PARAM: None
-	RETURN: FPlayerScore: MVP ( Most Valueble Player ), HS ( Most Headshots ), KS ( Most Kills ) 
-	DESC:
-	Returns score for the end of the game to display.
-
-*/
+/**
+ *	Returns score for the end of the game to display.
+ *
+ * @param
+ * @output The MVP, The player with the most headshots and kills.
+ * @return void
+ */
 void AHordeGameState::CalcEndScore(FPlayerScore& MVP, FPlayerScore& HS, FPlayerScore& KS)
 {
 	FPlayerScore LocalMVP("MVP");
@@ -1011,14 +967,12 @@ void AHordeGameState::CalcEndScore(FPlayerScore& MVP, FPlayerScore& HS, FPlayerS
 	
 }
 
-/*
-	FUNCTION: Count Alive Players
-	PARAM: None
-	RETURN: int32 Amount of Alive Players
-	DESC:
-	Returns amount of alive players in game.
-
-*/
+/**
+ *	Returns amount of alive players in game.
+ *
+ * @param
+ * @return int32 Amount of Alive Players
+ */
 int32 AHordeGameState::CountAlivePlayers()
 {
 	int32 TempAliveCount = 0;
@@ -1033,14 +987,12 @@ int32 AHordeGameState::CountAlivePlayers()
 	return TempAliveCount;
 }
 
-/*
-	FUNCTION: Count Alive Zeds
-	PARAM: None
-	RETURN: int32 Amount of alive zombies.
-	DESC:
-	Counts alive zombies on the map and returns it.
-
-*/
+/**
+ *	Counts alive zombies on the map and returns it.
+ *
+ * @param
+ * @return int32 Amount of alive zombies.
+ */
 int32 AHordeGameState::CountAliveZeds()
 {
 	int32 TempAliveCount = 0;
@@ -1056,14 +1008,12 @@ int32 AHordeGameState::CountAliveZeds()
 	return TempAliveCount;
 }
 
-/*
-	FUNCTION: Update Alive Zeds
-	PARAM: None
-	RETURN: void
-	DESC:
-	Updates ZedsLeft (Int32; Exposed to BP) and runs Check for Game Over.
-
-*/
+/**
+ *	Updates ZedsLeft (Int32; Exposed to BP) and runs Check for Game Over.
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::UpdateAliveZeds()
 {
 	ZedsLeft = CountAliveZeds();
@@ -1074,14 +1024,12 @@ void AHordeGameState::UpdateAliveZeds()
 	}
 }
 
-/*
-	FUNCTION: Start Character Trade
-	PARAM: FString Instigator Player ID, FString Target Player ID
-	RETURN: void
-	DESC:
-	Initiates Character Trade inside lobby with given Player IDs.
-
-*/
+/**
+ *	Initiates Character Trade inside lobby with given Player IDs.
+ *
+ * @param The Instigator Player ID and the Target Player ID.
+ * @return void
+ */
 void AHordeGameState::StartCharacterTrade(FString InstigatorPlayer, FString TargetPlayer)
 {
 	if (!IsTradeInProgress && InstigatorPlayer != "" && TargetPlayer != "" && !GetWorld()->GetTimerManager().IsTimerActive(LobbyTradeTimer))
@@ -1094,14 +1042,12 @@ void AHordeGameState::StartCharacterTrade(FString InstigatorPlayer, FString Targ
 	}
 }
 
-/*
-	FUNCTION: Process Character Trade
-	PARAM: None
-	RETURN: void
-	DESC:
-	Calculates Character Trade Time left. When time is < 0 Character Trade gets canceled.
-
-*/
+/**
+ *	Calculates Character Trade Time left. When time is < 0 Character Trade gets canceled.
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::ProcessCharacterTrade()
 {
 	if (TradeProgress.TimeLeft > 0)
@@ -1113,14 +1059,12 @@ void AHordeGameState::ProcessCharacterTrade()
 	}
 }
 
-/*
-	FUNCTION: Accept Character Trade
-	PARAM: None
-	RETURN: void
-	DESC:
-	Accepts Character Trade and Swaps Characters of Instigator and Target Player. After all that it updates the lobby.
-
-*/
+/**
+ *	Accepts Character Trade and Swaps Characters of Instigator and Target Player. After all that it updates the lobby.
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::AcceptCharacterTrade()
 {
 	
@@ -1149,14 +1093,12 @@ void AHordeGameState::AcceptCharacterTrade()
 
 }
 
-/*
-	FUNCTION: About Lobby Trade
-	PARAM: None
-	RETURN: void
-	DESC:
-	Stops Character Trade and resets Character Trade Structure.
-
-*/
+/**
+ *	Stops Character Trade and resets Character Trade Structure.
+ *
+ * @param
+ * @return void
+ */
 void AHordeGameState::AbortLobbyTrade()
 {
 	if (GetWorld()->GetTimerManager().IsTimerActive(LobbyTradeTimer))

@@ -2,14 +2,12 @@
 
 #include "CharacterLouis.h"
 
-/*
-	FUNCTION: Constructor for ACharacterLouis
-	PARAM: None
-	RETURN: None
-	DESC:
-	Default Constructor for ACharacterLouis. Sets the Default Material to Yellow Material.
-
-*/
+/**
+ *	Constructor for Character Louis
+ *
+ * @param
+ * @return
+ */
 ACharacterLouis::ACharacterLouis()
 {
 	const ConstructorHelpers::FObjectFinder<UMaterialInstanceConstant> CharacterMaterialAsset(TEXT("MaterialInstanceConstant'/Game/HordeTemplateBP/Assets/Mannequin/Character/Materials/M_UE4Man_Yellow.M_UE4Man_Yellow'"));

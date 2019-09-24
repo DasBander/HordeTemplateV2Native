@@ -3,13 +3,12 @@
 #include "HordeGameSession.h"
 #include "OnlineSubsystem.h"
 
-/*
-	FUNCTION: End Game Session
-	PARAM: None
-	RETURN: void
-	DESC:
-	Ends the current game session in the Online Subsystem.
-*/
+/**
+ *	Ends the current game session in the Online Subsystem.
+ *	
+ * @param
+ * @return void
+ */
 void AHordeGameSession::EndGameSession()
 {
 	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();

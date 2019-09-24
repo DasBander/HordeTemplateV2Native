@@ -7,14 +7,12 @@
 #include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
 
 
-/*
-	FUNCTION: Constructor for AZedAIController
-	PARAM: None
-	RETURN: None
-	DESC:
-	Default Constructor for AZedAIController. Populates Default Values for Component.
-
-*/
+/**
+ *	Constructor
+ *
+ * @param
+ * @return
+ */
 AZedAIController::AZedAIController()
 {
 	PCC = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("Perception Component"));
@@ -33,14 +31,12 @@ AZedAIController::AZedAIController()
 }
 
 
-/*
-	FUNCTION: Enemy In Sight
-	PARAM: AActor ( Enemy ), FAIStimulus ( Stimulus )
-	RETURN: void
-	DESC:
-	Detects Enemy Range Bases and sets it inside the Blackboard. Also starts clear sight timer in RandomRange Time Zone.
-
-*/
+/**
+ *	Detects Enemy Range Bases and sets it inside the Blackboard. Also starts clear sight timer in RandomRange Time Zone.
+ *
+ * @param The Enemy Actor and AI Stimulus
+ * @return void
+ */
 void AZedAIController::EnemyInSight(AActor* Actor, FAIStimulus Stimulus)
 {
 	AHordeBaseCharacter* Enemy = Cast<AHordeBaseCharacter>(Actor);
@@ -59,14 +55,12 @@ void AZedAIController::EnemyInSight(AActor* Actor, FAIStimulus Stimulus)
 }
 
 
-/*
-	FUNCTION: Clear Sight
-	PARAM: None
-	RETURN: void
-	DESC:
-	Sets Enemy as nullptr in Blackboard.
-
-*/
+/**
+ *	Sets Enemy as nullptr in Blackboard.
+ *
+ * @param
+ * @return void
+ */
 void AZedAIController::ClearSight()
 {
 	UBlackboardComponent* BB = GetBlackboardComponent();
@@ -76,14 +70,13 @@ void AZedAIController::ClearSight()
 	}
 }
 
-/*
-	FUNCTION: Begin Play
-	PARAM: None
-	RETURN: void
-	DESC:
-	Runs Behavior Tree on Server.
 
-*/
+/**
+ *	Begin Play -> Runs Behavior Tree on Server.
+ *
+ * @param
+ * @return void
+ */
 void AZedAIController::BeginPlay()
 {
 	Super::BeginPlay();

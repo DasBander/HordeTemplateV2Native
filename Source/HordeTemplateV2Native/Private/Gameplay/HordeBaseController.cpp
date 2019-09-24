@@ -6,13 +6,12 @@
 #include "Character/HordeBaseCharacter.h"
 #include "HUD/HordeBaseHUD.h"
 
-/*
-	FUNCTION: Client Close Trader UI ( Client )
-	PARAM: None
-	RETURN: void
-	DESC:
-	Runs Close Trader UI in HUD Class
-*/
+/** ( Client )
+ *	Runs Close Trader UI in HUD Class
+ *
+ * @param
+ * @return void
+ */
 void AHordeBaseController::ClientCloseTraderUI_Implementation()
 {
 	AHordeBaseHUD* HUD = Cast<AHordeBaseHUD>(GetHUD());
@@ -22,13 +21,12 @@ void AHordeBaseController::ClientCloseTraderUI_Implementation()
 	}
 }
 
-/*
-	FUNCTION: Client Play 2D Sound ( Client )
-	PARAM: USoundCue ( Sound To Play )
-	RETURN: void
-	DESC:
-	Plays sound on Owning Client.
-*/
+/** ( Client )
+ *	Plays sound on Owning Client.
+ *
+ * @param The Sound to play in 2D.
+ * @return void
+ */
 void AHordeBaseController::ClientPlay2DSound_Implementation(USoundCue* Sound)
 {
 	if (Sound)
@@ -37,25 +35,23 @@ void AHordeBaseController::ClientPlay2DSound_Implementation(USoundCue* Sound)
 	}
 }
 
-/*
-	FUNCTION: Constructor for AHordeBaseController
-	PARAM: None
-	RETURN: None
-	DESC:
-	Default Constructor for AHordeBaseController
-*/
+/**
+ * Constructor
+ *
+ * @param
+ * @return
+ */
 AHordeBaseController::AHordeBaseController()
 {
 	bAttachToPawn = true;
 }
 
-/*
-	FUNCTION: Client Open Trader UI ( Client )
-	PARAM: None
-	RETURN: void
-	DESC:
-	Runs OpenTraderUI in HUD Class.
-*/
+/** ( Client )
+ *	Runs OpenTraderUI in HUD Class.
+ *
+ * @param
+ * @return void
+ */
 void AHordeBaseController::ClientOpenTraderUI_Implementation()
 {
 	AHordeBaseHUD* HUD = Cast<AHordeBaseHUD>(GetHUD());
@@ -65,14 +61,12 @@ void AHordeBaseController::ClientOpenTraderUI_Implementation()
 	}
 }
 
-
-/*
-	FUNCTION: Open Escape Menu
-	PARAM: None
-	RETURN: void
-	DESC:
-	Runs OpenEscapeMenu in HUD Class.
-*/
+/**
+ *	Runs OpenEscapeMenu in HUD Class.
+ *
+ * @param
+ * @return void
+ */
 void AHordeBaseController::OpenEscapeMenu()
 {
 	AHordeBaseHUD* HUD = Cast<AHordeBaseHUD>(GetHUD());
@@ -82,13 +76,12 @@ void AHordeBaseController::OpenEscapeMenu()
 	}
 }
 
-/*
-	FUNCTION: Toggle Scoreboard
-	PARAM: None
-	RETURN: void
-	DESC:
-	Runs ToggleScoreboard in HUD Class.
-*/
+/**
+ *	Runs ToggleScoreboard in HUD Class.
+ *
+ * @param
+ * @return void
+ */
 void AHordeBaseController::ToggleScoreboard()
 {
 	AHordeBaseHUD* HUD = Cast<AHordeBaseHUD>(GetHUD());
@@ -98,13 +91,12 @@ void AHordeBaseController::ToggleScoreboard()
 	}
 }
 
-/*
-	FUNCTION: SetupInputComponent
-	PARAM: None
-	RETURN: void
-	DESC:
-	Sets up the key bindings that should be permanent.
-*/
+/** ( Virtual; Overridden )
+ *	Sets up the key bindings that should be permanent.
+ *
+ * @param
+ * @return void
+ */
 void AHordeBaseController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -118,13 +110,12 @@ void AHordeBaseController::SetupInputComponent()
 	}
 }
 
-/*
-	FUNCTION: Disconnect From Server 
-	PARAM: None
-	RETURN: void
-	DESC:
-	Drops Current Firearm and Kicks Player.
-*/
+/**
+ *	Drops Current Firearm and Kicks Player.
+ *
+ * @param
+ * @return void
+ */
 void AHordeBaseController::DisconnectFromServer()
 {
 	AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(GetPawn());
@@ -140,13 +131,12 @@ void AHordeBaseController::DisconnectFromServer()
 	}
 }
 
-/*
-	FUNCTION: Toggle Chat
-	PARAM: None
-	RETURN: void
-	DESC:
-	Toggles Chat in-game in HUD Class.
-*/
+/**
+ *	Toggles Chat in-game in HUD Class.
+ *
+ * @param
+ * @return void
+ */
 void AHordeBaseController::ToggleChat()
 {
 	AHordeBaseHUD* HUD = Cast<AHordeBaseHUD>(GetHUD());
@@ -161,13 +151,12 @@ void AHordeBaseController::ToggleChat()
 	}
 }
 
-/*
-	FUNCTION: Close Chat
-	PARAM: None
-	RETURN: void
-	DESC:
-	Closes Chat and sets input to Game Only.
-*/
+/**
+ *	Closes Chat and sets input to Game Only.
+ *
+ * @param
+ * @return void
+ */
 void AHordeBaseController::CloseChat()
 {
 	AHordeBaseHUD* HUD = Cast<AHordeBaseHUD>(GetHUD());

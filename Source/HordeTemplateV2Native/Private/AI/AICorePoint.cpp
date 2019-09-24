@@ -4,15 +4,12 @@
 #include "HordeTemplateV2Native.h"
 #include "ConstructorHelpers.h"
 
-/*
-	FUNCTION: Constructor for AAICorePoint
-	PARAM: None
-	RETURN: None
-	DESC:
-	Default Constructor for AIICorePoint.
-	Creates Root Component and Icon. Attaches Icon to Root Component and sets sprite of Icon.
-
-*/
+/**
+ *	Constructor
+ *
+ * @param
+ * @return
+ */
 AAICorePoint::AAICorePoint()
 {
 	PrimaryActorTick.bStartWithTickEnabled = false;

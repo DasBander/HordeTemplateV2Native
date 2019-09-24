@@ -6,6 +6,12 @@
 #include "HordeTemplateV2Native.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
+/**
+ * Returns the Trade Time for the Trade Widget.
+ *
+ * @param
+ * @return Trade Time in Minutes:Seconds format.
+ */
 FText ULobbyCharacterTradeWidget::GetTradeTime()
 {
 	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
@@ -25,6 +31,12 @@ FText ULobbyCharacterTradeWidget::GetTradeTime()
 	}
 }
 
+/**
+ * Returns Returns the Character Name of the Target Player.
+ *
+ * @param
+ * @return Character Name of Target Player.
+ */
 FText ULobbyCharacterTradeWidget::GetTargetCharacterName()
 {
 	FString RetStr = "None";
@@ -39,6 +51,12 @@ FText ULobbyCharacterTradeWidget::GetTargetCharacterName()
 	return FText::FromString(RetStr);
 }
 
+/**
+ * Returns Image of Target Players Character.
+ *
+ * @param
+ * @return Image of Target Players Character.
+ */
 FSlateBrush ULobbyCharacterTradeWidget::GetTargetCharacterImage()
 {
 	FSlateBrush RetBrush;
@@ -52,6 +70,12 @@ FSlateBrush ULobbyCharacterTradeWidget::GetTargetCharacterImage()
 	return RetBrush;
 }
 
+/**
+ * Returns Own Character Name
+ *
+ * @param
+ * @return Own Character Name
+ */
 FText ULobbyCharacterTradeWidget::GetOwnCharacterName()
 {
 	FString RetStr = "None";
@@ -66,6 +90,12 @@ FText ULobbyCharacterTradeWidget::GetOwnCharacterName()
 	return FText::FromString(RetStr);
 }
 
+/**
+ * Returns own characters image.
+ *
+ * @param
+ * @return Own Characters Image
+ */
 FSlateBrush ULobbyCharacterTradeWidget::GetOwnCharacterImage()
 {
 	FSlateBrush RetBrush;
@@ -79,6 +109,12 @@ FSlateBrush ULobbyCharacterTradeWidget::GetOwnCharacterImage()
 	return RetBrush;
 }
 
+/**
+ * Returns if you are in a character trade involved.
+ *
+ * @param
+ * @return Visible if involved in a character trade or collapsed.
+ */
 ESlateVisibility ULobbyCharacterTradeWidget::IsInCharacterTrade()
 {
 	ESlateVisibility RetVis = ESlateVisibility::Collapsed;

@@ -2,13 +2,12 @@
 
 #include "HordeCharacterAnimInstance.h"
 
-/*
-    FUNCTION: Native Begin Play
-    PARAM: None
-    RETURN: void
-    DESC:
-	Sets the Default Character Variable.
-*/
+/**
+ *	Constructor for UHordeCharacterAnimInstance
+ *
+ * @param
+ * @return
+ */
 void UHordeCharacterAnimInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
@@ -16,13 +15,12 @@ void UHordeCharacterAnimInstance::NativeBeginPlay()
 	Character = Cast<AHordeBaseCharacter>(TryGetPawnOwner());
 }
 
-/*
-    FUNCTION: Native Update Animation 
-    PARAM: float ( Delta Seconds )
-    RETURN: void
-    DESC:
-	Sets the Character Animation Variables.
-*/
+/** ( Virtual ; Overridden)
+ *	Sets the Character Animation Variables.
+ *
+ * @param DeltaSeconds
+ * @return void
+ */
 void UHordeCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);

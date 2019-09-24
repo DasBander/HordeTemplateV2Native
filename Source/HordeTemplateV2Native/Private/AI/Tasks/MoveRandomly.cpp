@@ -6,27 +6,25 @@
 #include "NavigationSystem/Public/NavigationSystem.h"
 #include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
 
-/*
-	FUNCTION: Constructor UMoveRandomly
-	PARAM: None
-	RETURN: None
-	DESC:
-	Default Constructor for UMoveRandomly
-
-*/
+/**
+ *	Constructor
+ *
+ * @param
+ * @return
+ */
 UMoveRandomly::UMoveRandomly()
 {
 	NodeName = "Zed Move Randomly";
 	bNotifyTick = true;
 }
 
-/*
-	FUNCTION: Tick Task
-	PARAM: UBehaviorTreeComponent ( Owner Component ), uint8 ( NodeMemory ), float ( Delta Seconds )
-	RETURN: void
-	DESC:
-	Checks if Enemy is Set or Moving is finished. If yes it finishes the latent Task.
-*/
+
+/**
+ * Checks if Enemy is Set or Moving is finished. If yes it finishes the latent Task.
+ *
+ * @param Owning Behavior Tree Component the Node Memory and the Delta Seconds
+ * @return void
+ */
 void UMoveRandomly::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
@@ -50,14 +48,13 @@ void UMoveRandomly::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 
 }
 
-/*
-	FUNCTION: Execute Task
-	PARAM: UBehaviorTreeComponent ( Owner Component ), uint8 ( NodeMemory )
-	RETURN: EBTNodeResult::Type
-	DESC:
-	Searches for random reachable point in radius and moves up there.
 
-*/
+/**
+ *	Searches for random reachable point in radius and moves up there.
+ *
+ * @param Owning BehaviorTreeComponent and the Node Memory
+ * @return EBTNodeResult::Type
+ */
 EBTNodeResult::Type UMoveRandomly::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);

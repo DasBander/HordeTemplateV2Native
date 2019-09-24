@@ -2,13 +2,13 @@
 
 #include "CameraShake_Damage.h"
 
-/*
-	FUNCTION: Constructor for UCameraShare_Damage
-	PARAM: None
-	RETURN: None
-	DESC:
-	Constructor for UCameraShake_Damage. Sets up default variables for the camera shake.
-*/
+
+/**
+ * Constructor for UCameraShake_Damage. Sets up default variables for the camera shake.
+ *
+ * @param
+ * @return
+ */
 UCameraShake_Damage::UCameraShake_Damage()
 {
 	bSingleInstance = true;

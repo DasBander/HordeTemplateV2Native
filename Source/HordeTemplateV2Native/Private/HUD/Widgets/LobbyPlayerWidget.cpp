@@ -4,7 +4,12 @@
 #include "Gameplay/HordePlayerState.h"
 #include "Gameplay/HordeGameState.h"
 
-
+/**
+ * Returns Ready Color if Player is Ready or not.
+ *
+ * @param
+ * @return Color that should be applied to the character object widget.
+ */
 FLinearColor ULobbyPlayerWidget::GetReadyColor()
 {
 	if (PlayerInfo.PlayerReady)
@@ -17,6 +22,12 @@ FLinearColor ULobbyPlayerWidget::GetReadyColor()
 	}
 }
 
+/**
+ * Returns visible if selected character id of owning player is != None.
+ *
+ * @param
+ * @return Returns visiblity based on if owning player character id != None.
+ */
 ESlateVisibility ULobbyPlayerWidget::GetCharacterAvailableVisibility()
 {
 	if (PlayerInfo.SelectedCharacter != NAME_None)
@@ -29,6 +40,12 @@ ESlateVisibility ULobbyPlayerWidget::GetCharacterAvailableVisibility()
 	}
 }
 
+/**
+ * Returns Visibility based on if Player is involved in the Character Trading Process.
+ *
+ * @param
+ * @return Visible if Character is involved in Trader. Hidden if not.
+ */
 ESlateVisibility ULobbyPlayerWidget::GetTradingAvailableVisibility()
 {
 	AHordePlayerState* PS = Cast<AHordePlayerState>(GetOwningPlayer()->PlayerState);
@@ -55,6 +72,12 @@ ESlateVisibility ULobbyPlayerWidget::GetTradingAvailableVisibility()
 	}
 }
 
+/**
+ * Initiates Trade with given Player.
+ *
+ * @param
+ * @return void
+ */
 void ULobbyPlayerWidget::InitiateTrade()
 {
 	AHordePlayerState* PS = Cast<AHordePlayerState>(GetOwningPlayer()->PlayerState);
@@ -64,6 +87,12 @@ void ULobbyPlayerWidget::InitiateTrade()
 	}
 }
 
+/**
+ * Checks if Player is owner of current session.
+ *
+ * @param
+ * @return bool if player is admin or not.
+ */
 bool ULobbyPlayerWidget::IsAdmin()
 {
 	bool RetIs = false;
@@ -83,7 +112,12 @@ bool ULobbyPlayerWidget::IsAdmin()
 }
 
 
-
+/**
+ * Checks if Player is Owner of the Current Widget
+ *
+ * @param
+ * @return bool if it's your own Player Widget.
+ */
 bool ULobbyPlayerWidget::IsOwner()
 {
 	bool RetIs = false;
@@ -102,6 +136,12 @@ bool ULobbyPlayerWidget::IsOwner()
 	return RetIs;
 }
 
+/** ( Virtual; Overridden )
+ * Gets the character from the Character Datatable.
+ *
+ * @param
+ * @return void
+ */
 void ULobbyPlayerWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
