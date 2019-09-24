@@ -7,6 +7,13 @@
 #include "Animation/AnimInstance.h"
 #include "ConstructorHelpers.h"
 
+/** ( Overridden )
+ * Defines Replicated Props
+ *
+ * @param
+ * @output Lifetime Props as Array.
+ * @return void
+ */
 void AMed_VAC::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -14,7 +21,12 @@ void AMed_VAC::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	DOREPLIFETIME(AMed_VAC, IsHealing);
 }
 
-
+/**
+ * Constructor for AMed_VAC
+ *
+ * @param
+ * @return
+ */
 AMed_VAC::AMed_VAC()
 {
 	Weapon->SetSkeletalMesh(nullptr);
@@ -30,17 +42,22 @@ AMed_VAC::AMed_VAC()
 	}
 }
 
+/** ( Virtual; Overridden )
+ * Starts the Healing Process.
+ *
+ * @param
+ * @return
+ */
 void AMed_VAC::FireFirearm()
 {
 	if (HasAuthority())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Should start Healing..."));
 		AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(GetOwner());
 		if (PLY && PLY->GetHealth() < 100.f && LoadedAmmo > 0 && !IsHealing)
 		{
 			IsHealing = true;
 
-			//Simulate Character Reloading so he can't drop the weapon or switch something.
+			//Simulate Character Reloading so he can't drop the weapon or switch to something.
 			PLY->Reloading = true;
 
 			StartHealing();
@@ -49,6 +66,12 @@ void AMed_VAC::FireFirearm()
 
 }
 
+/** ( Server )
+ * Finishes the Healing Process and drops the current item.
+ *
+ * @param
+ * @return void
+ */
 void AMed_VAC::FinishHealing_Implementation()
 {
 	AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(GetOwner());
@@ -68,6 +91,12 @@ bool AMed_VAC::FinishHealing_Validate()
 	return true;
 }
 
+/** ( Multicast )
+ * Plays Healing Animation and finishes healing after Animation is done.
+ *
+ * @param
+ * @return void
+ */
 void AMed_VAC::StartHealing_Implementation()
 {
 	AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(GetOwner());

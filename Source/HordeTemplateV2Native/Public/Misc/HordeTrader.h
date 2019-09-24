@@ -47,9 +47,6 @@ public:
 	UFUNCTION(NetMulticast, WithValidation, Reliable, BlueprintCallable, Category = "Trader")
 		void PlayWelcome();
 
-	UFUNCTION(NetMulticast, WithValidation, Reliable, BlueprintCallable, Category = "Trader")
-		void PlayGoodBye();
-
 protected:
 
 

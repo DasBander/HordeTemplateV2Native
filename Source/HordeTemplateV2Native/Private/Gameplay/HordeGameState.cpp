@@ -275,15 +275,6 @@ void AHordeGameState::StartGameRound()
 		}
 	}
 
-	for (TActorIterator<AHordeTrader> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-	{
-		AHordeTrader* Trader = *ActorItr;
-		if (Trader)
-		{
-			Trader->PlayGoodBye();
-		}
-		
-	}
 }
 
 /**

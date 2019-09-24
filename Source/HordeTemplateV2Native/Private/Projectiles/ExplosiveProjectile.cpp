@@ -10,6 +10,13 @@
 #include "Materials/MaterialInstanceConstant.h"
 #include "FX/Camera/CameraShake_Explosion.h"
 #include "ConstructorHelpers.h"
+
+/**
+ * Constructor for AExplosiveProjectile
+ *
+ * @param
+ * @return
+ */
 AExplosiveProjectile::AExplosiveProjectile()
 {
 	TracerMesh->SetRelativeLocation(FVector(-16.f, 0.f, 0.f));
@@ -35,6 +42,12 @@ AExplosiveProjectile::AExplosiveProjectile()
 	ProjectileMovement->OnProjectileBounce.AddDynamic(this, &AExplosiveProjectile::OnProjectileImpact);
 }
 
+/**
+ * Apply Radial Damage with Falloff on Impact Location and Play Explosion FX.
+ *
+ * @param Impact Hit Result and the Impact Velocity.
+ * @return void
+ */
 void AExplosiveProjectile::OnProjectileImpact(const FHitResult& ImpactResult, const FVector& ImpactVelocity)
 {
 	if (HasAuthority())
@@ -45,6 +58,12 @@ void AExplosiveProjectile::OnProjectileImpact(const FHitResult& ImpactResult, co
 	}
 }
 
+/** ( Multicast )
+ * Plays Explosion Particle and Sound. Also plays global camera shake.
+ *
+ * @param Impact Epicenter
+ * @return void
+ */
 void AExplosiveProjectile::PlayWorldFX_Implementation(FVector Epicenter)
 {
 	USoundCue* ExpSound = ObjectFromPath<USoundCue>(TEXT("SoundCue'/Game/HordeTemplateBP/Assets/Sounds/A_GranadeExplosion.A_GranadeExplosion'"));

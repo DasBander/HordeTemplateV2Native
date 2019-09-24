@@ -6,6 +6,12 @@
 #include "Character/HordeBaseCharacter.h"
 #include "Gameplay/HordeBaseController.h"
 
+/**
+ * Constructor for ABaseFirearm
+ *
+ * @param
+ * @return
+ */
 ABaseFirearm::ABaseFirearm()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -37,6 +43,12 @@ ABaseFirearm::ABaseFirearm()
 
 }
 
+/** ( Virtual ) 
+ * Fires Weapon, spawns projectile and removes ammo. Also Plays Camera Shake.
+ *
+ * @param
+ * @return void
+ */
 void ABaseFirearm::FireFirearm()
 {
 	if (LoadedAmmo > 0)
@@ -75,7 +87,13 @@ void ABaseFirearm::FireFirearm()
 }
 
 
-
+/** ( Overridden )
+ * Defines Replicated Props
+ *
+ * @param
+ * @output Lifetime Props as Array.
+ * @return void
+ */
 void ABaseFirearm::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -86,6 +104,12 @@ void ABaseFirearm::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(ABaseFirearm, FireMode);
 }
 
+/** ( Multicast )
+ * Plays Muzzle Flash and Weapon Sound.
+ *
+ * @param
+ * @return void
+ */
 void ABaseFirearm::PlayFirearmFX_Implementation()
 {
 	MuzzleFlash->Activate(true);
@@ -97,6 +121,12 @@ bool ABaseFirearm::PlayFirearmFX_Validate()
 	return true;
 }
 
+/** ( Server )
+ * Fires Weapon on Server.
+ *
+ * @param
+ * @return void
+ */
 void ABaseFirearm::ServerFireFirearm_Implementation()
 {
 	FireFirearm();
@@ -107,16 +137,12 @@ bool ABaseFirearm::ServerFireFirearm_Validate()
 	return true;
 }
 
-void ABaseFirearm::PlayFireModeChange_Implementation()
-{
-
-}
-
-bool ABaseFirearm::PlayFireModeChange_Validate()
-{
-	return true;
-}
-
+/** ( Server )
+ * Toggles the current Fire mode of weapon.
+ *
+ * @param
+ * @return void
+ */
 void ABaseFirearm::ServerToggleFireMode_Implementation()
 {
 	EFireMode CurrentFireMode = EFireMode(FireMode);
@@ -136,6 +162,13 @@ bool ABaseFirearm::ServerToggleFireMode_Validate()
 	return true;
 }
 
+/**
+ * Returns the Center Screen Rotation and View Location or the Weapon Muzzle Location and Rotation.
+ *
+ * @param bool if Location from Weapons Muzzle Flash
+ * @output View Location and Rotation
+ * @return void
+ */
 void ABaseFirearm::GetOwnerEyePoint(bool LocationFromWeapon, FVector& ViewLocation, FRotator& ViewRotation)
 {
 	AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(GetOwner());
@@ -154,7 +187,12 @@ void ABaseFirearm::GetOwnerEyePoint(bool LocationFromWeapon, FVector& ViewLocati
 
 }
 
-// Called when the game starts or when spawned
+/** ( Virtual; Overridden )
+ * Begin Play.
+ *
+ * @param
+ * @return void
+ */
 void ABaseFirearm::BeginPlay()
 {
 	Super::BeginPlay();

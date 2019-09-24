@@ -8,7 +8,12 @@
 #include "HordeTemplateV2Native.h"
 #include "Kismet/GameplayStatics.h"
 
-
+/**
+ * Constructor for ABaseProjectile
+ *
+ * @param
+ * @return
+ */
 ABaseProjectile::ABaseProjectile()
 {
 	const ConstructorHelpers::FObjectFinder<UStaticMesh> TracerMeshAsset(TEXT("StaticMesh'/Game/HordeTemplateBP/Assets/Effects/Meshes/Weapon/SM_Bullet.SM_Bullet'"));
@@ -57,11 +62,23 @@ ABaseProjectile::ABaseProjectile()
 
 }
 
+/**
+ * Destroy Projectile if Projectile Stops.
+ *
+ * @param Impact Hit Result
+ * @return void
+ */
 void ABaseProjectile::OnProjectileStop(const FHitResult& ImpactResult)
 {
 	Destroy(true, false);
 }
 
+/**
+ * Spawn Impact FX and Apply Point Damage if Character got Hit.
+ *
+ * @param Impact Hit Result and Impact Velocity.
+ * @return void
+ */
 void ABaseProjectile::OnProjectileBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity)
 {
 	UPhysicalMaterial* Phymat = Cast<UPhysicalMaterial>(ImpactResult.PhysMaterial);
@@ -92,6 +109,12 @@ void ABaseProjectile::OnProjectileBounce(const FHitResult& ImpactResult, const F
 
 }
 
+/** ( Multicast )
+ * Spawn Impact FX Actor on Impact Location
+ *
+ * @param The Impact Location, Impact Rotation and Class of Impact.
+ * @return
+ */
 void ABaseProjectile::SpawnImpactFX_Implementation(FVector ImpactLocation, FQuat ImpactRotation, TSubclassOf<ABaseImpact> ImpactClass)
 {
 	FActorSpawnParameters SpawnParam;

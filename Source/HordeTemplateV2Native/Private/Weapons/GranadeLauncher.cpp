@@ -5,6 +5,13 @@
 #include "Engine/SkeletalMesh.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Materials/MaterialInstanceConstant.h"
+
+/**
+ * Constructor for AGranadeLauncher
+ *
+ * @param
+ * @return
+ */
 AGranadeLauncher::AGranadeLauncher()
 {
 	//Nullptr the Muzzleflash as we don't want a muzzle flash on our weapon.

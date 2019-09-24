@@ -10,6 +10,12 @@
 #include "Animation/AnimInstance.h"
 #include "ConstructorHelpers.h"
 
+/**
+ * Constructor for AHordeTrader
+ *
+ * @param
+ * @return
+ */
 AHordeTrader::AHordeTrader()
 {
 	PrimaryActorTick.bStartWithTickEnabled = false;
@@ -38,16 +44,12 @@ AHordeTrader::AHordeTrader()
 
 }
 
-void AHordeTrader::PlayGoodBye_Implementation()
-{
-
-}
-
-bool AHordeTrader::PlayGoodBye_Validate()
-{
-	return true;
-}
-
+/** ( Multicast )
+ * Plays Welcome Sound and Animation on all clients.
+ *
+ * @param
+ * @return void
+ */
 void AHordeTrader::PlayWelcome_Implementation()
 {
 	USoundCue* WelcomeSound = ObjectFromPath<USoundCue>(TEXT("SoundCue'/Game/HordeTemplateBP/Assets/Sounds/Trader/A_Trader_Welcome.A_Trader_Welcome'"));
@@ -64,6 +66,12 @@ bool AHordeTrader::PlayWelcome_Validate()
 	return true;
 }
 
+/** ( Interface )
+ * Opens Trader UI on Interacting Client.
+ *
+ * @param Interacting Character / Actor
+ * @return void
+ */
 void AHordeTrader::Interact_Implementation(AActor* InteractingOwner)
 {
 	if (HasAuthority())
@@ -79,7 +87,12 @@ void AHordeTrader::Interact_Implementation(AActor* InteractingOwner)
 
 }
 
-
+/** ( Interface )
+ * Returns Interaction Info
+ *
+ * @param
+ * @return Interaction Information
+ */
 FInteractionInfo AHordeTrader::GetInteractionInfo_Implementation()
 {
 	FInteractionInfo InteractionInfo;

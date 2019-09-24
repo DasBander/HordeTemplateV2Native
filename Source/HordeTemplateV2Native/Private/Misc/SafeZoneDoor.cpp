@@ -5,6 +5,12 @@
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimBlueprintGeneratedClass.h"
 
+/**
+ * Constructor for ASafeZoneDoor
+ *
+ * @param
+ * @return
+ */
 ASafeZoneDoor::ASafeZoneDoor()
 {
 	SetReplicates(true);
@@ -28,6 +34,13 @@ ASafeZoneDoor::ASafeZoneDoor()
 	}
 }
 
+/** ( Overridden )
+ * Defines Replicated Props
+ *
+ * @param
+ * @output Lifetime Props as Array.
+ * @return void
+ */
 void ASafeZoneDoor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -35,6 +48,12 @@ void ASafeZoneDoor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME(ASafeZoneDoor, bIsOpen);
 }
 
+/** ( Interface )
+ * Opens door.
+ *
+ * @param Interacting Actor
+ * @return
+ */
 void ASafeZoneDoor::Interact_Implementation(AActor* InteractingOwner)
 {
 	if (!bIsOpen)
@@ -43,7 +62,12 @@ void ASafeZoneDoor::Interact_Implementation(AActor* InteractingOwner)
 	}
 }
 
-
+/** ( Interface )
+ * Returns Interaction Info.
+ *
+ * @param
+ * @return Interaction Information.
+ */
 FInteractionInfo ASafeZoneDoor::GetInteractionInfo_Implementation()
 {
 	return FInteractionInfo((bIsOpen) ? "" : "Open Door", 2, true);

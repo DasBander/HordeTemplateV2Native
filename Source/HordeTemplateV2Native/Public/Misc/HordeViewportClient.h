@@ -21,7 +21,7 @@ public:
 	virtual void BeginDestroy() override;
 	virtual void DetachViewportClient() override;
 
-	void ReleaseSlateRessources();
+	void ReleaseSlateResources();
 
 protected:
 

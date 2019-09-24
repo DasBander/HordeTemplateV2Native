@@ -4,6 +4,7 @@
 #include "HordeTemplateV2Native.h"
 #include "CoreMinimal.h"
 #include "Components/AudioComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "GameFramework/Actor.h"
 #include "Sound/SoundCue.h"
@@ -41,13 +42,6 @@ public:
 		void ServerFireFirearm();
 
 protected:
-
-
-
-	UFUNCTION(NetMulticast, WithValidation, Unreliable, BlueprintCallable, Category = "Firearm")
-		void PlayFireModeChange();
-
-
 
 	UFUNCTION(NetMulticast, WithValidation, Unreliable, BlueprintCallable, Category = "Firearm")
 		void PlayFirearmFX();

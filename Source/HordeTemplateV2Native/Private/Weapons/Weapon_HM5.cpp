@@ -3,6 +3,12 @@
 #include "Weapon_HM5.h"
 #include "ConstructorHelpers.h"
 
+/**
+ * Constructor for AWeapon_HM5
+ *
+ * @param
+ * @return
+ */
 AWeapon_HM5::AWeapon_HM5()
 {
 	const ConstructorHelpers::FObjectFinder<USkeletalMesh> WeaponMeshAsset(TEXT("SkeletalMesh'/Game/HordeTemplateBP/Assets/Meshes/Weapons/HTM4/SK_HTM4.SK_HTM4'"));
