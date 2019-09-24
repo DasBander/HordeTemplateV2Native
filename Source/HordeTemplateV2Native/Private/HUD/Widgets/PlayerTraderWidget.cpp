@@ -3,6 +3,12 @@
 #include "PlayerTraderWidget.h"
 #include "Gameplay/HordePlayerState.h"
 
+/** ( Virtual; Overridden )
+ * Sets widget bIsFocusable to true.
+ *
+ * @param
+ * @return
+ */
 void UPlayerTraderWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -10,6 +16,12 @@ void UPlayerTraderWidget::NativeConstruct()
 	bIsFocusable = true;
 }
 
+/**
+ * Returns Players Money as Text.
+ *
+ * @param
+ * @return Players Money as Text.
+ */
 FText UPlayerTraderWidget::GetPlayerMoney()
 {
 	FText PlayerMoney;

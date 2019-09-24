@@ -7,6 +7,12 @@
 #include "HordeTemplateV2Native.h"
 #include "Kismet/GameplayStatics.h"
 
+/** ( Virtual; Overridden )
+ * Binds the Delegates and Updates the Lobby Info inside the Widget.
+ *
+ * @param
+ * @return void
+ */
 void UPlayerLobbyWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -33,6 +39,12 @@ void UPlayerLobbyWidget::NativeConstruct()
 	}
 }
 
+/**
+ * Returns the Lobby Time as Text in the Minutes:Seconds format.
+ *
+ * @param
+ * @return Lobby Time as Minutes:Seconds
+ */
 FText UPlayerLobbyWidget::GetLobbyTime()
 {
 	FFormatNamedArguments Args;
@@ -54,6 +66,12 @@ FText UPlayerLobbyWidget::GetLobbyTime()
 
 }
 
+/**
+ * Returns bool if Disconnect is Blocked or not.
+ *
+ * @param
+ * @return bool if Disconnect is Blocked.
+ */
 bool UPlayerLobbyWidget::IsDisconnectBlocked()
 {
 	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
@@ -67,6 +85,12 @@ bool UPlayerLobbyWidget::IsDisconnectBlocked()
 	}
 }
 
+/**
+ * Visibility if Character is Trading or involved in a Trading Process. Visible if Yes; Collapsed if Not.
+ *
+ * @param
+ * @return Visible if Character is involved in Trading; Collapsed if Not.
+ */
 ESlateVisibility UPlayerLobbyWidget::IsCharacterTrading()
 {
 	AHordeBaseController* PC = Cast<AHordeBaseController>(GetOwningPlayer());
@@ -100,6 +124,12 @@ ESlateVisibility UPlayerLobbyWidget::IsCharacterTrading()
 	}
 }
 
+/**
+ * Returns bool if Game is Starting or not.
+ *
+ * @param
+ * @return bool if Game is Starting.
+ */
 bool UPlayerLobbyWidget::bIsGameStarting()
 {
 	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());

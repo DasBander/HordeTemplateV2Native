@@ -5,6 +5,12 @@
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimBlueprintGeneratedClass.h"
 
+/**
+ * Constructor for ADoor
+ *
+ * @param
+ * @return
+ */
 ADoor::ADoor()
 {
 	SetReplicates(true);
@@ -29,6 +35,13 @@ ADoor::ADoor()
 
 }
 
+/** ( Overridden )
+ * Defines Replicated Props
+ *
+ * @param
+ * @output Lifetime Props as Array.
+ * @return void
+ */
 void ADoor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -36,12 +49,23 @@ void ADoor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePro
 	DOREPLIFETIME(ADoor, bIsOpen);
 }
 
+/** ( Interface )
+ * Toggles Open Status by Interaction
+ *
+ * @param Interacting Character / Actor 
+ * @return void
+ */
 void ADoor::Interact_Implementation(AActor* InteractingOwner)
 {
 	bIsOpen = !bIsOpen;
 }
 
-
+/** ( Interface )
+ * Returns Interaction Info depending if door is closed or open.
+ *
+ * @param
+ * @return Interaction Information
+ */
 FInteractionInfo ADoor::GetInteractionInfo_Implementation()
 {
 	return FInteractionInfo((bIsOpen) ? "Close Door" : "Open Door", 2, true);

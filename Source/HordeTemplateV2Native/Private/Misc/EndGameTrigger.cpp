@@ -3,6 +3,13 @@
 #include "EndGameTrigger.h"
 #include "Character/HordeBaseCharacter.h"
 #include "Gameplay/HordeGameState.h"
+
+/**
+ * Constructor for AEndGameTrigger
+ *
+ * @param
+ * @return
+ */
 AEndGameTrigger::AEndGameTrigger()
 {
 	SetReplicates(true);
@@ -16,6 +23,12 @@ AEndGameTrigger::AEndGameTrigger()
 
 }
 
+/** ( Delegate Binding )
+ * Triggers End Game inside the Game State if Player Enters.
+ *
+ * @param OverlappedComponent, OtherActor,  OtherComponent, OtherBodyIndex, bFromSweep, SweepResult
+ * @return void
+ */
 void AEndGameTrigger::OnColide(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (HasAuthority())

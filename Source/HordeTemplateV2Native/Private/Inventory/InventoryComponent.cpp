@@ -6,13 +6,25 @@
 #include "Character/HordeBaseCharacter.h"
 #include "Gameplay/HordeWorldSettings.h"
 
+/**
+ * Constructor for UInventoryComponent
+ *
+ * @param
+ * @return
+ */
 UInventoryComponent::UInventoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
-	
 }
 
+/** ( Overridden )
+ * Define Replicated Props
+ *
+ * @param
+ * @output Lifetime Props
+ * @return void
+ */
 void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -21,12 +33,23 @@ void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(UInventoryComponent, AvailableAmmoForCurrentWeapon);
 }
 
-
+/**
+ * Returns current Inventory Array
+ *
+ * @param
+ * @return TArray of FItem ( Inventory )
+ */
 const TArray<FItem>& UInventoryComponent::GetInventory()
 {
 	return Inventory;
 }
 
+/**
+ * Updates the Ammo of current active item in Inventory.
+ *
+ * @param Ammo to update.
+ * @return void
+ */
 void UInventoryComponent::UpdateCurrentItemAmmo(int32 Ammo)
 {
 	if (Inventory.IsValidIndex(ActiveItemIndex))
@@ -35,6 +58,12 @@ void UInventoryComponent::UpdateCurrentItemAmmo(int32 Ammo)
 	}
 }
 
+/**
+ * Refreshes the Available Ammo Value for the current item so we don't have to replicate the whole item.
+ *
+ * @param
+ * @return
+ */
 void UInventoryComponent::RefreshCurrentAmmoForItem()
 {
 	if (Inventory.IsValidIndex(ActiveItemIndex))
@@ -47,6 +76,12 @@ void UInventoryComponent::RefreshCurrentAmmoForItem()
 	}
 }
 
+/** ( Server )
+ * Adds Item with given Item ID.
+ *
+ * @param The Item ID, bool if modified Item and the modified Item. Only used if Custom is set to true.
+ * @return void
+ */
 void UInventoryComponent::ServerAddItem_Implementation(const FString& ItemID, bool Custom, FItem CustomItem)
 {
 	FItem FoundItm;
@@ -108,6 +143,12 @@ bool UInventoryComponent::ServerAddItem_Validate(const FString& ItemID, bool Cus
 	return true;
 }
 
+/** ( Server )
+ * Drops current item and removes it from the Inventory.
+ *
+ * @param
+ * @return
+ */
 void UInventoryComponent::ServerDropItem_Implementation(ABaseFirearm* Firearm)
 {
 	if (Firearm)
@@ -138,7 +179,12 @@ void UInventoryComponent::ServerDropItem_Implementation(ABaseFirearm* Firearm)
 	}
 }
 
-
+/** ( Server )
+ * Drops item by given inventory index.
+ *
+ * @param Inventory Index to Drop
+ * @return void
+ */
 void UInventoryComponent::ServerDropItemAtIndex_Implementation(int32 IndexToDrop)
 {
 		if (Inventory.IsValidIndex(IndexToDrop) && (Inventory[IndexToDrop].ItemID != "Item_Hands" || Inventory[IndexToDrop].ItemID != "Hands"))
@@ -168,6 +214,13 @@ bool UInventoryComponent::ServerDropItem_Validate(ABaseFirearm* Firearm)
 	return true;
 }
 
+/**
+ * Returns if the item exists or not. Also returns the Item Index inside the Inventory and the Item Type.
+ *
+ * @param The Item ID
+ * @output Item Index in Inventory and the Item Type
+ * @return if item exists or not.
+ */
 bool UInventoryComponent::InventoryItemExists(FString ItemID, int32& Index, EActiveType &ItemType)
 {
 	int32 TempIndex = -1;
@@ -188,6 +241,12 @@ bool UInventoryComponent::InventoryItemExists(FString ItemID, int32& Index, EAct
 	return TempSuccess;
 }
 
+/**
+ * Calculates item drop location with a line trace by channel.
+ *
+ * @param
+ * @return Item Drop Location
+ */
 FTransform UInventoryComponent::CalculateDropLocation()
 {
 	FTransform TempLocation;
@@ -225,6 +284,13 @@ FTransform UInventoryComponent::CalculateDropLocation()
 	return TempLocation;
 }
 
+/**
+ * Counts Ammo by Ammo Type, returns the amount and index of it.
+ *
+ * @param Ammo Type
+ * @output Index in Inventory
+ * @return Amount of Ammo
+ */
 int32 UInventoryComponent::CountAmmo(FName AmmoType, int32& Index)
 {
 	int32 TempAmount = 0;
@@ -243,6 +309,12 @@ int32 UInventoryComponent::CountAmmo(FName AmmoType, int32& Index)
 	return TempAmount;
 }
 
+/**
+ * Removes Ammo by given Type and Amount.
+ *
+ * @param
+ * @return bool true if has enough to remove or false if not.
+ */
 bool UInventoryComponent::RemoveAmmoByType(FName AmmoType, int32 AmountToRemove)
 {
 	int32 AmmoIndex;
@@ -266,6 +338,12 @@ bool UInventoryComponent::RemoveAmmoByType(FName AmmoType, int32 AmountToRemove)
 	}
 }
 
+/**
+ * Returns next active weapon type by current selected item.
+ *
+ * @param
+ * @return EActiveType ( Primary, Secondary, Med, Misc )
+ */
 EActiveType UInventoryComponent::FindNextWeaponType()
 {
 	EActiveType RetType;
@@ -282,6 +360,12 @@ EActiveType UInventoryComponent::FindNextWeaponType()
 	return RetType;
 }
 
+/**
+ * Returns last active weapon type by current selected item.
+ *
+ * @param
+ * @return EActiveType ( Primary, Secondary, Med, Misc )
+ */
 EActiveType UInventoryComponent::FindLastWeaponType()
 {
 	EActiveType RetType = EActiveType::EActiveRifle;
@@ -302,6 +386,12 @@ EActiveType UInventoryComponent::FindLastWeaponType()
 	return RetType;
 }
 
+/**
+ * Returns available EActiveType category from Inventory.
+ *
+ * @param
+ * @return TArray<EActiveType> Weapon Category in Inventory.
+ */
 TArray<EActiveType> UInventoryComponent::GetAvailableCategories()
 {
 	TArray<EActiveType> TempActiveTypes;
@@ -315,6 +405,12 @@ TArray<EActiveType> UInventoryComponent::GetAvailableCategories()
 	return TempActiveTypes;
 }
 
+/** ( Server )
+ * Switch to active weapon by Item Type.
+ *
+ * @param Item Type to be switched to.
+ * @return void
+ */
 void UInventoryComponent::SwitchWeapon_Implementation(EActiveType ItemType)
 {
 	AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(GetOwner());
@@ -337,6 +433,13 @@ bool UInventoryComponent::SwitchWeapon_Validate(EActiveType ItemType)
 	return true;
 }
 
+/**
+ * Returns Item and Index by Category.
+ *
+ * @param Item Type
+ * @output The Item and Index in the Inventory.
+ * @return void
+ */
 void UInventoryComponent::FindItemByCategory(EActiveType IType, FItem& OutItem, int32& OutIndex)
 {
 	int32 LIndex = -1;
@@ -354,6 +457,12 @@ void UInventoryComponent::FindItemByCategory(EActiveType IType, FItem& OutItem, 
 	OutIndex = LIndex;
 }
 
+/** ( Server )
+ * Scroll trough Inventory mostly by MouseWheel Up and Down.
+ *
+ * @param bool if Scrolling up or down.
+ * @return void
+ */
 void UInventoryComponent::ScrollItems_Implementation(bool ScrollUp)
 {
 	if (ScrollUp)
@@ -371,6 +480,12 @@ bool UInventoryComponent::ScrollItems_Validate(bool ScrollUp)
 	return true;
 }
 
+/** ( Virtual; Overridden )
+ * Adds starting items to inventory.
+ *
+ * @param
+ * @return
+ */
 void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -390,6 +505,13 @@ void UInventoryComponent::BeginPlay()
 	
 }
 
+/**
+ * Returns Item by Item ID.
+ *
+ * @param Item ID
+ * @output The Item.
+ * @return bool if found in Datatable.
+ */
 bool UInventoryComponent::GetItemByID(FString ItemID, FItem& Item)
 {
 	bool TempSuccess = false;

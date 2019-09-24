@@ -3,6 +3,12 @@
 #include "PlayerScoreboardItem.h"
 #include "Gameplay/HordePlayerState.h"
 
+/**
+ * Returns color depending on if the character is dead or not.
+ *
+ * @param
+ * @return Color if Character is Dead or Not.
+ */
 FLinearColor UPlayerScoreboardItem::GetDeadBorderColor()
 {
 	FLinearColor RetColor = FLinearColor();
@@ -21,6 +27,12 @@ FLinearColor UPlayerScoreboardItem::GetDeadBorderColor()
 	return RetColor;
 }
 
+/**
+ * Returns the Players Ping as text with Ms.
+ *
+ * @param
+ * @return Players ping with Ms ( 10Ms )
+ */
 FText UPlayerScoreboardItem::GetPlayerPing()
 {
 	FString RetPing = "/";
@@ -32,6 +44,12 @@ FText UPlayerScoreboardItem::GetPlayerPing()
 	return FText::FromString(RetPing);
 }
 
+/**
+ * Returns the Players Score as Text.
+ *
+ * @param
+ * @return Players Score as Text.
+ */
 FText UPlayerScoreboardItem::GetPlayerScore()
 {
 	FString RetScore = "/";
@@ -43,6 +61,12 @@ FText UPlayerScoreboardItem::GetPlayerScore()
 	return FText::FromString(RetScore);
 }
 
+/**
+ * Returns the Players Username as Text.
+ *
+ * @param
+ * @return Players Username as Text.
+ */
 FText UPlayerScoreboardItem::GetPlayerName()
 {
 	FString RetUsername = "Unknown";

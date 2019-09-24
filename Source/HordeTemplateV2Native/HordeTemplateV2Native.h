@@ -6,6 +6,7 @@
 
 /*
 	Default Project Definitions
+	Documentation found on https://bugs.finalspark.io/docs/horde-template-native
 */
 
 /*
@@ -18,6 +19,7 @@
 //Economy
 #define STARTING_MONEY 1500
 #define ECONOMY_DATATABLE_PATH TEXT("DataTable'/Game/HordeTemplateBP/Data/TraderItems.TraderItems'")
+#define CURRENCY_PREFIX "$"
 
 //Inventory
 #define INVENTORY_DATATABLE_PATH TEXT("DataTable'/Game/HordeTemplateBP/Data/HordeInventoryItems.HordeInventoryItems'")

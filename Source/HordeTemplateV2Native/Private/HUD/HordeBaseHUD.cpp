@@ -9,6 +9,12 @@
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Character/HordeBaseCharacter.h"
 
+/**
+ * Swaps widgets out and switches input mode depending on the game status. 
+ *
+ * @param Current Game Status.
+ * @return void
+ */
 void AHordeBaseHUD::GameStatusChanged(uint8 GameStatus)
 {
 	EGameStatus GS = (EGameStatus)GameStatus;
@@ -60,6 +66,12 @@ void AHordeBaseHUD::GameStatusChanged(uint8 GameStatus)
 	}
 }
 
+/**
+ * On Player Points Received Binding.
+ *
+ * @param The Ponts Type and Points.
+ * @return void
+ */
 void AHordeBaseHUD::OnPlayerPointsReceived(EPointType PointType, int32 Points)
 {
 	if (PlayerHUDWidget)
@@ -68,6 +80,12 @@ void AHordeBaseHUD::OnPlayerPointsReceived(EPointType PointType, int32 Points)
 	}
 }
 
+/**
+ * Constructor for AHordeBaseHUD
+ *
+ * @param
+ * @return
+ */
 AHordeBaseHUD::AHordeBaseHUD()
 {
 	const ConstructorHelpers::FClassFinder<UPlayerHUDWidget> PlayerHUDAsset(WIDGET_HUD_MAIN_UI_PATH);
@@ -122,16 +140,34 @@ AHordeBaseHUD::AHordeBaseHUD()
 	OnPlayerPointsReceivedDelegate.AddDynamic(this, &AHordeBaseHUD::OnPlayerPointsReceived);
 }
 
+/**
+ * Returns HUD Widget Object
+ *
+ * @param
+ * @return HUDWidget Object
+ */
 UPlayerHUDWidget* AHordeBaseHUD::GetHUDWidget()
 {
 	return (PlayerHUDWidget) ? PlayerHUDWidget : nullptr;
 }
 
+/**
+ * Returns Lobby Widget Object.
+ *
+ * @param
+ * @return Lobby Widget Object.
+ */
 UPlayerLobbyWidget* AHordeBaseHUD::GetLobbyWidget()
 {
 	return (PlayerLobbyWidget) ? PlayerLobbyWidget : nullptr;
 }
 
+/**
+ * Closes Escape Menu and Resets input mode to game only.
+ *
+ * @param
+ * @return void
+ */
 void AHordeBaseHUD::CloseEscapeMenu()
 {
 	if (PlayerEscapeWidget)
@@ -142,6 +178,12 @@ void AHordeBaseHUD::CloseEscapeMenu()
 	}
 }
 
+/**
+ * Opens or closes Scoreboard.
+ *
+ * @param
+ * @return void
+ */
 void AHordeBaseHUD::ToggleScoreboard()
 {
 	if (!IsInChat && !bIsTraderUIOpen && CurrentGameStatus == EGameStatus::EINGAME)
@@ -163,6 +205,12 @@ void AHordeBaseHUD::ToggleScoreboard()
 	}
 }
 
+/**
+ * Opens Escape Menu or closes chat or trader ui.
+ *
+ * @param
+ * @return void
+ */
 void AHordeBaseHUD::OpenEscapeMenu()
 {
 	if (!bIsScoreboardOpen && CurrentGameStatus != EGameStatus::ELOBBY)
@@ -188,6 +236,12 @@ void AHordeBaseHUD::OpenEscapeMenu()
 	}
 }
 
+/**
+ * Opens Trader UI
+ *
+ * @param
+ * @return void
+ */
 void AHordeBaseHUD::OpenTraderUI()
 {
 	if (!IsInChat && !bIsScoreboardOpen && CurrentGameStatus == EGameStatus::EINGAME && !bIsTraderUIOpen)
@@ -201,6 +255,12 @@ void AHordeBaseHUD::OpenTraderUI()
 	}
 }
 
+/**
+ * Closes Trader UI
+ *
+ * @param
+ * @return void
+ */
 void AHordeBaseHUD::CloseTraderUI()
 {
 	if (bIsTraderUIOpen)
@@ -212,12 +272,24 @@ void AHordeBaseHUD::CloseTraderUI()
 	}
 }
 
+/** ( Virtual; Overridden )
+ * Tick
+ *
+ * @param
+ * @return
+ */
 void AHordeBaseHUD::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	
 }
 
+/** ( Virtual; Overridden )
+ * Creates all Widgets on Begin Play and makes Objects Valid.
+ *
+ * @param
+ * @return void
+ */
 void AHordeBaseHUD::BeginPlay()
 {
 	Super::BeginPlay();
@@ -239,6 +311,12 @@ void AHordeBaseHUD::BeginPlay()
 
 }
 
+/** ( Virtual; Overridden )
+ * Draws Waiting for Server if Player state is not valid or simply client isn't ready.
+ * Draws Center Dot.
+ * @param
+ * @return void
+ */
 void AHordeBaseHUD::DrawHUD()
 {
 	Super::DrawHUD();
@@ -262,6 +340,12 @@ void AHordeBaseHUD::DrawHUD()
 	}
 }
 
+/** ( Virtual; Overridden )
+ * Releases Slate Resources on HUDClass getting destroyed.
+ *
+ * @param End Play Reason
+ * @return void
+ */
 void AHordeBaseHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	PlayerHUDWidget->ReleaseSlateResources(true);

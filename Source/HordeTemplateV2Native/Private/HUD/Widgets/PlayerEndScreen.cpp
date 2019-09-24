@@ -4,6 +4,12 @@
 #include "Gameplay/HordeGameState.h"
 #include "HordeTemplateV2Native.h"
 
+/**
+ * Gets the username of the current MVP.
+ *
+ * @param
+ * @return The Player Name of the MVP
+ */
 FText UPlayerEndScreen::GetMVPName()
 {
 	FText RetText = FText::FromString("None");
@@ -15,6 +21,12 @@ FText UPlayerEndScreen::GetMVPName()
 	return RetText;
 }
 
+/**
+ * Returns the username of the player with the most head shots.
+ *
+ * @param
+ * @return Player Username of the player with the most head shots.
+ */
 FText UPlayerEndScreen::GetMHSName()
 {
 	FText RetText = FText::FromString("None");
@@ -26,6 +38,12 @@ FText UPlayerEndScreen::GetMHSName()
 	return RetText;
 }
 
+/**
+ * Returns the username of the player with the most kills.
+ *
+ * @param
+ * @return Player Username of the player with the most kills.
+ */
 FText UPlayerEndScreen::GetMKSName()
 {
 	FText RetText = FText::FromString("None");
@@ -37,6 +55,12 @@ FText UPlayerEndScreen::GetMKSName()
 	return RetText;
 }
 
+/**
+ * Returns the points from the MVP.
+ *
+ * @param
+ * @return Points of the MVP
+ */
 FText UPlayerEndScreen::GetMVPPoints()
 {
 	FText RetText = FText::FromString("0");
@@ -48,6 +72,12 @@ FText UPlayerEndScreen::GetMVPPoints()
 	return RetText;
 }
 
+/**
+ * Returns the amount of the head shots from the player that has the most.
+ *
+ * @param
+ * @return Most Head shots.
+ */
 FText UPlayerEndScreen::GetMHSPoints()
 {
 	FText RetText = FText::FromString("0");
@@ -59,6 +89,12 @@ FText UPlayerEndScreen::GetMHSPoints()
 	return RetText;
 }
 
+/**
+ * Returns the amount of the kills from the player that has the most.
+ *
+ * @param
+ * @return Most Kills.
+ */
 FText UPlayerEndScreen::GetMKSPoints()
 {
 	FText RetText = FText::FromString("0");
@@ -70,6 +106,12 @@ FText UPlayerEndScreen::GetMKSPoints()
 	return RetText;
 }
 
+/**
+ * Returns the End Time of the End Game Timer.
+ *
+ * @param
+ * @return Returns the End Time in Minutes:Seconds format.
+ */
 FText UPlayerEndScreen::GetEndTime()
 {
 	FFormatNamedArguments Args;
@@ -90,6 +132,12 @@ FText UPlayerEndScreen::GetEndTime()
 	}
 }
 
+/**
+ * Returns the name of the Next Level.
+ *
+ * @param
+ * @return Name of Next Level
+ */
 FText UPlayerEndScreen::GetNextLevel()
 {
 	FString RetText = "NEXT: Not found!";
@@ -106,6 +154,12 @@ FText UPlayerEndScreen::GetNextLevel()
 	return FText::FromString(RetText);
 }
 
+/**
+ * Returns Level Structure by given Level ID
+ *
+ * @param
+ * @return FPlayableLevel by given ID.
+ */
 FPlayableLevel UPlayerEndScreen::FindLevelByID(FName LevelID)
 {
 	UDataTable* InventoryData = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, MAPS_DATATABLE_PATH));

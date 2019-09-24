@@ -6,6 +6,12 @@
 #include "Sound/SoundCue.h"
 #include "HordeTemplateV2Native.h"
 
+/**
+ * Buys Item and plays buy sound on owning player.
+ *
+ * @param
+ * @return void
+ */
 void UTraderItemWidget::BuyItem()
 {
 	AHordePlayerState* PS = Cast<AHordePlayerState>(GetOwningPlayer()->PlayerState);
@@ -24,11 +30,23 @@ void UTraderItemWidget::BuyItem()
 	}
 }
 
+/**
+ * Returns the current item price as text.
+ *
+ * @param
+ * @return Current Item Price as Text with Currency Prefix.
+ */
 FText UTraderItemWidget::GetPriceText()
 {
-	return FText::FromString(FString::FromInt(TraderItem.ItemPrice) + "$");
+	return FText::FromString(FString::FromInt(TraderItem.ItemPrice) + CURRENCY_PREFIX);
 }
 
+/**
+ * Returns true if Player has enough money to afford item. 
+ *
+ * @param
+ * @return true if Player can afford else false.
+ */
 bool UTraderItemWidget::HasEnoughMoney()
 {
 	AHordePlayerState* PS = Cast<AHordePlayerState>(GetOwningPlayer()->PlayerState);

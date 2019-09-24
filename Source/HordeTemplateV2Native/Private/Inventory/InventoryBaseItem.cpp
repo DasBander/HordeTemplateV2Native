@@ -4,6 +4,12 @@
 #include "InventoryComponent.h"
 #include "InventoryHelpers.h"
 
+/**
+ * Constructor for InventoryBaseItem
+ *
+ * @param
+ * @return
+ */
 AInventoryBaseItem::AInventoryBaseItem()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -17,6 +23,14 @@ AInventoryBaseItem::AInventoryBaseItem()
 	WorldMesh->SetupAttachment(RootComponent);
 
 }
+
+/** ( Overridden )
+ * Define Replicated Props
+ *
+ * @param
+ * @output Out Lifetime Props
+ * @return void
+ */
 void AInventoryBaseItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -26,7 +40,12 @@ void AInventoryBaseItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	DOREPLIFETIME(AInventoryBaseItem, ItemID);
 }
 
-// Called when the game starts or when spawned
+/** ( Virtual; Overridden )
+ * Populate Item with Item Info.
+ *
+ * @param
+ * @return
+ */
 void AInventoryBaseItem::BeginPlay()
 {
 	Super::BeginPlay();
@@ -34,6 +53,12 @@ void AInventoryBaseItem::BeginPlay()
 	PopInfo();
 }
 
+/** (Interface)
+ * On Interaction with Actor add this Item to his Inventory and set lifespan to 0.1f.
+ *
+ * @param Interacting Character / Actor.
+ * @return void
+ */
 void AInventoryBaseItem::Interact_Implementation(AActor* InteractingOwner)
 {
 	UInventoryComponent* PlayerInventory = InteractingOwner->FindComponentByClass<UInventoryComponent>();
@@ -44,12 +69,23 @@ void AInventoryBaseItem::Interact_Implementation(AActor* InteractingOwner)
 	}
 }
 
-
+/** ( Interface )
+ * Return Items Interaction Info.
+ *
+ * @param
+ * @return Interaction Info.
+ */
 FInteractionInfo AInventoryBaseItem::GetInteractionInfo_Implementation()
 {
 	return ItemInfo.InteractionInfo;
 }
 
+/**
+ * Sets Static Mesh and Simulates Physics on Item.
+ *
+ * @param
+ * @return void
+ */
 void AInventoryBaseItem::PopInfo()
 {
 	if (ItemID.ToString() != "None" && !Spawned)
@@ -70,6 +106,12 @@ void AInventoryBaseItem::PopInfo()
 	}
 }
 
+/** ( Virtual; Overridden )
+ * Updates Item Mesh World Model.
+ *
+ * @param Item Location
+ * @return void
+ */
 void AInventoryBaseItem::OnConstruction(const FTransform& Transform)
 {
 	PopInfo();

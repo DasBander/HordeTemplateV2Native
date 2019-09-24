@@ -8,11 +8,23 @@
 #include "InventoryHelpers.h"
 #include "HordeTemplateV2Native.h"
 
+/**
+ * Calls delegate to hide the Interaction Text.
+ *
+ * @param
+ * @return void
+ */
 void UPlayerHUDWidget::HideInteractionTxt()
 {
 	OnHideInteractionText.Broadcast();
 }
 
+/**
+ * Returns Slate Visibility as Visible if Player Owns a Character.
+ *
+ * @param
+ * @return Visibility if Owner has Character.
+ */
 ESlateVisibility UPlayerHUDWidget::IsOwningCharacter()
 {
 	ESlateVisibility DefaultVisibilty = ESlateVisibility::Hidden;
@@ -24,7 +36,12 @@ ESlateVisibility UPlayerHUDWidget::IsOwningCharacter()
 	return DefaultVisibilty;
 }
 
-
+/**
+ * Returns Interpolated Player Health for Progress bar ( 0.f - 1.f )
+ *
+ * @param
+ * @return Player Health from 0.f - 1.f
+ */
 float UPlayerHUDWidget::GetPlayerHealth()
 {
 	AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(GetOwningPlayerPawn());
@@ -38,6 +55,12 @@ float UPlayerHUDWidget::GetPlayerHealth()
 	}
 }
 
+/**
+ * Returns Interpolated Player Stamina for Progress bar ( 0.f - 1.f )
+ *
+ * @param
+ * @return Player Stamina from 0.f - 1.f
+ */
 float UPlayerHUDWidget::GetPlayerStamina()
 {
 	AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(GetOwningPlayerPawn());
@@ -51,6 +74,12 @@ float UPlayerHUDWidget::GetPlayerStamina()
 	}
 }
 
+/**
+ * Returns Visibility depending on if Player is dead or not.
+ *
+ * @param
+ * @return  Visible depending on if Player is dead or not.
+ */
 ESlateVisibility UPlayerHUDWidget::bGetIsDead()
 {
 	AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(GetOwningPlayerPawn());
@@ -64,23 +93,43 @@ ESlateVisibility UPlayerHUDWidget::bGetIsDead()
 	}
 }
 
+/**
+ * Returns Weapon Text as ( Weapon Name - 12 / 350 )
+ *
+ * @param
+ * @return Weapon Text ( Weapon Name - Loaded Ammo / Amount of Ammo in Inventory )
+ */
 FText UPlayerHUDWidget::GetWeaponText()
 {
 	FString ReturnString;
 	AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(GetOwningPlayerPawn());
 	ABaseFirearm* Firearm = PLY->GetCurrentFirearm();
+	
 	if (PLY && Firearm)
 	{
-		ReturnString = (PLY->Inventory->AvailableAmmoForCurrentWeapon == 0) ? Firearm->WeaponID + " - " + FString::FromInt(Firearm->LoadedAmmo) : Firearm->WeaponID + " - " + FString::FromInt(Firearm->LoadedAmmo) + " / " + FString::FromInt(PLY->Inventory->AvailableAmmoForCurrentWeapon);
+		FItem Itm = UInventoryHelpers::FindItemByID(FName(*Firearm->WeaponID));
+		ReturnString = (PLY->Inventory->AvailableAmmoForCurrentWeapon == 0) ? Itm.ItemName + " - " + FString::FromInt(Firearm->LoadedAmmo) : Firearm->WeaponID + " - " + FString::FromInt(Firearm->LoadedAmmo) + " / " + FString::FromInt(PLY->Inventory->AvailableAmmoForCurrentWeapon);
 	}
 	return FText::FromString(ReturnString);
 }
 
+/**
+ * Returns Health as Text.
+ *
+ * @param
+ * @return Health as Text.
+ */
 FText UPlayerHUDWidget::GetHealthText()
 {
-	return FText::FromString(FString::SanitizeFloat(HealthInterpolate, 1));
+	return FText::FromString(FString::SanitizeFloat(HealthInterpolate, 0));
 }
 
+/**
+ * Returns amount of Remaining Zombies.
+ *
+ * @param
+ * @return Amount of Remaining Zeds as Text.
+ */
 FText UPlayerHUDWidget::GetZedsLeft()
 {
 	FString ReturnString = "None";
@@ -92,6 +141,12 @@ FText UPlayerHUDWidget::GetZedsLeft()
 	return FText::FromString(ReturnString);
 }
 
+/**
+ * Returns Amount of Rounds as Text ( 1 / 10 )
+ *
+ * @param
+ * @return Amount of Rounds ( Current Round / Max Rounds )
+ */
 FText UPlayerHUDWidget::GetRounds()
 {
 	FString ReturnString = "Unknown Rounds";
@@ -103,17 +158,35 @@ FText UPlayerHUDWidget::GetRounds()
 	return FText::FromString(ReturnString);
 }
 
+/**
+ * Returns Visibility depending on if owner is character or spectator.
+ *
+ * @param
+ * @return Visibility if owner is spectator.
+ */
 ESlateVisibility UPlayerHUDWidget::bIsSpectator()
 {
 	AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(GetOwningPlayerPawn());
 	return (PLY) ? ESlateVisibility::Collapsed : ESlateVisibility::Visible;
 }
 
+/**
+ * Returns Visibility depending on if owner is interacting.
+ *
+ * @param
+ * @return Visibility if owner is interacting.
+ */
 ESlateVisibility UPlayerHUDWidget::bIsInteracting()
 {
 	return (IsInteracting) ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
 }
 
+/**
+ * Returns current Weapons FireMode as Text.
+ *
+ * @param
+ * @return Returns Weapons FireMode as Text.
+ */
 FText UPlayerHUDWidget::GetWeaponFireMode()
 {
 	FString ReturnString;
@@ -142,6 +215,12 @@ FText UPlayerHUDWidget::GetWeaponFireMode()
 	return FText::FromString(ReturnString);
 }
 
+/**
+ * Returns Visibility depending on game type. ( Visible if NonLinear / Collapsed if Linear )
+ *
+ * @param
+ * @return ( Visible if NonLinear / Collapsed if Linear )
+ */
 ESlateVisibility UPlayerHUDWidget::GetGameType()
 {
 	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
@@ -154,6 +233,12 @@ ESlateVisibility UPlayerHUDWidget::GetGameType()
 	}
 }
 
+/**
+ * Returns Round Time as Text in the Minutes:Seconds format.
+ *
+ * @param
+ * @return Round Time as Minutes:Seconds
+ */
 FText UPlayerHUDWidget::GetRoundTime()
 {
 	FFormatNamedArguments Args;
@@ -174,6 +259,12 @@ FText UPlayerHUDWidget::GetRoundTime()
 	}
 }
 
+/** ( Virtual; Overridden )
+ *	Creates Circle Progress Bar Material Instance and binds Delegates.
+ *
+ * @param
+ * @return void
+ */
 void UPlayerHUDWidget::NativeConstruct()
 {
 	
@@ -197,6 +288,12 @@ void UPlayerHUDWidget::NativeConstruct()
 	Super::NativeConstruct();
 }
 
+/** ( Virtual; Overridden )
+ * Updates the Circle Progress Bar Material with the Interaction Progress Value.
+ *
+ * @param The Geometry and DeltaTime
+ * @return void
+ */
 void UPlayerHUDWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
