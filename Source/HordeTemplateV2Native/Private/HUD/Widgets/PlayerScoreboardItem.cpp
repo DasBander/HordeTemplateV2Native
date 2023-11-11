@@ -39,7 +39,7 @@ FText UPlayerScoreboardItem::GetPlayerPing()
 	AHordePlayerState* PS = Cast<AHordePlayerState>(PlayerState);
 	if (PS)
 	{
-		RetPing = FString::FromInt(PS->Ping) + " Ms";
+		RetPing = FString::FromInt(PS->GetPingInMilliseconds()) + " Ms";
 	}
 	return FText::FromString(RetPing);
 }

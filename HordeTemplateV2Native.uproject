@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "4.21",
+	"EngineAssociation": "5.3",
 	"Category": "Frameworks",
 	"Description": "Horde Template V2 C++ ( Native C++ Version ) gives you the ability to create awesome horde games.",
 	"Modules": [

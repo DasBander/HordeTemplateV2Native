@@ -265,7 +265,7 @@ void AHordeBaseHUD::CloseTraderUI()
 {
 	if (bIsTraderUIOpen)
 	{
-		PlayerTraderWidget->RemoveFromViewport();
+		PlayerTraderWidget->RemoveFromParent();
 		GetOwningPlayerController()->SetInputMode(FInputModeGameOnly());
 		GetOwningPlayerController()->bShowMouseCursor = false;
 		bIsTraderUIOpen = false;
@@ -329,7 +329,7 @@ void AHordeBaseHUD::DrawHUD()
 		(Center.Y - (CrosshairTex->GetSurfaceHeight() * 0.5f)));
 
 	// Draw the crosshair
-	FCanvasTileItem TileItem(CrosshairDrawPosition, CrosshairTex->Resource, FLinearColor::White);
+	FCanvasTileItem TileItem(CrosshairDrawPosition, CrosshairTex->GetResource(), FLinearColor::White);
 	TileItem.BlendMode = SE_BLEND_Translucent;
 	Canvas->DrawItem(TileItem);
 

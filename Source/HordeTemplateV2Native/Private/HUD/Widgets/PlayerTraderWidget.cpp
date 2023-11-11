@@ -13,7 +13,7 @@ void UPlayerTraderWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	bIsFocusable = true;
+	SetIsFocusable(true);
 }
 
 /**

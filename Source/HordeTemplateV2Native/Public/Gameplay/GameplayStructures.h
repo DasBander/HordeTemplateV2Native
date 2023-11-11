@@ -3,7 +3,6 @@
 #include "Weapons/BaseFirearm.h"
 #include "Inventory/InteractionInterface.h"
 #include "Projectiles/BaseProjectile.h"
-#include "Camera/CameraShake.h"
 #include "GameplayStructures.generated.h"
 
 USTRUCT(BlueprintType)
@@ -64,7 +63,7 @@ public:
 		TSubclassOf<ABaseFirearm> FirearmClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Firearm Settings")
-		TSubclassOf<UCameraShake> VisualRecoilClass;
+		TSubclassOf<UObject> VisualRecoilClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Firearm Settings")
 		FName AttachmentPoint;

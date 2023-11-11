@@ -22,4 +22,6 @@ ABloodImpact::ABloodImpact()
 	{
 		ImpactFX->SetTemplate(BloodParticleAsset.Object);
 	}
+
+	SetLifeSpan(3.f);
 }

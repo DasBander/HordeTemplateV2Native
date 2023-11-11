@@ -17,9 +17,9 @@ void AHordeGameSession::EndGameSession()
 		IOnlineSessionPtr Session = OnlineSub->GetSessionInterface();
 		if (Session.IsValid())
 		{
-			if (Session->EndSession(GameSessionName))
+			if (Session->EndSession(NAME_GameSession))
 			{
-				Session->DestroySession(GameSessionName);
+				Session->DestroySession(NAME_GameSession);
 			}
 		}
 	}

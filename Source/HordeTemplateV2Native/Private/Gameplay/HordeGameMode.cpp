@@ -153,7 +153,7 @@ APlayerController* AHordeGameMode::GetControllerByID(FString PlayerID)
 		APlayerController* APC = *ActorItr;
 		if (APC)
 		{
-			if (APC->PlayerState->UniqueId->ToString() == PlayerID)
+			if (APC->PlayerState->GetUniqueId()->ToString() == PlayerID)
 			{
 				TempCTRL = APC;
 			}

@@ -89,7 +89,7 @@ void AHordeGameState::BeginPlay()
 					{
 						if (PC->PlayerState)
 						{
-							LobbyInformation.OwnerID = PC->PlayerState->UniqueId->ToString();
+							LobbyInformation.OwnerID = PC->PlayerState->GetUniqueId()->ToString();
 						}
 					}
 					LobbyInformation.LobbyName = GI->LobbyName;
@@ -578,7 +578,7 @@ AHordePlayerState* AHordeGameState::GetPlayerStateByID(FString PlayerID)
 		AHordePlayerState* PS = Cast<AHordePlayerState>(PLY);
 		if (PS)
 		{
-			if (PS->UniqueId->ToString() == PlayerID)
+			if (PS->GetUniqueId()->ToString() == PlayerID)
 			{
 				RetPS = PS;
 				break;
@@ -657,7 +657,7 @@ FString AHordeGameState::GetUsernameBySteamID(FString ID, bool &FoundPlayer)
 		AHordePlayerState* PlayerST = Cast<AHordePlayerState>(PS);
 		if (PlayerST)
 		{
-			if (PlayerST->UniqueId->ToString() == ID)
+			if (PlayerST->GetUniqueId()->ToString() == ID)
 			{
 				RetUserName = PlayerST->GetPlayerName();
 				TempFoundPlayer = true;

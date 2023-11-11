@@ -220,7 +220,7 @@ float AHordeBaseCharacter::TakeDamage(float Damage, struct FDamageEvent const& D
 				APlayerController* PC = Cast<APlayerController>(GetController());
 				if (PC)
 				{
-					PC->ClientPlayCameraShake(UCameraShake_Damage::StaticClass(), 2.f);
+					//PC->ClientPlayCameraShake(UCameraShake_Damage::StaticClass(), 2.f);
 				}
 				USoundCue* DamageSound = ObjectFromPath<USoundCue>(FName(TEXT("SoundCue'/Game/HordeTemplateBP/Assets/Sounds/A_PlayerDamage.A_PlayerDamage'")));
 				if (DamageSound)

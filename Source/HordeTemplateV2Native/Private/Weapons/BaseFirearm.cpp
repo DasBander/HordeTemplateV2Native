@@ -75,7 +75,7 @@ void ABaseFirearm::FireFirearm()
 			AHordeBaseController* PC = Cast<AHordeBaseController>(PLY->GetController());
 			if (PC && CurrentWeaponItem.VisualRecoilClass)
 			{
-				PC->ClientPlayCameraShake(CurrentWeaponItem.VisualRecoilClass, 1.f, ECameraAnimPlaySpace::CameraLocal, FRotator::ZeroRotator);
+				//PC->ClientPlayCameraShake(CurrentWeaponItem.VisualRecoilClass, 1.f, ECameraAnimPlaySpace::CameraLocal, FRotator::ZeroRotator);
 			}
 			PLY->Inventory->UpdateCurrentItemAmmo(LoadedAmmo);
 		}

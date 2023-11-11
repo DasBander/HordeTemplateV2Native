@@ -18,7 +18,7 @@ void UPlayerLobbyWidget::NativeConstruct()
 	Super::NativeConstruct();
 	//Bind Delegate to ImplementableEvent
 	OnLobbyPlayersUpdateDelegate.AddDynamic(this, &UPlayerLobbyWidget::OnLobbyPlayersUpdated);
-	bIsFocusable = true;
+	SetIsFocusable(true);
 	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
 	if (GS)
 	{
