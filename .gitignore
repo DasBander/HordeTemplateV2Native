@@ -1,5 +1,8 @@
 .vs
 Binaries
+.idea
+Build
+.vsconfig
 Intermediate
 Saved
 *.sln
