@@ -3,8 +3,9 @@
 #include "MoveToPatrolPoint.h"
 #include "EngineUtils.h"
 #include "AI/AICorePoint.h"
-#include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
-#include "AIModule/Classes/AIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "Navigation/PathFollowingComponent.h"
+#include "AIController.h"
 
 /**
  *	Constructor

@@ -52,11 +52,13 @@ AHordeBaseCharacter::AHordeBaseCharacter()
 		GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f).Quaternion());
 		GetMesh()->SetCollisionProfileName(FName(TEXT("Ragdoll")));
 	}
-	static ConstructorHelpers::FObjectFinder<UAnimBlueprintGeneratedClass> AnimBlueprint(TEXT("AnimBlueprint'/Game/HordeTemplateBP/Assets/Mannequin/Animations/ABP_ThirdPerson.ABP_ThirdPerson_C'"));
-	if (AnimBlueprint.Succeeded())
-	{
-		GetMesh()->AnimClass = AnimBlueprint.Object;
-	}
+
+	
+	// static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP(TEXT("/Game/HordeTemplateBP/Assets/Mannequin/Animations/ABP_ThirdPerson"));
+	// if (AnimBP.Succeeded() && GetMesh())
+	// {
+	// 	GetMesh()->SetAnimInstanceClass(AnimBP.Class);
+	// }
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Boom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -91,21 +93,51 @@ AHordeBaseCharacter::AHordeBaseCharacter()
 
 
 	Inventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("Player Inventory"));
-	if (GetWorld())
-	{
-		Inventory->RegisterComponent();
-		Inventory->SetIsReplicated(true);
-		Inventory->OnActiveItemChanged.AddDynamic(this, &AHordeBaseCharacter::ActiveItemChanged);
-		const ConstructorHelpers::FObjectFinder<UDataTable> InventoryDataTableAsset(INVENTORY_DATATABLE_PATH);
-		if (InventoryDataTableAsset.Succeeded())
-		{
-			Inventory->DataTable = InventoryDataTableAsset.Object;
-		}
-	}
+	
 
 
 }
 
+void AHordeBaseCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	// If a BP child swapped/removed the pointer, fall back to whatever exists
+	if (!Inventory)
+	{
+		Inventory = FindComponentByClass<UInventoryComponent>();
+	}
+
+	if (Inventory)
+	{
+		// Ensure component replication (BP can toggle it off in editor)
+		Inventory->SetIsReplicated(true);
+
+		// Bind once (ctor binds can be skipped in BP construction)
+		if (!Inventory->OnActiveItemChanged.IsAlreadyBound(this, &AHordeBaseCharacter::ActiveItemChanged))
+		{
+			Inventory->OnActiveItemChanged.AddDynamic(this, &AHordeBaseCharacter::ActiveItemChanged);
+		}
+
+		// Ensure DataTable is set if the BP didn’t assign one
+		if (!Inventory->DataTable)
+		{
+			static ConstructorHelpers::FObjectFinder<UDataTable> InvDT(INVENTORY_DATATABLE_PATH);
+			if (InvDT.Succeeded())
+			{
+				Inventory->DataTable = InvDT.Object;
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("[CHAR] Inventory DataTable missing for character! That's really really bad!"))
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[CHAR] Inventory component missing on %s"), *GetName());
+	}
+}
 
 /**
  * Hacky methode for GetBaseAimRotation() (Pitch).
@@ -131,24 +163,57 @@ void AHordeBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	FTimerHandle DelayedBeginPlay;
-	FTimerDelegate DelayedBeginPlayDelegate;
-
-	DelayedBeginPlayDelegate.BindLambda([=] {
-		if (IsLocallyControlled())
-		{
-			GetWorld()->GetTimerManager().SetTimer(InteractionDetectionTimer, this, &AHordeBaseCharacter::InteractionDetection, 0.05f, true);
-			PlayerNameWidget->SetWidget(nullptr);
-			GetWorld()->GetTimerManager().SetTimer(HeadDisplayTraceTimer, this, &AHordeBaseCharacter::HeadDisplayTrace, 0.05f, true);
-		}
-		if (HasAuthority())
-		{
-
-			UpdateHeadDisplayWidget(GetPlayerState()->GetPlayerName(), Health);
-		}
-	});
-	GetWorld()->GetTimerManager().SetTimer(DelayedBeginPlay, DelayedBeginPlayDelegate, 1.f, false);
 	
+	
+}
+
+void AHordeBaseCharacter::PawnClientRestart()
+{
+	Super::PawnClientRestart();
+
+	// Called on the owning client after possession & input are ready
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
+
+	// Start local-only periodic tasks
+	GetWorld()->GetTimerManager().SetTimer(
+		InteractionDetectionTimer,
+		this, &AHordeBaseCharacter::InteractionDetection,
+		0.05f, /*bLoop=*/ true);
+
+	// If this widget exists locally, you can alter it now
+	if (IsValid(PlayerNameWidget))
+	{
+		// Your original code cleared the widget — keep if intended
+		PlayerNameWidget->SetWidget(nullptr);
+	}
+
+	GetWorld()->GetTimerManager().SetTimer(
+		HeadDisplayTraceTimer,
+		this, &AHordeBaseCharacter::HeadDisplayTrace,
+		0.05f, /*bLoop=*/ true);
+}
+
+void AHordeBaseCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	// Server-side initial UI/data push (PlayerState is usually valid here on the server)
+	const APlayerState* PS = GetPlayerState();
+	const FString Name = PS ? PS->GetPlayerName() : TEXT("");
+	UpdateHeadDisplayWidget(Name, Health);
+}
+
+void AHordeBaseCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	// Client reacts when PlayerState arrives/changes (handles late joiners etc.)
+	const APlayerState* PS = GetPlayerState();
+	const FString Name = PS ? PS->GetPlayerName() : TEXT("");
+	UpdateHeadDisplayWidget(Name, Health);
 }
 
 
@@ -849,7 +914,7 @@ void AHordeBaseCharacter::ServerReload_Implementation()
 			if (AmmoAmount > 0 && (TempItem.DefaultLoadedAmmo != CurrentSelectedFirearm->LoadedAmmo))
 			{
 				Reloading = true;
-				if (TempItem.PlayerAnimationData.CharacterReloadAnimation)
+				if (TempItem.PlayerAnimationData.CharacterReloadAnimation && GetMesh()->GetAnimInstance())
 				{
 					float AnimationDuration = TempItem.PlayerAnimationData.CharacterReloadAnimation->CalculateSequenceLength();
 					PlayAnimationAllClients(TempItem.PlayerAnimationData.CharacterReloadAnimation);

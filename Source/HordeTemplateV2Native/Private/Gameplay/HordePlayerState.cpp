@@ -385,7 +385,7 @@ void AHordePlayerState::BeginPlay()
 	FTimerHandle DelayedBeginPlay;
 	FTimerDelegate DelayedBeginPlayDelegate;
 
-	DelayedBeginPlayDelegate.BindLambda([=] {
+	DelayedBeginPlayDelegate.BindLambda([this] {
 		if (HasAuthority())
 		{
 			AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
@@ -393,7 +393,7 @@ void AHordePlayerState::BeginPlay()
 			{
 				ClientUpdateGameStatus(GS->GameStatus);
 				Player.SelectedCharacter = GS->GetFreeCharacter();
-				Player.PlayerID = UniqueId->ToString();
+				Player.PlayerID = GetUniqueId()->ToString();
 				Player.UserName = GetPlayerName();
 
 				GS->TakePlayer(Player);

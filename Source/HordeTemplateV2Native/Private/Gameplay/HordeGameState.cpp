@@ -878,7 +878,7 @@ void AHordeGameState::ProcessEndTime()
 		FTimerHandle TravelTimer;
 		FTimerDelegate TravelTimerDelegate;
 
-		TravelTimerDelegate.BindLambda([=] {
+		TravelTimerDelegate.BindLambda([this] {
 			GetWorld()->ServerTravel(NextLevel.ToString() + "?listen", false, false);
 		});
 

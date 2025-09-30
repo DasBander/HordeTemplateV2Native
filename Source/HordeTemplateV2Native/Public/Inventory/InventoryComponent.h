@@ -1,143 +1,104 @@
-/*
-@Todo
-Weapon Switching
-*/
+// InventoryComponent.h
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Weapons/BaseFirearm.h"
+#include "Engine/DataTable.h"
 #include "Gameplay/GameplayStructures.h"
 #include "InventoryComponent.generated.h"
 
+// Forward decls
+class ABaseFirearm;
+class AInventoryBaseItem;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+
+// === Events ===
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnActiveItemChanged, FString, ItemID, int32, Index, int32, LoadedAmmo);
+
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class HORDETEMPLATEV2NATIVE_API UInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-		DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnActiveItemChanged, FString, ItemID, int32, ItemIndex, int32, LoadedRounds);
-
-public:	
+public:
 	UInventoryComponent();
 
-	/*
-	Gets the Protected Inventory.
-	*/
-	UFUNCTION(BlueprintPure, Category="Inventory")
+	// --- Replication ---
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	// Inventory accessor
 	const TArray<FItem>& GetInventory();
 
-	/*
-	Gets called if the current item has changed.
-	*/
-	UPROPERTY(BlueprintAssignable, Category = "Inventory")
-	FOnActiveItemChanged OnActiveItemChanged;
-
-	/*
-	Updates the Amount of Ammo in Current Selected item.
-	*/
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	// Update ammo of the *active* item entry (not the world firearm)
+	UFUNCTION(BlueprintCallable, Category="Inventory")
 	void UpdateCurrentItemAmmo(int32 Ammo);
 
-	/*
-	Refreshes the Value of AvailableAmmoForCurrentWeapon so we can use it in our HUD.
-	*/
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	// Recompute the simple replicated ammo count for the active item (avoid replicating whole item)
+	UFUNCTION(BlueprintCallable, Category="Inventory")
 	void RefreshCurrentAmmoForItem();
 
-	/*
-	Adds Item by ID or by Custom Structure to Inventory on the Server.
-	*/
-	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category = "Inventory")
-		void ServerAddItem(const FString &ItemID, bool Custom, FItem CustomItem);
+	// === Server RPCs ===
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerAddItem(const FString& ItemID, bool Custom, FItem CustomItem);
 
-	/*
-	Available Ammo for Current Selected Weapon ( Used for HUD )
-	*/
-	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Inventory")
-		int32 AvailableAmmoForCurrentWeapon;
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerDropItem(ABaseFirearm* Firearm);
 
-	/*
-	Drops current selected Weapon on ground.
-	*/
-	UFUNCTION(Server, WithValidation, Reliable, Category = "Inventory")
-		void ServerDropItem(ABaseFirearm* Firearm);
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerDropItemAtIndex(int32 IndexToDrop);
 
-	/*
-	Drops Weapon on given index to the ground.
-	*/
-	UFUNCTION(Server, WithValidation, Reliable, Category = "Inventory")
-		void ServerDropItemAtIndex(int32 IndexToDrop);
+	UFUNCTION(Server, Reliable, WithValidation)
+	void SwitchWeapon(EActiveType ItemType);
 
-	/*
-	Checks if Item exists in Inventory and returns Index as well as the Item Type
-	*/
-	UFUNCTION(BlueprintCallable, Category="Inventory")
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ScrollItems(bool ScrollUp);
+
+	// === Queries / Helpers ===
 	bool InventoryItemExists(FString ItemID, int32& Index, EActiveType& ItemType);
-
-	/*
-	Returns Transform in front of the current owning actor. Used to Drop items on the Ground.
-	*/
-	UFUNCTION(BlueprintPure, Category="Inventory")
 	FTransform CalculateDropLocation();
+	int32 CountAmmo(FName AmmoType, int32& Index);                 // returns total, outputs last stack index (or -1)
+	bool RemoveAmmoByType(FName AmmoType, int32 AmountToRemove);   // drains across stacks
+	void FindItemByCategory(EActiveType IType, FItem& OutItem, int32& OutIndex);
 
-	/*
-	Gets amount of Ammo by Type
-	*/
-	UFUNCTION(BlueprintCallable, Category="Inventory")
-	int32 CountAmmo(FName AmmoType, int32& Index);
+	// Datatable lookup
+	bool GetItemByID(FString ItemID, FItem& Item);
 
-	/*
-	Removes Specific Amount of Ammo by Type
-	*/
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
-		bool RemoveAmmoByType(FName AmmoType, int32 AmountToRemove);
-
-	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "Inventory")
-		void ScrollItems(bool ScrollUp);
-
-	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "Inventory")
-		void SwitchWeapon(EActiveType ItemType);
-
-	UFUNCTION()
-		EActiveType FindNextWeaponType();
-
-	UFUNCTION()
-		EActiveType FindLastWeaponType();
-
-	UFUNCTION()
-		TArray<EActiveType> GetAvailableCategories();
-	/*
-	Data Table where we have all Item Base Values stored.
-	*/
-	UPROPERTY(EditAnywhere, Category="Inventory")
-		UDataTable* DataTable;
-
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
-		void FindItemByCategory(EActiveType IType, FItem& OutItem, int32& OutIndex);
+	// Event: inform UI/character when active item changes
+	UPROPERTY(BlueprintAssignable, Category="Inventory")
+	FOnActiveItemChanged OnActiveItemChanged;
 
 protected:
 	virtual void BeginPlay() override;
 
-	/*
-	The Inventory. Do not touch or make it public!
-	*/
-	UPROPERTY()
-		TArray<FItem> Inventory;
+	// === RepNotifies ===
+	UFUNCTION()
+	void OnRep_ActiveItemIndex();
 
-	/*
-	Gets a fresh Item of our Data Table based on the ItemID
-	*/
-	bool GetItemByID(FString ItemID, FItem &Item);
+	UFUNCTION()
+	void OnRep_AvailableAmmo();
 
-	/*
-	Current Selected Active Index in our Inventory
-	*/
-	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Inventory")
-		int32 ActiveItemIndex;
+protected:
 
+
+	// Local inventory (server authoritative; replicated via your own approach)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory")
+	TArray<FItem> Inventory;
+
+public:
+	// Replicated — which inventory slot is active
+	UPROPERTY(ReplicatedUsing=OnRep_ActiveItemIndex, VisibleAnywhere, Category="Inventory")
+	int32 ActiveItemIndex = 0;
+
+	// Replicated — lightweight ammo info for HUD
+	UPROPERTY(ReplicatedUsing=OnRep_AvailableAmmo, VisibleAnywhere, Category="Inventory")
+	int32 AvailableAmmoForCurrentWeapon = 0;
 	
+	// Source of item definitions
+	UPROPERTY(EditDefaultsOnly, Category="Inventory")
+	UDataTable* DataTable = nullptr;
 
-		
+private:
+	// Internal server-side add (no RPC used by server itself)
+	void AddItem_Internal(const FItem& ItemToAdd, bool bSetActiveIfWeapon);
 };

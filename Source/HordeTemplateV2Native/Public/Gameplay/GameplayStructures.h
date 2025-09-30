@@ -20,10 +20,11 @@ public:
 UENUM(BlueprintType)
 enum class EActiveType : uint8
 {
-	EActiveRifle UMETA(DisplayName = "Rifle"),
-	EActivePistol UMETA(DisplayName = "Pistol"),
-	EActiveMed UMETA(DisplayName = "Medic"),
-	EActiveAmmo UMETA(DisplayName = "Ammo")
+	EActiveRifle    UMETA(DisplayName="Rifle"),
+	EActivePistol   UMETA(DisplayName="Pistol"),
+	EActiveMed      UMETA(DisplayName="Medical"),
+	EActiveMisc     UMETA(DisplayName="Misc"),
+	EActiveAmmo     UMETA(DisplayName="Ammo")
 };
 
 UENUM(BlueprintType)

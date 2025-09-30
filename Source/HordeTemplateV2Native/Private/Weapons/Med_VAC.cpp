@@ -108,7 +108,7 @@ void AMed_VAC::StartHealing_Implementation()
 			PLY->GetMesh()->GetAnimInstance()->Montage_Play(VACHealAnimation);
 			FTimerHandle FinishTimer;
 			FTimerDelegate FinishTimerDelegate;
-			FinishTimerDelegate.BindLambda([=] {
+			FinishTimerDelegate.BindLambda([this] {
 				FinishHealing();
 			});
 			GetWorld()->GetTimerManager().SetTimer(FinishTimer, FinishTimerDelegate, VACHealAnimation->CalculateSequenceLength() / 2.f, false);

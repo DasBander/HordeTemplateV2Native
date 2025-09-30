@@ -11,7 +11,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 #include "Sound/SoundCue.h"
-#include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "Engine/DamageEvents.h"
 #include "HordeTemplateV2Native.h"
 
 /**
@@ -33,12 +34,12 @@ AZedPawn::AZedPawn()
 		GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f).Quaternion());
 		GetMesh()->SetCollisionProfileName(FName(TEXT("Zed")));
 	}
-
-	const ConstructorHelpers::FObjectFinder<UAnimBlueprintGeneratedClass> AnimBlueprint(TEXT("AnimBlueprint'/Game/HordeTemplateBP/Assets/Animations/Zombie/ABP_Zombie.ABP_Zombie_C'"));
-	if (AnimBlueprint.Succeeded())
-	{
-		GetMesh()->AnimClass = AnimBlueprint.Object;
-	}
+	
+	// static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP(TEXT("/Game/HordeTemplateBP/Assets/Animations/Zombie/ABP_Zombie"));
+	// if (AnimBP.Succeeded() && GetMesh())
+	// {
+	// 	GetMesh()->SetAnimInstanceClass(AnimBP.Class);
+	// }
 
 	const ConstructorHelpers::FObjectFinder<UMaterialInstanceConstant> ZedCharacterMaterial(TEXT("MaterialInstanceConstant'/Game/HordeTemplateBP/Assets/Mannequin/Character/Materials/M_UE4Man_Zombie.M_UE4Man_Zombie'"));
 	if (ZedCharacterMaterial.Succeeded())
@@ -104,7 +105,7 @@ void AZedPawn::BeginPlay()
 	FTimerHandle DelayedBeginPlayHandle;
 	FTimerDelegate DelayedBeginPlayDelegate;
 
-	DelayedBeginPlayDelegate.BindLambda([=] {
+	DelayedBeginPlayDelegate.BindLambda([this] {
 		AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
 		if (GS)
 		{

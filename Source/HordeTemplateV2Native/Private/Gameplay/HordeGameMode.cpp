@@ -293,7 +293,7 @@ void AHordeGameMode::InitiateZombieSpawning(int32 Amount)
 		{
 			FTimerHandle RestartSpawningHandle;
 			FTimerDelegate RestartSpawningDelegate;
-			RestartSpawningDelegate.BindLambda([=] {
+			RestartSpawningDelegate.BindLambda([this] {
 				InitiateZombieSpawning(ZedsLeftToSpawn);
 				});
 			GetWorld()->GetTimerManager().SetTimer(RestartSpawningHandle, RestartSpawningDelegate, 3.f, false);

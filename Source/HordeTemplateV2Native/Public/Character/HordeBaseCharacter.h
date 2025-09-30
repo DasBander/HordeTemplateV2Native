@@ -102,6 +102,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Interaction")
 		bool IsInteracting = false;
 
+	virtual void PostInitializeComponents() override;
 
 
 	
@@ -270,9 +271,23 @@ public:
 	void ScrollDownItems();
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+
+
+	
+
+	/** Owning client restart hook (after possession & input setup on client) */
+	virtual void PawnClientRestart() override;
+
+	/** Server-side possession hook (PlayerState is typically valid here) */
+	virtual void PossessedBy(AController* NewController) override;
+
+	/** Client gets/changes PlayerState via replication */
+	virtual void OnRep_PlayerState() override;
 	
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Character|Inventory")
 		UInventoryComponent* Inventory;
+
+	
 
 
 	

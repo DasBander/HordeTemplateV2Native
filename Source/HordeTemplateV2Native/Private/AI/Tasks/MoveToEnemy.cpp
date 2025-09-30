@@ -5,6 +5,7 @@
 #include "GameFramework/Pawn.h"
 #include "NavigationSystem/Public/NavigationSystem.h"
 #include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "Character/HordeBaseCharacter.h"
 
 /**

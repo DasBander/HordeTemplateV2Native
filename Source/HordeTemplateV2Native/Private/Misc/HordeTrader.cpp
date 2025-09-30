@@ -31,11 +31,17 @@ AHordeTrader::AHordeTrader()
 		TraderMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		TraderMeshComponent->SetCollisionProfileName(TEXT("TraderCollision"));
 	}
-	const ConstructorHelpers::FObjectFinder<UAnimBlueprintGeneratedClass> TraderMeshAnimAsset(TEXT("AnimBlueprint'/Game/HordeTemplateBP/Assets/Mannequin/Animations/ABP_ThirdPerson.ABP_ThirdPerson_C'"));
-	if (TraderMeshAnimAsset.Succeeded())
-	{
-		TraderMeshComponent->AnimClass = TraderMeshAnimAsset.Object;
-	}
+
+	// static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP(
+	// 	  TEXT("/Game/HordeTemplateBP/Assets/Mannequin/Animations/ABP_ThirdPerson")
+	//   );
+	//
+	// if (AnimBP.Succeeded() && TraderMeshComponent)
+	// {
+	// 	TraderMeshComponent->SetAnimInstanceClass(AnimBP.Class);
+	// }
+	
+	
 	TraderTextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Trader Header Text"));
 	TraderTextComponent->SetupAttachment(TraderMeshComponent);
 	TraderTextComponent->SetRelativeLocation(FVector(-29.f, 0.f, 180.f));
@@ -57,7 +63,11 @@ void AHordeTrader::PlayWelcome_Implementation()
 	if (WelcomeSound && WelcomeAnimation)
 	{
 		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), WelcomeSound, TraderMeshComponent->GetComponentLocation());
-		TraderMeshComponent->GetAnimInstance()->Montage_Play(WelcomeAnimation);
+		if (TraderMeshComponent->GetAnimInstance())
+		{
+			TraderMeshComponent->GetAnimInstance()->Montage_Play(WelcomeAnimation, 1.f);
+		}
+		
 	}
 }
 

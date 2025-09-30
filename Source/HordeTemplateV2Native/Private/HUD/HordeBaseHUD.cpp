@@ -1,5 +1,3 @@
-
-
 #include "HordeBaseHUD.h"
 #include "Engine/Canvas.h"
 #include "TextureResource.h"
@@ -20,33 +18,41 @@ void AHordeBaseHUD::GameStatusChanged(uint8 GameStatus)
 	EGameStatus GS = (EGameStatus)GameStatus;
 	CurrentGameStatus = GS;
 	FirstTimeGameStatusChange = true;
-	//Remove All Widgets from Viewport.
+
+	// Remove All Widgets from Viewport.
 	UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport();
 	if (ViewportClient)
 	{
 		ViewportClient->RemoveAllViewportWidgets();
 	}
 	
-	//Add Widgets to Viewport depending on Game Status.
-	switch (GS) {
+	// Add Widgets to Viewport depending on Game Status.
+	switch (GS)
+	{
 		case EGameStatus::EINGAME:
-			if (PlayerHUDWidget) {
+		{
+			if (PlayerHUDWidget)
+			{
 				PlayerHUDWidget->AddToViewport();
 				GetOwningPlayerController()->SetInputMode(FInputModeGameOnly());
 				GetOwningPlayerController()->bShowMouseCursor = false;
-			} 
+			}
 			break;
+		}
 		case EGameStatus::ELOBBY:
+		{
 			if (PlayerLobbyWidget)
 			{
 				PlayerLobbyWidget->AddToViewport();
-				FInputModeGameAndUI * PlyInput = new FInputModeGameAndUI();
+				FInputModeGameAndUI* PlyInput = new FInputModeGameAndUI();
 				PlyInput->SetWidgetToFocus(PlayerLobbyWidget->TakeWidget());
 				GetOwningPlayerController()->SetInputMode(*PlyInput);
 				GetOwningPlayerController()->bShowMouseCursor = true;
-			} 
+			}
 			break;
+		}
 		case EGameStatus::EGAMEOVER:
+		{
 			if (PlayerEndScreenWidget)
 			{
 				PlayerEndScreenWidget->AddToViewport();
@@ -54,13 +60,14 @@ void AHordeBaseHUD::GameStatusChanged(uint8 GameStatus)
 				GetOwningPlayerController()->bShowMouseCursor = false;
 			}
 			break;
-
+		}
 		case EGameStatus::ESERVERTRAVEL:
+		{
 			PlayerTravelWidget->AddToViewport();
 			GetOwningPlayerController()->SetInputMode(FInputModeGameOnly());
 			GetOwningPlayerController()->bShowMouseCursor = false;
 			break;
-
+		}
 		default:
 			break;
 	}
@@ -136,6 +143,12 @@ AHordeBaseHUD::AHordeBaseHUD()
 		PlayerScoreboardWidgetClass = PlayerScoreboardAsset.Class;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UFont> DF(TEXT("/Engine/EngineFonts/RobotoDistanceField.RobotoDistanceField"));
+	if (DF.Succeeded())
+	{
+		WaitingFont = DF.Object;
+	}
+
 	OnGameStatusChanged.AddDynamic(this, &AHordeBaseHUD::GameStatusChanged);
 	OnPlayerPointsReceivedDelegate.AddDynamic(this, &AHordeBaseHUD::OnPlayerPointsReceived);
 }
@@ -191,14 +204,15 @@ void AHordeBaseHUD::ToggleScoreboard()
 		if (!bIsScoreboardOpen)
 		{
 			AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
-			if(GS)
+			if (GS)
 			{
 				PlayerScoreboardWidget->UpdatePlayerList(GS->PlayerArray);
-			}	
+			}
 			bIsScoreboardOpen = true;
 			PlayerScoreboardWidget->AddToViewport(9999);
 		}
-		else {
+		else
+		{
 			PlayerScoreboardWidget->RemoveFromParent();
 			bIsScoreboardOpen = false;
 		}
@@ -232,7 +246,6 @@ void AHordeBaseHUD::OpenEscapeMenu()
 		InputMode->SetWidgetToFocus(PlayerEscapeWidget->TakeWidget());
 		GetOwningPlayerController()->SetInputMode(*InputMode);
 		GetOwningPlayerController()->bShowMouseCursor = true;
-
 	}
 }
 
@@ -247,7 +260,7 @@ void AHordeBaseHUD::OpenTraderUI()
 	if (!IsInChat && !bIsScoreboardOpen && CurrentGameStatus == EGameStatus::EINGAME && !bIsTraderUIOpen)
 	{
 		PlayerTraderWidget->AddToViewport(9999);
-		FInputModeUIOnly * InputMode = new FInputModeUIOnly();
+		FInputModeUIOnly* InputMode = new FInputModeUIOnly();
 		InputMode->SetWidgetToFocus(PlayerTraderWidget->TakeWidget());
 		GetOwningPlayerController()->SetInputMode(*InputMode);
 		GetOwningPlayerController()->bShowMouseCursor = true;
@@ -281,7 +294,6 @@ void AHordeBaseHUD::CloseTraderUI()
 void AHordeBaseHUD::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	
 }
 
 /** ( Virtual; Overridden )
@@ -294,21 +306,13 @@ void AHordeBaseHUD::BeginPlay()
 {
 	Super::BeginPlay();
 
-
-	PlayerHUDWidget = CreateWidget<UPlayerHUDWidget>(GetOwningPlayerController(), PlayerHUDWidgetClass);
-
-	PlayerLobbyWidget = CreateWidget<UPlayerLobbyWidget>(GetOwningPlayerController(), PlayerLobbyWidgetClass);
-
-	PlayerTraderWidget = CreateWidget<UPlayerTraderWidget>(GetOwningPlayerController(), PlayerTraderWidgetClass);
-
-	PlayerEndScreenWidget =CreateWidget<UPlayerEndScreen>(GetOwningPlayerController(), PlayerEndScreenClass);
-	
-	PlayerTravelWidget = CreateWidget<UPlayerTravelWidget>(GetOwningPlayerController(), PlayerTravelWidgetClass);
-	
-	PlayerEscapeWidget = CreateWidget<UPlayerEscapeMenu>(GetOwningPlayerController(), PlayerEscapeWidgetClass);
-
-	PlayerScoreboardWidget = CreateWidget<UPlayerScoreboardWidget>(GetOwningPlayerController(), PlayerScoreboardWidgetClass);
-
+	PlayerHUDWidget       = CreateWidget<UPlayerHUDWidget>(GetOwningPlayerController(), PlayerHUDWidgetClass);
+	PlayerLobbyWidget     = CreateWidget<UPlayerLobbyWidget>(GetOwningPlayerController(), PlayerLobbyWidgetClass);
+	PlayerTraderWidget    = CreateWidget<UPlayerTraderWidget>(GetOwningPlayerController(), PlayerTraderWidgetClass);
+	PlayerEndScreenWidget = CreateWidget<UPlayerEndScreen>(GetOwningPlayerController(), PlayerEndScreenClass);
+	PlayerTravelWidget    = CreateWidget<UPlayerTravelWidget>(GetOwningPlayerController(), PlayerTravelWidgetClass);
+	PlayerEscapeWidget    = CreateWidget<UPlayerEscapeMenu>(GetOwningPlayerController(), PlayerEscapeWidgetClass);
+	PlayerScoreboardWidget= CreateWidget<UPlayerScoreboardWidget>(GetOwningPlayerController(), PlayerScoreboardWidgetClass);
 }
 
 /** ( Virtual; Overridden )
@@ -320,23 +324,54 @@ void AHordeBaseHUD::BeginPlay()
 void AHordeBaseHUD::DrawHUD()
 {
 	Super::DrawHUD();
+	if (!Canvas) return;
 
-	// Find center of the Canvas
-	const FVector2D Center(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f);
+	const bool bWaiting =
+		(!GetOwningPlayerController() ||
+		 !GetOwningPlayerController()->PlayerState ||
+		 !FirstTimeGameStatusChange);
 
-	// Offset by half the texture's dimensions so that the center of the texture aligns with the center of the Canvas
-	const FVector2D CrosshairDrawPosition((Center.X - (CrosshairTex->GetSurfaceWidth() * 0.5)),
-		(Center.Y - (CrosshairTex->GetSurfaceHeight() * 0.5f)));
+	// Only draw crosshair when not waiting
+	if (!bWaiting && CrosshairTex)
+	{
+		const FVector2D Center(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f);
+		const FVector2D CrosshairDrawPosition(
+			Center.X - (CrosshairTex->GetSurfaceWidth() * 0.5f),
+			Center.Y - (CrosshairTex->GetSurfaceHeight() * 0.5f));
 
-	// Draw the crosshair
-	FCanvasTileItem TileItem(CrosshairDrawPosition, CrosshairTex->GetResource(), FLinearColor::White);
-	TileItem.BlendMode = SE_BLEND_Translucent;
-	Canvas->DrawItem(TileItem);
+		FCanvasTileItem TileItem(CrosshairDrawPosition, CrosshairTex->GetResource(), FLinearColor::White);
+		TileItem.BlendMode = SE_BLEND_Translucent;
+		Canvas->DrawItem(TileItem);
+	}
 
-	//Display Waiting for Server if player isn't ready yet.
-	if (!GetOwningPlayerController()->PlayerState || !FirstTimeGameStatusChange) {
-		//Draw Message if player is not Ready.
-		DrawText("Waiting for Server...", FLinearColor(FVector4(1.f, 1.f, 1.f, 1.f)), 10.f, 10.f, nullptr, 3.f, false);
+	if (bWaiting)
+	{
+		// 1) Fullscreen black background
+		{
+			const FVector2D FullSize(Canvas->ClipX, Canvas->ClipY);
+			FCanvasTileItem FullscreenItem(FVector2D::ZeroVector, FullSize, FLinearColor(0, 0, 0, 1)); // solid black
+			FullscreenItem.BlendMode = SE_BLEND_Opaque; // ensures completely black
+			Canvas->DrawItem(FullscreenItem);
+		}
+
+		// 2) Centered, crisp text on top
+		const float t = GetWorld()->GetRealTimeSeconds(); // or TimeSeconds; RealTimeSeconds ignores pause
+		const int32 dots = 1 + (static_cast<int32>(t / 0.5f) % 4);
+
+		static const FString Base = TEXT("Waiting for Server");
+		const FString MsgStr = Base + FString::ChrN(dots, '.');
+		const FText   Msg    = FText::FromString(MsgStr);
+		
+		UFont* Font = WaitingFont ? WaitingFont : LoadObject<UFont>(nullptr, TEXT("/Engine/EngineFonts/RobotoDistanceField.RobotoDistanceField"));
+
+		FCanvasTextItem TextItem(FVector2D::ZeroVector, Msg, Font, FLinearColor::White);
+		TextItem.bCentreX = true;
+		TextItem.bCentreY = true;
+		TextItem.Scale    = FVector2D(2.2f, 2.2f);
+		TextItem.EnableShadow(FLinearColor::Black);
+
+		const FVector2D Center(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f);
+		Canvas->DrawItem(TextItem, Center);
 	}
 }
 
@@ -354,13 +389,13 @@ void AHordeBaseHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	PlayerEndScreenWidget->ReleaseSlateResources(true);
 	PlayerTravelWidget->ReleaseSlateResources(true);
 	PlayerScoreboardWidget->ReleaseSlateResources(true);
+
 	PlayerScoreboardWidget = nullptr;
-	PlayerHUDWidget = nullptr;
-	PlayerLobbyWidget = nullptr;
-	PlayerTraderWidget = nullptr;
-	PlayerEndScreenWidget = nullptr;
-	PlayerTravelWidget = nullptr;
+	PlayerHUDWidget        = nullptr;
+	PlayerLobbyWidget      = nullptr;
+	PlayerTraderWidget     = nullptr;
+	PlayerEndScreenWidget  = nullptr;
+	PlayerTravelWidget     = nullptr;
 
 	Super::EndPlay(EndPlayReason);
 }
-
