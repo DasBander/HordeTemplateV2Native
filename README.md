@@ -1,14 +1,27 @@
-# Horde Template ( Native ) - UE5.3
+# Horde Template ( Native ) - v2.6 ( Unreal Engine 5.6 )
 *"If You Love Something, Set It Free" - March 2, 2015 Tim*
+
 
 This is the official release of the Marketplace Asset - Horde Template (Native) UE 5.3 also seen here:
 https://www.unrealengine.com/marketplace/en-US/product/horde-template-v2-native-horde-template-framework
 
 I wanted to give the community something back after all these years of game development. So this is now open source.
 
-I might upgrade this project some day to newer Unreal Engine Versions.
+## - Update 2.6 (UE5.6)
+```
+    The 5.6 Update is not quite done. ( Pre-release ). It's at least working now.
 
-
+    - Upgraded to Unreal Engine Version 5.6
+    - Changed the Code Base to fit the new Engine Version
+    - Fixed some Font Issues in the HUD
+    - Fixed HUD Boxes being Rounded Boxes
+    - Fixed Animation Crash because of bad references.
+    - Fixed Inventory not being properly initialized.
+    - Fixed General Inventory Issues
+    - Fixed Issue with Spawning the Character
+    - Changed the SubCharacter to Blueprints ( We don't need for each Character a new C++ Class )
+    - Added some Failsafe Changes.
+```
 
 
 # Features
