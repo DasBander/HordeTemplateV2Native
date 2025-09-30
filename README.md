@@ -54,6 +54,7 @@ I wanted to give the community something back after all these years of game deve
 Supported Development Platforms: Win64, Win32
 Supported Target Build Platforms: Win64, Win32
 
+
 # License
 **MIT License**
 ```
@@ -76,3 +77,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
+```
+
+```
+PS:
+In loving memory Alexander Gregory Morano ( Joviex )
+May 28, 1973 – September 26, 2025
+
+( Voice of the Trader / Tester and helper )
+```
