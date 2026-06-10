@@ -70,8 +70,6 @@ public class HordeTemplateV2Native : ModuleRules
             "LevelSequence",
             "MovieScene",
             "RHI",
-            "ApexDestruction",
-            "AIModule",
             "GameplayTasks",
             "NavigationSystem",
             "MoviePlayer"

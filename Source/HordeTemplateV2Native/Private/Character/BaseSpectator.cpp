@@ -10,6 +10,9 @@
  * @author Marc Fraedrich
  */
 #include "EngineUtils.h"
+#include "Camera/CameraComponent.h"
+#include "Camera/PlayerCameraManager.h"
+#include "GameFramework/PlayerController.h"
 
 /**
  * Constructor for ABaseSpectator
@@ -54,6 +57,15 @@ void ABaseSpectator::Tick(float DeltaTime)
 		APlayerController* PC = Cast<APlayerController>(GetController());
 		if (PC && PC->PlayerCameraManager)
 		{
+			// Stop following once the target dies so the camera doesn't track the ragdoll,
+			// and ask the server for a new alive player to spectate
+			if (CurrentSpectateTarget->GetIsDead())
+			{
+				CurrentSpectateTarget = nullptr;
+				ServerFocusPlayer();
+				return;
+			}
+
 			// Get target camera location from the spectated player's camera
 			UCameraComponent* TargetCamera = CurrentSpectateTarget->GetCamera();
 			if (TargetCamera)
@@ -61,11 +73,12 @@ void ABaseSpectator::Tick(float DeltaTime)
 				FVector TargetLocation = TargetCamera->GetComponentLocation();
 				FRotator TargetRotation = TargetCamera->GetComponentRotation();
 
-				// Initialize smoothed values on first tick
+				// Start the blend from the current view so acquiring or switching
+				// targets eases over instead of snapping
 				if (!bSmoothedValuesInitialized)
 				{
-					SmoothedCameraLocation = TargetLocation;
-					SmoothedCameraRotation = TargetRotation;
+					SmoothedCameraLocation = PC->PlayerCameraManager->GetCameraLocation();
+					SmoothedCameraRotation = PC->PlayerCameraManager->GetCameraRotation();
 					bSmoothedValuesInitialized = true;
 				}
 
@@ -95,7 +108,7 @@ void ABaseSpectator::ClientFocusPlayer_Implementation(AHordeBaseCharacter* Playe
 	{
 		// Store the current spectate target for smooth following
 		CurrentSpectateTarget = Player;
-		bSmoothedValuesInitialized = false; // Reset to snap to new target initially
+		bSmoothedValuesInitialized = false; // Reset so the next tick blends from the current view
 
 		// Set view target to ourselves - we'll manually track the target smoothly in Tick
 		PC->SetViewTarget(this);
