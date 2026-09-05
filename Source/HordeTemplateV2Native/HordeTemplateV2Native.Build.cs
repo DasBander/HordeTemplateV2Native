@@ -72,7 +72,8 @@ public class HordeTemplateV2Native : ModuleRules
             "RHI",
             "GameplayTasks",
             "NavigationSystem",
-            "MoviePlayer"
+            "MoviePlayer",
+            "EngineCameras"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {

@@ -12,7 +12,7 @@
 
 #include "CoreMinimal.h"
 #include "Camera/CameraShakeBase.h"
-#include "PerlinNoiseCameraShakePattern.h"
+#include "Shakes/PerlinNoiseCameraShakePattern.h"
 #include "CameraShake_RifleFire.generated.h"
 
 /**
@@ -24,5 +24,5 @@ class HORDETEMPLATEV2NATIVE_API UCameraShake_RifleFire : public UCameraShakeBase
 	GENERATED_BODY()
 
 public:
-	UCameraShake_RifleFire();
+	UCameraShake_RifleFire(const FObjectInitializer& ObjectInitializer);
 };

@@ -3,7 +3,7 @@
 // Licensed under the MIT License
 
 #include "CameraShake_Damage.h"
-#include "PerlinNoiseCameraShakePattern.h"
+#include "Shakes/PerlinNoiseCameraShakePattern.h"
 
 /**
  * @file CameraShake_Damage.cpp
@@ -11,7 +11,8 @@
  * @author Marc Fraedrich
  */
 
-UCameraShake_Damage::UCameraShake_Damage()
+UCameraShake_Damage::UCameraShake_Damage(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	// Create Perlin noise pattern for organic hit feel
 	UPerlinNoiseCameraShakePattern* ShakePattern = CreateDefaultSubobject<UPerlinNoiseCameraShakePattern>(TEXT("ShakePattern"));

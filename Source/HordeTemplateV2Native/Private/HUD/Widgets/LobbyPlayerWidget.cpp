@@ -26,7 +26,7 @@ FLinearColor ULobbyPlayerWidget::GetReadyColor()
 	}
 	else
 	{
-		return FLinearColor(0.f, 0.f, 0.f, 0.8);
+		return FLinearColor(0.f, 0.f, 0.f, 0.8f);
 	}
 }
 

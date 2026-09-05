@@ -3,7 +3,7 @@
 // Licensed under the MIT License
 
 #include "CameraShake_Explosion.h"
-#include "PerlinNoiseCameraShakePattern.h"
+#include "Shakes/PerlinNoiseCameraShakePattern.h"
 
 /**
  * @file CameraShake_Explosion.cpp
@@ -11,7 +11,8 @@
  * @author Marc Fraedrich
  */
 
-UCameraShake_Explosion::UCameraShake_Explosion()
+UCameraShake_Explosion::UCameraShake_Explosion(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	// Create and configure Perlin noise shake pattern for organic, high-quality feel
 	UPerlinNoiseCameraShakePattern* ShakePattern = CreateDefaultSubobject<UPerlinNoiseCameraShakePattern>(TEXT("ShakePattern"));

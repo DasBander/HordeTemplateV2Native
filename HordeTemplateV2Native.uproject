@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.7",
+	"EngineAssociation": "5.8",
 	"Category": "Frameworks",
 	"Description": "Horde Template V2 C++ ( Native C++ Version ) gives you the ability to create awesome horde games.",
 	"Modules": [
@@ -34,6 +34,10 @@
 			"Enabled": true
 		},
 		{
+			"Name": "EngineCameras",
+			"Enabled": true
+		},
+		{
 			"Name": "AndroidDeviceProfileSelector",
 			"Enabled": false
 		},
@@ -58,10 +62,6 @@
 		},
 		{
 			"Name": "AppleMoviePlayer",
-			"Enabled": false
-		},
-		{
-			"Name": "AppleVision",
 			"Enabled": false
 		},
 		{
@@ -98,10 +98,6 @@
 		},
 		{
 			"Name": "MobilePatchingUtils",
-			"Enabled": false
-		},
-		{
-			"Name": "OculusVR",
 			"Enabled": false
 		},
 		{

@@ -3,7 +3,7 @@
 // Licensed under the MIT License
 
 #include "CameraShake_RifleFire.h"
-#include "PerlinNoiseCameraShakePattern.h"
+#include "Shakes/PerlinNoiseCameraShakePattern.h"
 
 /**
  * @file CameraShake_RifleFire.cpp
@@ -11,7 +11,8 @@
  * @author Marc Fraedrich
  */
 
-UCameraShake_RifleFire::UCameraShake_RifleFire()
+UCameraShake_RifleFire::UCameraShake_RifleFire(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	// Create Perlin noise pattern for organic weapon kick
 	UPerlinNoiseCameraShakePattern* ShakePattern = CreateDefaultSubobject<UPerlinNoiseCameraShakePattern>(TEXT("ShakePattern"));

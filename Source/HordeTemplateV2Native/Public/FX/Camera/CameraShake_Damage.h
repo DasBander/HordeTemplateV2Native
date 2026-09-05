@@ -12,7 +12,7 @@
 
 #include "CoreMinimal.h"
 #include "Camera/CameraShakeBase.h"
-#include "PerlinNoiseCameraShakePattern.h"
+#include "Shakes/PerlinNoiseCameraShakePattern.h"
 #include "CameraShake_Damage.generated.h"
 
 /**
@@ -24,5 +24,5 @@ class HORDETEMPLATEV2NATIVE_API UCameraShake_Damage : public UCameraShakeBase
 	GENERATED_BODY()
 
 public:
-	UCameraShake_Damage();
+	UCameraShake_Damage(const FObjectInitializer& ObjectInitializer);
 };

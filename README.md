@@ -1,12 +1,12 @@
 # Horde Template V2 (Native) - v2.8.0
 
-[![Unreal Engine](https://img.shields.io/badge/Unreal%20Engine-5.7-blue)](https://www.unrealengine.com/)
+[![Unreal Engine](https://img.shields.io/badge/Unreal%20Engine-5.8-blue)](https://www.unrealengine.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![C++](https://img.shields.io/badge/C++-Native-orange)](https://docs.unrealengine.com/5.7/en-US/programming-with-cplusplus-in-unreal-engine/)
+[![C++](https://img.shields.io/badge/C++-Native-orange)](https://dev.epicgames.com/documentation/en-us/unreal-engine/programming-with-cplusplus-in-unreal-engine)
 
 > *"If You Love Something, Set It Free"* - March 2, 2015 Tim
 
-A fully-featured, open-source **C++ framework** for creating 4-player cooperative horde/zombie survival games in Unreal Engine 5.7.
+A fully-featured, open-source **C++ framework** for creating 4-player cooperative horde/zombie survival games in Unreal Engine 5.8.
 
 Originally a premium Unreal Marketplace asset, now released to the community for free under the MIT License.
 
@@ -77,8 +77,8 @@ Originally a premium Unreal Marketplace asset, now released to the community for
 ## Getting Started
 
 ### Requirements
-- Unreal Engine 5.7
-- Visual Studio 2022 (Windows) or Xcode (macOS)
+- Unreal Engine 5.8
+- Visual Studio 2022 (17.14 or newer) or Visual Studio 2026 (Windows), or Xcode (macOS)
 - ~2GB disk space
 
 ### Installation
@@ -211,8 +211,16 @@ Default controls (configurable in `Config/DefaultInput.ini`):
 
 ## Changelog
 
-### Update 2.8.0 - Major Feature Update
+### Update 2.8.0 (UE5.8) - Major Feature Update
 ```
+Engine & Configuration:
+- Upgraded to Unreal Engine 5.8
+- Updated build settings to BuildSettingsVersion.V7 and include order to Unreal5_8
+- Removed plugins no longer shipped with the engine (OculusVR, AppleVision)
+- Camera shakes now use the EngineCameras plugin and FObjectInitializer constructors (camera shake API moved/changed in 5.8)
+- Reset deprecated Windows compiler setting (VisualStudio2017) to Default
+- Updated project version to 2.8.0.0
+
 New Feature: AAA Quest System
 - Complete quest framework with linear cooperative objectives
 - Quest types: Location, CollectItem, KillEnemies, KillSpecificType, Interact, Survive, Escort, TriggerSequence, Custom
